@@ -1,12 +1,12 @@
 BODY
 {
 	background-color: #0070AD;
-	/*padding: 5pt 20pt 5pt 20pt;*/
 	padding: 0px;
 	margin: 0px;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	text-align: center;
 	font-size: 10pt;
+	padding-bottom: 50px;	
 }
 
 A:link
@@ -27,8 +27,6 @@ A:hover
 
 INPUT
 {
-	border: 0px;
-	padding: 2px;
 	border: 1px solid #000000;
 	padding: 1px 2pt 1px 2pt;
 	font-size: 10pt;
@@ -36,13 +34,11 @@ INPUT
 
 INPUT.button
 {
-	text-decoration: none;
 	color: #000000;
 	background-color: #FFF2E6;
-	border: 1px solid #000000;
 	padding: 1px 8pt 1px 8pt;
 }
-#queryContainer
+#queryContainer, #header
 {
 	background-color: #004368;
 	color: #FFFFFF;
@@ -139,10 +135,18 @@ TH, TD
 
 #footer
 {
-	margin-top: 10pt;
-	/*width: 100%;*/
+    position: absolute;
+    width: 100%;
+    bottom: 5px;
 	text-align: center;
 	color: #FFFFFF;
 	font-size: 10pt;
-	padding: 10px;
+}
+.errorMessage
+{
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    font-size: 12pt; 
+    padding: 5px;
 }
