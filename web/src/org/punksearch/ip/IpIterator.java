@@ -1,4 +1,4 @@
-package org.punksearch.utils;
+package org.punksearch.ip;
 
 import java.util.Iterator;
 import java.util.List;

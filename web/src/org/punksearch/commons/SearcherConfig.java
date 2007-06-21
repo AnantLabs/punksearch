@@ -3,7 +3,7 @@ package org.punksearch.commons;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.punksearch.utils.IpRange;
+import org.punksearch.ip.IpRange;
 
 
 /**

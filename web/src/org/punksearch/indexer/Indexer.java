@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.punksearch.commons.SearcherConfig;
-import org.punksearch.utils.Ip;
-import org.punksearch.utils.IpIterator;
+import org.punksearch.ip.Ip;
+import org.punksearch.ip.IpIterator;
 
 
 public class Indexer implements Runnable
