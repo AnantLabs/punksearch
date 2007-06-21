@@ -1,0 +1,148 @@
+BODY
+{
+	background-color: #0070AD;
+	/*padding: 5pt 20pt 5pt 20pt;*/
+	padding: 0px;
+	margin: 0px;
+	font-family: Arial;
+	text-align: center;
+	font-size: 10pt;
+}
+
+A:link
+{
+	color: #000000;
+	text-decoration: none;
+}
+A:visited
+{
+	color: #000000;
+	text-decoration: none;
+}
+A:hover
+{
+	color: #000000;
+	text-decoration: underline;
+}
+
+INPUT
+{
+	border: 0px;
+	padding: 2px;
+	border: 1px solid #000000;
+	padding: 1px 2pt 1px 2pt;
+	font-size: 10pt;
+}
+
+INPUT.button
+{
+	text-decoration: none;
+	color: #000000;
+	background-color: #FFF2E6;
+	border: 1px solid #000000;
+	padding: 1px 8pt 1px 8pt;
+}
+#queryContainer
+{
+	background-color: #004368;
+	color: #FFFFFF;
+	font-size: 12pt;
+	padding: 10px;
+	font-weight: bold;
+}
+
+TH, TD
+{
+	text-align: left;
+	padding: 2px;
+	font-size: 9pt;
+}
+
+#resultsContainer
+{
+	text-align: center;
+	padding: 5pt 20pt 5pt 20pt;
+	/*height: 400px;*/
+}
+#resultsContainer TABLE
+{
+	width: 100%;
+}
+#resultsContainer TABLE TD
+{
+	font-size: 10pt;
+	padding-left: 10pt;
+	padding-right: 10pt;
+}
+#resultsContainer #resultsTable TD
+{
+	border-bottom: 1px solid #0070AD;
+}
+#resultsContainer TABLE TH
+{
+	color: #000000;
+	/*background-color: #004368;*/
+	background-color: #FF7B00;
+	padding-left: 10pt;
+	padding-right: 10pt;
+}
+#resultsContainer TABLE TR.light TD
+{
+	background-color: #E6F6FF;
+}
+#resultsContainer TABLE TR.dark TD
+{
+	background-color: #66C9FF;
+}
+
+#statsTable
+{
+	border: 0px;
+	padding: 0px;
+	margin: 0px;
+	color: #FFFFFF;
+	background-color: #0070AD;
+}
+#statsTable TD
+{
+	padding: 0px;
+	margin: 0px;
+}
+#statsTable A
+{
+	text-decoration: none;
+	color: #000000;
+	padding: 1px 8pt 1px 8pt;
+	margin: 0px;
+	font-size: 8pt;
+}
+.pageNumStyle
+{
+	background-color: #FFF2E6;
+	/*border: 1px solid #000000;*/
+	border: 0px;
+}
+.pageCurrNumStyle
+{
+	background-color: #FF7B00;
+	/*background-color: #004368;*/
+	border-top: 2px solid #FF7B00;
+	font-size: 8pt;
+	font-weight: bold;
+}
+
+/* tricks */
+#resultsContainer TABLE
+{
+	_width: 90%; /* IE trick */
+}
+
+#footer
+{
+	margin-top: 10pt;
+	/*width: 100%;*/
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 10pt;
+	padding: 10px;
+}

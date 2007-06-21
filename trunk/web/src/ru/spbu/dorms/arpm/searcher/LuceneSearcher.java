@@ -1,0 +1,143 @@
+package ru.spbu.dorms.arpm.searcher;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.search.Filter;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+
+import ru.spbu.dorms.arpm.commons.SearcherException;
+
+public class LuceneSearcher
+{
+	private static final Logger		__log 	= Logger.getLogger(LuceneSearcher.class.getName());
+	
+	private Directory	luceneDirectory;
+	private int			overallCount	= 0;
+	//private String		sortFieldId	= null;
+	
+	public LuceneSearcher(String path) throws IOException
+	{
+		this(FSDirectory.getDirectory(path));
+	}
+	
+	public LuceneSearcher(Directory dir)
+	{
+		luceneDirectory = dir;
+	}
+	
+	public List<Document> search(Query query, Integer first, Integer last, Filter filter) throws SearcherException
+	{
+		IndexSearcher searcher = null;
+		
+		if (null != first && null != last && (first > last || first < 0 || last < 0))
+		{
+			String errorMessage = "First and last should be non-negative and first shoul be more than or equal to last.";
+			throw new IllegalArgumentException(errorMessage);
+		}
+		
+		try
+		{
+			searcher = new IndexSearcher(luceneDirectory);
+			//Query query = new QueryParser(SearcherConstants.NAME, new StandardAnalyzer()).parse(text);
+
+			//Sort sort = (null != sortFieldId)? new Sort(new SortField(sortFieldId + SearcherConstants.SORT_SUFFIX)) : null;
+			Hits hits = searcher.search(query, filter);
+
+			List<Document> result = new ArrayList<Document>();
+			
+			if (null == first)
+			{
+				first = 0;
+			}
+			
+			if (null == last || hits.length() - 1 < last)
+			{
+				last = hits.length() - 1;
+			}
+			
+			for (int i = first; i <= last; i++)
+			{
+				Document doc = hits.doc(i);
+				doc.setBoost(hits.score(i));
+				result.add(doc);
+			}	
+			overallCount = hits.length();
+			
+			return result;
+		}
+		catch(IOException e)
+		{
+			__log.error(e.getMessage(), e);
+			throw new SearcherException("Problem with Lucene index directory.", e);
+		}
+		catch (RuntimeException e) 
+		{
+			__log.error(e.getMessage(), e);
+			throw new SearcherException("Exception during search: " + e.getMessage(), e);
+		}
+		finally
+		{
+			if (null != searcher)
+			{
+				try
+				{
+					searcher.close();
+				}
+				catch (IOException e)
+				{
+					__log.error(e);
+					throw new SearcherException("Unable to close Lucene index directory.", e);
+				}
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.navio.search.Searcher#lastCount()
+	 */	
+	public int overallCount()
+	{
+		return overallCount;
+	}
+	/*
+	public void setSortField(String fieldId)
+	{
+		if (null == fieldId || fieldId.equals(""))
+		{
+			this.sortFieldId = null;
+		}
+		else
+		{
+			this.sortFieldId	= fieldId;
+		}
+	}
+	*/
+	
+	public static NumberRangeFilter createNumberFilter(String fieldName, Long min, Long max)
+	{
+		if (min == null && max == null)
+		{
+			throw new IllegalArgumentException("Both min and max can't be null at the same time");
+		}
+		if (min != null && max != null && min > max)
+		{
+			throw new IllegalArgumentException("min > max");
+		}
+		
+		NumberRangeFilter<Long> filter = new NumberRangeFilter<Long>(fieldName, min, max, false, false) {
+			public Long termTextToNumber(String text) {
+				return Long.valueOf(text);
+			}
+		};
+		__log.debug("SizeFilter: " + filter.toString());
+		return filter;
+	}
+}
