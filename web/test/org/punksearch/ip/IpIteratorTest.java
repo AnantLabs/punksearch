@@ -1,11 +1,11 @@
-package org.punksearch.utils;
+package org.punksearch.ip;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.punksearch.utils.Ip;
-import org.punksearch.utils.IpIterator;
-import org.punksearch.utils.IpRange;
+import org.punksearch.ip.Ip;
+import org.punksearch.ip.IpIterator;
+import org.punksearch.ip.IpRange;
 
 import junit.framework.TestCase;
 

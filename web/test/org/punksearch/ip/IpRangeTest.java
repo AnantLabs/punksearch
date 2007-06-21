@@ -1,7 +1,7 @@
-package org.punksearch.utils;
+package org.punksearch.ip;
 
-import org.punksearch.utils.Ip;
-import org.punksearch.utils.IpRange;
+import org.punksearch.ip.Ip;
+import org.punksearch.ip.IpRange;
 
 import junit.framework.TestCase;
 
