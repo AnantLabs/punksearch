@@ -40,7 +40,7 @@
 		
 	<filter>
 		<filter-name>AuthFilter</filter-name>
-		<filter-class>ru.spbu.dorms.arpm.commons.AuthFilter</filter-class>
+		<filter-class>org.punksearch.commons.AuthFilter</filter-class>
 	</filter>	
 	<filter-mapping>
 		<filter-name>AuthFilter</filter-name>
@@ -53,7 +53,7 @@
 	
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>
-		<servlet-class>ru.spbu.dorms.arpm.commons.InitServlet</servlet-class>
+		<servlet-class>org.punksearch.commons.InitServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
