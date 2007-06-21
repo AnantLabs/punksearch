@@ -1,6 +1,7 @@
-package ru.spbu.dorms.arpm.common;
+package org.punksearch.common;
 
-import ru.spbu.dorms.arpm.commons.SearcherConfig;
+import org.punksearch.commons.SearcherConfig;
+
 import junit.framework.TestCase;
 
 public class SearcherConfigTest extends TestCase
