@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
+
+	<context-param>
+		<param-name>indexDirectory</param-name>
+		<param-value>/var/LanSearcherIndex</param-value>
+	</context-param>
+	<context-param>
+		<param-name>indexThreads</param-name>
+		<param-value>10</param-value>
+	</context-param>
+	<context-param>
+		<param-name>indexDeep</param-name>
+		<param-value>5</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ipRange</param-name>
+		<param-value>10.0.0.1-10.0.0.255</param-value>
+	</context-param>
+	<context-param>
+		<param-name>smbLogin</param-name>
+		<param-value></param-value><!-- DOMAIN\user:password -->
+	</context-param>
+	<context-param>
+		<param-name>searchMaxClauseCount</param-name>
+		<param-value>1000000</param-value>
+	</context-param>
+	<context-param>
+		<param-name>adminPassword</param-name>
+		<param-value>123_456</param-value>
+	</context-param>
+	
+	<servlet>
+		<servlet-name>InitServlet</servlet-name>
+		<servlet-class>ru.spbu.dorms.arpm.commons.InitServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+</web-app>
