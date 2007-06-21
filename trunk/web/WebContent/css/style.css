@@ -9,22 +9,6 @@ BODY
 	padding-bottom: 50px;	
 }
 
-A:link
-{
-	color: #000000;
-	text-decoration: none;
-}
-A:visited
-{
-	color: #000000;
-	text-decoration: none;
-}
-A:hover
-{
-	color: #000000;
-	text-decoration: underline;
-}
-
 INPUT
 {
 	border: 1px solid #000000;
@@ -47,64 +31,38 @@ INPUT.button
 	font-weight: bold;
 }
 
-TH, TD
+TABLE TD
 {
 	text-align: left;
 	padding: 2px;
 	font-size: 9pt;
+	padding-left: 10pt;
+	padding-right: 10pt;	
 }
 
-#resultsContainer
+TABLE#results
 {
-	text-align: center;
-	padding: 5pt 20pt 5pt 20pt;
-	/*height: 400px;*/
+    border-top: 5px solid #FF7B00;
+	width: 90%;
 }
-#resultsContainer TABLE
+TABLE#results TD
 {
-	width: 100%;
-}
-#resultsContainer TABLE TD
-{
-	font-size: 10pt;
-	padding-left: 10pt;
-	padding-right: 10pt;
-}
-#resultsContainer #resultsTable TD
-{
+    background-color: #E6F6FF;
 	border-bottom: 1px solid #0070AD;
 }
-#resultsContainer TABLE TH
-{
-	color: #000000;
-	/*background-color: #004368;*/
-	background-color: #FF7B00;
-	padding-left: 10pt;
-	padding-right: 10pt;
-}
-#resultsContainer TABLE TR.light TD
-{
-	background-color: #E6F6FF;
-}
-#resultsContainer TABLE TR.dark TD
-{
-	background-color: #66C9FF;
-}
 
-#statsTable
+TABLE#pager
 {
-	border: 0px;
-	padding: 0px;
-	margin: 0px;
+    width:90%;
 	color: #FFFFFF;
 	background-color: #0070AD;
 }
-#statsTable TD
+TABLE#pager TD
 {
 	padding: 0px;
 	margin: 0px;
 }
-#statsTable A
+TABLE#pager A
 {
 	text-decoration: none;
 	color: #000000;
@@ -112,39 +70,46 @@ TH, TD
 	margin: 0px;
 	font-size: 8pt;
 }
-.pageNumStyle
+TABLE#pager A.pageNumStyle
 {
 	background-color: #FFF2E6;
-	/*border: 1px solid #000000;*/
 	border: 0px;
 }
-.pageCurrNumStyle
+TABLE#pager A.pageCurrNumStyle
 {
 	background-color: #FF7B00;
-	/*background-color: #004368;*/
 	border-top: 2px solid #FF7B00;
-	font-size: 8pt;
 	font-weight: bold;
-}
-
-/* tricks */
-#resultsContainer TABLE
-{
-	_width: 90%; /* IE trick */
 }
 
 #footer
 {
     position: absolute;
     width: 100%;
+    left: 0px;
     bottom: 5px;
 	text-align: center;
-	color: #FFFFFF;
+	color: white;
 	font-size: 10pt;
 }
+
+#footer A
+{
+	color: white;
+}
+
 .errorMessage
 {
     background-color: red;
+    color: white;
+    font-weight: bold;
+    font-size: 12pt; 
+    padding: 5px;
+}
+
+.infoMessage
+{
+    background-color: blue;
     color: white;
     font-weight: bold;
     font-size: 12pt; 
