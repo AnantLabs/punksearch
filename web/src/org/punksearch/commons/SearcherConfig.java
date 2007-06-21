@@ -1,9 +1,10 @@
-package ru.spbu.dorms.arpm.commons;
+package org.punksearch.commons;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.spbu.dorms.arpm.utils.IpRange;
+import org.punksearch.utils.IpRange;
+
 
 /**
  * Class for storing indexer config

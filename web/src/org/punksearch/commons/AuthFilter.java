@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.commons;
+package org.punksearch.commons;
 
 import java.io.IOException;
 

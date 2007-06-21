@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.searcher;
+package org.punksearch.searcher;
 
 import java.util.List;
 

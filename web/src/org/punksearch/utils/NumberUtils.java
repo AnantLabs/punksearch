@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.utils;
+package org.punksearch.utils;
 
 /**
  * Date: 15.06.2006

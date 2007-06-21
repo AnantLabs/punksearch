@@ -1,14 +1,14 @@
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.punksearch.commons.SearcherConfig;
+import org.punksearch.utils.Ip;
+import org.punksearch.utils.IpIterator;
 
-import ru.spbu.dorms.arpm.commons.SearcherConfig;
-import ru.spbu.dorms.arpm.utils.Ip;
-import ru.spbu.dorms.arpm.utils.IpIterator;
 
 public class Indexer implements Runnable
 {
