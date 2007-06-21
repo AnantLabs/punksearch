@@ -60,11 +60,11 @@ public class IndexerOperator
 	 * @param host for ex. smb://10.20.0.155
 	 * @throws SearcherException Failed deleting documents
 	 */
-	public synchronized void deleteDocuments(String ip) throws SearcherException
+	public synchronized void deleteDocuments(String ip, String proto) throws SearcherException
 	{
 		try
 		{
-			indexModifier.deleteDocuments(new Term(SearcherConstants.HOST, ip));
+			indexModifier.deleteDocuments(new Term(SearcherConstants.HOST, proto + "_" + ip));
 			//indexModifier.flush();
 			//indexModifier.close();
 		}

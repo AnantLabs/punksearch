@@ -2,7 +2,6 @@ package ru.spbu.dorms.arpm.commons;
 
 public class SearcherConstants
 {
-	public static final String	TYPE				= "Type";			// smb|ftp
 	public static final String	EXTENSION			= "Extension";		// avi
 	public static final String	DIRECTORY_EXTENSION	= "";
 	public static final String	HOST				= "Host";			// smb://195.19.254.184

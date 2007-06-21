@@ -8,11 +8,7 @@
 package ru.spbu.dorms.arpm.indexer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
 
 import jcifs.smb.SmbException;
 
@@ -45,22 +41,35 @@ public class IndexerThread extends Thread
 			{
 				__log.debug(ip + " start indexing");
 				
-				IndexerOperator.getInstance().deleteDocuments(ip);
-				SmbIndexer smbIndexer = new SmbIndexer(ip);
-				long size = smbIndexer.index();
+				IndexerOperator.getInstance().deleteDocuments(ip, "smb");
 				
-				if (size > 0)
+				try
 				{
-					__log.debug("SMB: " + ip + " indexed: " + size + " bytes");
+					SmbIndexer smbIndexer = new SmbIndexer(ip);
+					long sizeSmb = smbIndexer.index();
+					if (sizeSmb > 0)
+					{
+						__log.debug("SMB: " + ip + " indexed: " + sizeSmb + " bytes");
+					}
 				}
-				/*
+				catch (SmbException e)
+				{
+					String reason = e.getMessage();
+					
+					//String reason = (e.getCause() == null)? "unknown reason" : e.getCause().getMessage();
+					__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
+				}
+				
 				FtpIndexer ftpIndexer = new FtpIndexer(ip);
-				String ftpHost = "ftp://" + ip;
-				__log.debug(ftpHost + " is indexing");
-				IndexerOperator.getInstance().deleteDocuments(ftpHost);
-				ftpIndexer.performIndexing();
-				__log.debug(ftpHost + " was indexed");
-				*/
+				//String ftpHost = "ftp://" + ip;
+				//__log.debug(ftpHost + " is indexing");
+				IndexerOperator.getInstance().deleteDocuments(ip, "ftp");
+				long sizeFtp = ftpIndexer.index();
+				if (sizeFtp > 0)
+				{
+					__log.debug("FTP: " + ip + " indexed: " + sizeFtp + " bytes");
+				}
+				
 				//IndexerOperator.getInstance().optimizeIndex();
 				IndexerOperator.getInstance().flushIndex();
 			}
@@ -75,13 +84,6 @@ public class IndexerThread extends Thread
 			catch (SearcherException e)
 			{
 				__log.error("SE: " + e);
-			}
-			catch (SmbException e)
-			{
-				String reason = e.getMessage();
-				
-				//String reason = (e.getCause() == null)? "unknown reason" : e.getCause().getMessage();
-				__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
 			}
 			catch (IOException e)
 			{

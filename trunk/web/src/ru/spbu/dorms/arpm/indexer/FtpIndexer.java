@@ -7,26 +7,30 @@
 
 package ru.spbu.dorms.arpm.indexer;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.commons.net.ftp.*;
-
-import java.util.List;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.io.*;
+import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.apache.lucene.document.Document;
+
+import ru.spbu.dorms.arpm.commons.SearcherConfig;
 import ru.spbu.dorms.arpm.commons.SearcherConstants;
 import ru.spbu.dorms.arpm.commons.SearcherException;
-import ru.spbu.dorms.arpm.utils.NumberUtils;
+
+import com.enterprisedt.net.ftp.FTPClient;
+import com.enterprisedt.net.ftp.FTPException;
+import com.enterprisedt.net.ftp.FTPFile;
 
 /**
  * Class for ftp indexing and storing information
  */
-public class FtpIndexer
+public class FtpIndexer extends ProtocolIndexer
 {
-	private List<Document> documentList = new ArrayList<Document>();
+	private static Logger	__log	= Logger.getLogger(FtpIndexer.class);
+	
 	private FTPClient ftp = new FTPClient();
-	private String host;
 	private String ip;
 
 	/**
@@ -41,33 +45,17 @@ public class FtpIndexer
 			throw new IllegalArgumentException("IP must not be null");
 		}
 		this.ip = ip;
-		host = "ftp://" + ip;
-	}
-
-	/**
-	 * Creates <code>Document</code> instance and adds it to <code>documentList</code>
-	 * @param name
-	 * @param extension
-	 * @param size
-	 * @param path
-	 */
-	private void addDocumentToList(String name, String extension, String size, String path)
-	{
-		Document document = new Document();
-		document.add(new Field(SearcherConstants.HOST,      host,      Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.NAME,      name,      Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.EXTENSION, extension, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.SIZE,      size,      Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.PATH,      path,      Field.Store.YES, Field.Index.UN_TOKENIZED));
-		documentList.add(document);
 	}
 
 	/**
 	 * Indexes standalone file
 	 * @param file instance of FTPFile for indexing
 	 * @param path
+	 * @throws FTPException 
+	 * @throws IOException 
 	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
 	 */
+	/*
 	private long indexFile(FTPFile file, String path) throws IllegalArgumentException
 	{
 		if (! file.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
@@ -85,130 +73,275 @@ public class FtpIndexer
 
 		return fileSize;
 	}
+	*/
+	
+	private Document makeDirDocument(FTPFile dir, long dirSize) throws IOException, FTPException
+	{
+		/*
+		if (!dir.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
+		{
+			return null;
+		}
+		*/
+		String fullDirName = (ftp.pwd()).toLowerCase();
+		//fullDirName = fullDirName.substring(0, fullDirName.length() - 1); // cut last "/"
+		
+		int lastSlash = fullDirName.lastIndexOf("/");
+		
+		String dirName = fullDirName.substring(lastSlash + 1);
+		String dirPath = (lastSlash > 1)? fullDirName.substring(1, lastSlash) : "";
+		
+		String dirExtension = SearcherConstants.DIRECTORY_EXTENSION;
+		String dirSizeStr = Long.toString(dirSize);
+		
+		//String tempDirPath = dir.getPath().toLowerCase();
+		String lastModified = Long.toString(dir.lastModified().getTime());
+
+		String[] pathParts = dirPath.split("/");
+		float boost = 1.0f;
+		for (int i = 0; i < pathParts.length; i++)
+		{
+			boost /= 2;
+		}
+		boost *= dirSize / 1000.0f;
+		//float boost = 100000/(pathParts.length*50 + dirName.length()*100) + dirSize/1000000;
+
+		return makeDocument(dirName, dirExtension, dirSizeStr, dirPath, lastModified, boost);
+	}
 
 	/**
-	 * Indexes directory
-	 * @param path
-	 * @return size of indexed directory
-	 * @throws IllegalArgumentException too big file or directory size (see <code>NumberUtils</code> class)
-	 * @throws IOException error occurs while either sending a command to the server or receiving a reply from the server
-	 * @throws SearcherException Failed adding documents in index
+	 * Indexes standalone file
+	 * @param file instance of SmbFile for indexing
+	 * @return size of indexed file
+	 * @throws FTPException 
+	 * @throws IOException 
+	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
 	 */
-	private long parseDirectory(String path) throws IllegalArgumentException, IOException, SearcherException
+	private Document makeFileDocument(FTPFile file) throws IOException, FTPException
 	{
-		// class FTPFile uses Telnet protocol. It doubles letter "ÿ" (code 255). For "ß" it's ok
-		String pathInUpperCase = path.toUpperCase(); // TODO: think about it
-		if (! ftp.changeWorkingDirectory(pathInUpperCase))
+		/*
+		if (!file.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
+		{
+			return null;
+		}
+		*/
+
+		String fullFileName = (ftp.pwd() + "/" + file.getName()).toLowerCase();
+		
+		int dotIndex   = fullFileName.lastIndexOf('.');
+		int slashIndex = fullFileName.lastIndexOf('/');
+		
+		String fileName = (dotIndex != -1) ? fullFileName.substring(slashIndex + 1, dotIndex) : fullFileName;
+		String fileExt = (dotIndex != -1) ? fullFileName.substring(dotIndex + 1, fullFileName.length()) : "";
+		String fileSize = Long.toString(file.size());
+
+		String fileFolderPath = fullFileName.substring(1, slashIndex);
+		
+		String lastModified = Long.toString(file.lastModified().getTime());
+
+		String[] pathParts = fileFolderPath.split("/");
+		float boost = 1.0f;
+		for (int i = 0; i < pathParts.length; i++)
+		{
+			boost /= 2;
+		}
+
+		return makeDocument(fileName, fileExt, fileSize, fileFolderPath, lastModified, boost);
+	}
+	
+	
+	
+	private Document processResource(String root, FTPFile file, int deep) throws SearcherException, FTPException, ParseException, IOException
+	{
+		Document doc = null;
+
+		if (file.getName().startsWith("."))
+		{
+			return null;
+		}
+
+		if (file.isDir())
+		{
+			if (deep > SearcherConfig.getInstance().getIndexDeep() || file.getName().contains("$"))
+			{
+				return null;
+			}
+			long size = indexDirectoryContents(root + "/" + file.getName(), deep + 1);
+			if (size != 0L)
+			{
+				doc = makeDirDocument(file, size);
+			}
+		}
+		else if (!file.isLink())
+		{
+			doc = makeFileDocument(file);
+		}
+
+		return doc;
+	}
+	
+	private boolean isGoodDirectory(FTPFile[] items)
+	{
+		boolean goodFileFound = false;
+		boolean badFileFound  = false;
+		for (FTPFile item : items)
+		{
+			try
+			{
+				if (!item.isDir() && !item.getName().startsWith("."))
+				{
+					String ext = item.getName().substring(item.getName().lastIndexOf(".")+1);
+					if (isGoodExtension(ext))
+					{
+						goodFileFound = true;
+						break;
+					}
+					else
+					{
+						badFileFound = true;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				__log.info("Error processing resource: " + item.toString() + ". " + e.getMessage());
+			}
+		}
+		
+		if (!goodFileFound && badFileFound)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+		
+	}
+	
+	private long indexDirectoryContents(String dir, int deep) throws SearcherException, FTPException, ParseException
+	{
+		
+		try
+		{
+			//String pathInUpperCase = path.toUpperCase(); // TODO: think about it
+			ftp.chdir(dir);
+		}
+		catch (IOException e)
+		{
+			__log.info("IOException (" + e.toString() + ") during changing working directory to: " + dir);
+			return 0L;
+		}
+		
+		
+		FTPFile[] items = {};
+		
+		try
+		{
+			items = ftp.dirDetails(dir);
+		}
+		catch (IOException e)
+		{
+			__log.info("IOException (" + e.toString() + ") during listing directory: " + dir);
+			return 0L;
+		}
+		
+		if (!isGoodDirectory(items))
 		{
 			return 0L;
 		}
-		FTPFile files[] = ftp.listFiles();
-		long dirSize = 0L;
-		for (FTPFile file : files)
+		
+		// start actual indexing
+		long size = 0L;
+		List<Document> documentList = new ArrayList<Document>();
+
+		for (FTPFile file : items)
 		{
-			if (file.isDirectory())
+			//__log.debug(dir + "/" + file.getName());
+			Document doc = null;
+			try
 			{
-				String dirName = file.getName().toLowerCase();
-				if (dirName.equals(".") || dirName.equals(".."))
-				{
-					continue;
-				}
-
-				long curDirSize = parseDirectory(path + dirName + "/");
-				dirSize += curDirSize;
-
-				String dirExtension = SearcherConstants.DIRECTORY_EXTENSION;
-				String dirSizeStr   = NumberUtils.pad(curDirSize);
-
-				addDocumentToList(dirName, dirExtension, dirSizeStr, host + path);
+				doc = processResource(dir, file, deep);
+				ftp.chdir(dir);
 			}
-			else if (file.isFile())
+			catch (Exception e)
 			{
-				dirSize += indexFile(file, path);
+				__log.info("Error processing resource: " + file.toString() + ". " + e.getMessage());
+				e.printStackTrace();
+			}
+
+			if (doc != null)
+			{
+				documentList.add(doc);
+				size += Long.parseLong(doc.get(SearcherConstants.SIZE));
 			}
 		}
-		if (documentList.size() > 1000)
+
+		try
 		{
 			IndexerOperator.getInstance().addDocuments(documentList);
-			documentList.clear();
 		}
-		return dirSize;
-	}
+		catch (IOException e)
+		{
+			__log.error("IOException (" + e.toString() + ") during adding documents into index");
+			throw new SearcherException("Can't add documents to index.", e);
+		}
 
-	/**
-	 * Indexes ftp
-	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
-	 * @throws IOException error occurs while either sending a command to the server or receiving a reply from the server
-	 * @throws SearcherException Failed adding documents in index
-	 */
-	public void performIndexing() throws IllegalArgumentException, IOException, SearcherException
+		return size;
+	}
+	
+	
+	public long index() throws SearcherException
 	{
-		documentList.clear();
-		try
+		long result = 0L;
+		if (isActive(ip))
 		{
-			ftp.setControlEncoding("Cp1251"); // TODO: think about this
-			ftp.connect(ip);
-			int reply = ftp.getReplyCode();
-			if (! FTPReply.isPositiveCompletion(reply))
+			try
 			{
-				ftp.disconnect();
-				return;
+				ftp.setControlEncoding("UTF-8"); // TODO: think about this
+				ftp.setRemoteHost(ip);
+				ftp.connect();
+				
+				ftp.login("anonymous", "arpmipg@gmail.com");
+				
+				result = indexDirectoryContents("/", 0);
 			}
-		}
-		catch (IOException e)
-		{
-            if (ftp.isConnected())
-            {
-                try
-                {
-                    ftp.disconnect();
-                }
-                catch (IOException ex)
-                {
-					// do nothing
-                }
-            }
-			return;
-		}
-		try
-		{
-			if (! ftp.login("Anonymous", "arpmipg@gmail.com"))
+			catch (Exception e)
 			{
-				ftp.logout();
-				return;
+				__log.info("Can't connect to active ftp server: " + ip);
 			}
-			parseDirectory("/");
-		}
-		catch (IOException e)
-		{
-			// do nothing
-		}
-		finally
-		{
-			if (ftp.isConnected())
+			finally
 			{
 				try
 				{
-					ftp.disconnect();
+					 if (ftp.connected()) ftp.quit();
 				}
-				catch (IOException e)
+				catch (Exception e)
 				{
-					// do nothing
+					__log.info("Can't disconnect from ftp server: " + ip);
 				}
 			}
 		}
-		IndexerOperator.getInstance().addDocuments(documentList);
+		return result;
 	}
 
-/*	public static void main(String[] args)
+	@Override
+	protected String getIp()
 	{
-		try
-		{
-			new FtpIndexer("195.19.254.184").performIndexing();
-		}
-		catch (Exception e)
-		{
-			int a = 1;
-		}
-	} */
+		return ip;
+	}
+
+	@Override
+	protected int getPort()
+	{
+		return 21;
+	}
+
+	@Override
+	protected String getProtocol()
+	{
+		return "ftp";
+	}
+
+	
 }
