@@ -3,8 +3,9 @@
 <%@ page import="org.apache.lucene.index.*" %>
 <%@ page import="org.apache.lucene.search.*" %>
 <%@ page import="org.apache.lucene.document.Document" %>
-<%@ page import="ru.spbu.dorms.arpm.searcher.*" %>
-<%@ page import="ru.spbu.dorms.arpm.commons.SearcherConstants" %>
+<%@ page import="org.punksearch.search.*" %>
+<%@ page import="org.punksearch.search.filters.*" %>
+<%@ page import="org.punksearch.commons.SearcherConstants" %>
 <%!
 	private static final int MIN_TERM_LENGTH = 3;
 	private static final int PAGE_LINKS_PER_SIDE = 10;
@@ -174,7 +175,7 @@
 %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<%@page import="ru.spbu.dorms.arpm.commons.SearcherConfig"%>
+<%@page import="org.punksearch.commons.SearcherConfig"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
@@ -212,37 +213,37 @@
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="avi" />
 					<input type="hidden" name="min" value="300" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Films 7" class="button"/>
 			</form>
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="avi" />
 					<input type="hidden" name="min" value="300" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (30 * 7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= (new Date().getTime()) - (30L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Films 30" class="button"/>
 			</form>
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="mp3 wav ogg" />
 					<input type="hidden" name="min" value="1" />
 					<input type="hidden" name="max" value="100" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Music 7" class="button"/>
 			</form>
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="mp3 wav ogg" />
 					<input type="hidden" name="min" value="1" />
 					<input type="hidden" name="max" value="100" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (30 * 7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= new Date().getTime() - (30L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Music 30" class="button"/>
 			</form>
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="iso mdf" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Iso 7" class="button"/>
 			</form>
 			<form action="search.jsp" method="get" style="display:inline;">
 					<input type="hidden" name="ext" value="iso mdf" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (30 * 7 * 24 * 3600 * 1000) %>" />
+					<input type="hidden" name="from" value="<%= new Date().getTime() - (30L * 24 * 3600 * 1000) %>" />
 					<input type="submit" value="Iso 30" class="button"/>
 			</form>
 		</div>
