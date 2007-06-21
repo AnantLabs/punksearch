@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.utils;
+package org.punksearch.utils;
 
 import java.util.Iterator;
 import java.util.List;

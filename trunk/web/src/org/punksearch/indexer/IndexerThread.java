@@ -5,7 +5,7 @@
  * Email      arpmipg@gmail.com
  */
 
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -13,8 +13,8 @@ import java.net.MalformedURLException;
 import jcifs.smb.SmbException;
 
 import org.apache.log4j.Logger;
+import org.punksearch.commons.SearcherException;
 
-import ru.spbu.dorms.arpm.commons.SearcherException;
 
 /**
  * Class represents indexer thread

@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,10 +8,10 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexModifier;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.punksearch.commons.SearcherConfig;
+import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.SearcherException;
 
-import ru.spbu.dorms.arpm.commons.SearcherConfig;
-import ru.spbu.dorms.arpm.commons.SearcherConstants;
-import ru.spbu.dorms.arpm.commons.SearcherException;
 
 public class IndexerOperator
 {
@@ -27,7 +27,7 @@ public class IndexerOperator
 	/**
 	 * Adds documents in index
 	 * @param documentList List of Document
-	 * @throws ru.spbu.dorms.arpm.commons.SearcherException Failed adding documents in index
+	 * @throws org.punksearch.commons.SearcherException Failed adding documents in index
 	 */
 	public synchronized void addDocuments(List<Document> documentList) throws SearcherException
 	{

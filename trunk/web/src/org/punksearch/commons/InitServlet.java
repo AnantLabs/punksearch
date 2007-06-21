@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.commons;
+package org.punksearch.commons;
 
 import org.apache.log4j.PropertyConfigurator;
 

@@ -5,7 +5,7 @@
  * Email      arpmipg@gmail.com
  */
 
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -14,10 +14,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
+import org.punksearch.commons.SearcherConfig;
+import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.SearcherException;
 
-import ru.spbu.dorms.arpm.commons.SearcherConfig;
-import ru.spbu.dorms.arpm.commons.SearcherConstants;
-import ru.spbu.dorms.arpm.commons.SearcherException;
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.enterprisedt.net.ftp.FTPException;

@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -8,8 +8,8 @@ import java.net.SocketException;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.punksearch.commons.SearcherConstants;
 
-import ru.spbu.dorms.arpm.commons.SearcherConstants;
 
 
 public abstract class ProtocolIndexer

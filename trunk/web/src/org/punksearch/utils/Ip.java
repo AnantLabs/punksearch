@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.utils;
+package org.punksearch.utils;
 
 public class Ip implements Comparable<Ip>
 {

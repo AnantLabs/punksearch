@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.searcher;
+package org.punksearch.searcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.punksearch.commons.SearcherException;
 
-import ru.spbu.dorms.arpm.commons.SearcherException;
 
 public class LuceneSearcher
 {
