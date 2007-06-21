@@ -283,9 +283,13 @@
 					dateFilter = LuceneSearcher.createNumberFilter(SearcherConstants.DATE, from, to);
 				}
 				
-				CompositeFilter filter = new CompositeFilter();
-				if (sizeFilter != null) filter.add(sizeFilter);
-				if (dateFilter != null) filter.add(dateFilter);
+				CompositeFilter filter = null;
+				if (sizeFilter != null || dateFilter != null)
+				{
+					filter = new CompositeFilter();
+					if (sizeFilter != null) filter.add(sizeFilter);
+					if (dateFilter != null) filter.add(dateFilter);
+				}
 				
 				LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
 				
