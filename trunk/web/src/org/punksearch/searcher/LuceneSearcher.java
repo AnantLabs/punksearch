@@ -13,6 +13,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.commons.SearcherException;
+import org.punksearch.searcher.filters.NumberRangeFilter;
 
 
 public class LuceneSearcher

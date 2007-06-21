@@ -1,4 +1,4 @@
-package org.punksearch.utils;
+package org.punksearch.ip;
 
 public class IpRange
 {

@@ -1,4 +1,4 @@
-package org.punksearch.searcher;
+package org.punksearch.searcher.filters;
 
 import java.io.IOException;
 import java.util.BitSet;
