@@ -1,4 +1,5 @@
 #summary Quick start guide
+#labels Featured
 
   * Download WAR file
   * Deploy WAR into your servlet container (tomcat: put WAR into webapps directory)
