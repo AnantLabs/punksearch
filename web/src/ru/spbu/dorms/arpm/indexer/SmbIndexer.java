@@ -8,11 +8,7 @@
 package ru.spbu.dorms.arpm.indexer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +18,6 @@ import jcifs.smb.SmbFile;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 
 import ru.spbu.dorms.arpm.commons.SearcherConfig;
 import ru.spbu.dorms.arpm.commons.SearcherConstants;
@@ -31,23 +26,12 @@ import ru.spbu.dorms.arpm.commons.SearcherException;
 /**
  * Class for smb indexing and storing information
  */
-public class SmbIndexer
+public class SmbIndexer extends ProtocolIndexer
 {
 	private static Logger	__log	= Logger.getLogger(SmbIndexer.class);
 
-	private static int		PORT	= 139;
-
 	private String			ip;
 	private SmbFile			smb		= null;
-	
-	private String[] goodExtensions = {
-			"avi", "mov", "mpg", "vob", "wmv", "wmf", 
-			"mp3", "wav", "ogg",
-			"exe", 
-			"iso", "bin", "dmg", "mdf",
-			"txt", "xml", "doc", "rtf", "xls", "pdf", "ps",
-			"jpg", "gif", "png",
-			"zip", "rar", "tar", "gz", "tgz"};
 
 	/**
 	 * Constructor
@@ -84,27 +68,6 @@ public class SmbIndexer
 			smb = new SmbFile("smb://" + ip + "/");
 		}
 
-	}
-
-	/**
-	 * Creates <code>Document</code> instance and adds it to <code>documentList</code>
-	 * @param name
-	 * @param extension
-	 * @param size
-	 * @param path
-	 */
-	private Document makeDocument(String name, String ext, String size, String path, String date, float boost)
-	{
-		Document document = new Document();
-		document.add(new Field(SearcherConstants.TYPE, "smb", Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.HOST, ip, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.NAME, name, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.PATH, path, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.setBoost(boost);
-		return document;
 	}
 
 	/**
@@ -192,30 +155,8 @@ public class SmbIndexer
 		}
 	}
 
-	private boolean isGoodExtension(String ext)
+	private boolean isGoodDirectory(SmbFile[] items)
 	{
-		for (String goodExt : goodExtensions)
-		{
-			if (ext.equalsIgnoreCase(goodExt))
-				return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Processes a directory
-	 * @param dir instance of SmbFile for parsing
-	 * @return size of processed directory.
-	 * @throws IllegalArgumentException too big file or directory size (see <code>NumberUtils</code> class)
-	 * @throws SearcherException Failed adding documents in index
-	 * @throws SmbException 
-	 * @throws NumberFormatException 
-	 * @throws IOException 
-	 */
-	private long indexDirectoryContents(SmbFile dir, int deep) throws SearcherException, SmbException
-	{
-		SmbFile[] items = dir.listFiles();
-		
 		boolean goodFileFound = false;
 		boolean badFileFound  = false;
 		for (SmbFile item : items)
@@ -243,7 +184,34 @@ public class SmbIndexer
 		}
 		
 		if (!goodFileFound && badFileFound)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+		
+	}
+	
+	/**
+	 * Processes a directory
+	 * @param dir instance of SmbFile for parsing
+	 * @return size of processed directory.
+	 * @throws IllegalArgumentException too big file or directory size (see <code>NumberUtils</code> class)
+	 * @throws SearcherException Failed adding documents in index
+	 * @throws SmbException 
+	 * @throws NumberFormatException 
+	 * @throws IOException 
+	 */
+	private long indexDirectoryContents(SmbFile dir, int deep) throws SearcherException, SmbException
+	{
+		SmbFile[] items = dir.listFiles();
+		
+		if (!isGoodDirectory(items))
+		{
 			return 0L;
+		}
 		
 		// start actual indexing
 		long size = 0L;
@@ -333,23 +301,21 @@ public class SmbIndexer
 		}
 	}
 
-	public static boolean isActive(String ip)
+	@Override
+	protected String getIp()
 	{
-		try
-		{
-			SocketAddress sockaddr = new InetSocketAddress(ip, PORT);
-			Socket s = new Socket();
-			s.connect(sockaddr, 1000);
-			s.close();
-			return true;
-		}
-		catch (SocketException e)
-		{
-			return false;
-		}
-		catch (IOException e)
-		{
-			return false;
-		}
+		return ip;
+	}
+
+	@Override
+	protected String getProtocol()
+	{
+		return "smb";
+	}
+
+	@Override
+	protected int getPort()
+	{
+		return 139;
 	}
 }
