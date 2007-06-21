@@ -321,7 +321,7 @@
 					boolean dark = false;
 					for (Document doc: results)
 					{
-						String host = doc.get(SearcherConstants.HOST);
+						String host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
 						String path = doc.get(SearcherConstants.PATH).replaceAll("&", "&amp;");
 						String name = doc.get(SearcherConstants.NAME).replaceAll("&", "&amp;");
 						String size = doc.get(SearcherConstants.SIZE);
