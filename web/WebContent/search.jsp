@@ -247,119 +247,120 @@
 					<input type="submit" value="Iso 30" class="button"/>
 			</form>
 		</div>
-		<div id="resultsContainer">
-			&nbsp;
-			<%
-				List<String> dirTerms 	= prepareQueryParameter(dirParam);
-				List<String> fileTerms	= prepareQueryParameter(fileParam);
-				List<String> extTerms	= prepareQueryParameter(extParam);
-				Query query = makeQuery(dirTerms, fileTerms, extTerms);
+		<%
+			List<String> dirTerms 	= prepareQueryParameter(dirParam);
+			List<String> fileTerms	= prepareQueryParameter(fileParam);
+			List<String> extTerms	= prepareQueryParameter(extParam);
+			Query query = makeQuery(dirTerms, fileTerms, extTerms);
 
-				Integer first = (firstParam.length() != 0)? Integer.valueOf(firstParam) : 0;
-				Integer last  = (lastParam.length()  != 0)? Integer.valueOf(lastParam) : PAGE_SIZE - 1;
-				
-				Long  min  = ((minParam != null) && (minParam.length() > 0))? (Long)Math.round(Double.valueOf(minParam)*1024*1024) : null;
-				Long  max  = ((maxParam != null) && (maxParam.length() > 0))? (Long)Math.round(Double.valueOf(maxParam)*1024*1024) : null;
-				if (min != null && max != null && min > max)
+			Integer first = (firstParam.length() != 0)? Integer.valueOf(firstParam) : 0;
+			Integer last  = (lastParam.length()  != 0)? Integer.valueOf(lastParam) : PAGE_SIZE - 1;
+			
+			Long  min  = ((minParam != null) && (minParam.length() > 0))? (Long)Math.round(Double.valueOf(minParam)*1024*1024) : null;
+			Long  max  = ((maxParam != null) && (maxParam.length() > 0))? (Long)Math.round(Double.valueOf(maxParam)*1024*1024) : null;
+			if (min != null && max != null && min > max)
+			{
+				min = null;
+				max = null;
+			}
+			NumberRangeFilter sizeFilter = null;
+			if (min != null || max != null)
+			{
+				sizeFilter = LuceneSearcher.createNumberFilter(SearcherConstants.SIZE, min, max);
+			}
+			
+			Long  from = ((fromParam != null) && (fromParam.length() > 0))? Long.valueOf(fromParam) : null;
+			Long  to   = ((toParam   != null) && (toParam.length()   > 0))? Long.valueOf(toParam)   : null;
+			if (from != null && to != null && from > to)
+			{
+				from = null;
+				to   = null;
+			}
+			NumberRangeFilter dateFilter = null;
+			if (from != null || to != null)
+			{
+				dateFilter = LuceneSearcher.createNumberFilter(SearcherConstants.DATE, from, to);
+			}
+			
+			CompositeFilter filter = null;
+			if (sizeFilter != null || dateFilter != null)
+			{
+				filter = new CompositeFilter();
+				if (sizeFilter != null) filter.add(sizeFilter);
+				if (dateFilter != null) filter.add(dateFilter);
+			}
+			
+			LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
+			
+			Date startDate = new Date();
+			List<Document> results  = searcher.search(query, first, last, filter);
+			Date stopDate  = new Date();
+			long time = stopDate.getTime() - startDate.getTime();
+			
+			if (results != null && !results.isEmpty())
+			{
+				int	allCount = searcher.overallCount();
+				int cur      = (firstParam != null && firstParam.length() != 0)? Integer.valueOf(firstParam)/PAGE_SIZE : 0;
+			 	String pageNums = makePagesRow(cur, allCount, PAGE_SIZE);
+				%>
+					<table cellspacing="0" cellpadding="0" id="pager" align="center">
+						<tr>
+							<td style="font-size: 10pt;">
+								<span style="font-size: 14pt;"><%= allCount %></span> items (<%= (allCount%PAGE_SIZE == 0)? allCount/PAGE_SIZE : allCount/PAGE_SIZE + 1  %> pages) in <%= time/1000.0 %> secs
+							</td>
+							<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
+						</tr>
+					</table>
+					<table id="results" cellspacing="0" align="center">
+						<!--tr>
+							<th>name</th>
+							<th width="10%" style="text-align:right; padding-right: 5px;">size<sub>Mb</sub></th>
+						</tr-->
+				<%
+				for (Document doc: results)
 				{
-					min = null;
-					max = null;
-				}
-				NumberRangeFilter sizeFilter = null;
-				if (min != null || max != null)
-				{
-					sizeFilter = LuceneSearcher.createNumberFilter(SearcherConstants.SIZE, min, max);
-				}
-				
-				Long  from = ((fromParam != null) && (fromParam.length() > 0))? Long.valueOf(fromParam) : null;
-				Long  to   = ((toParam   != null) && (toParam.length()   > 0))? Long.valueOf(toParam)   : null;
-				if (from != null && to != null && from > to)
-				{
-					from = null;
-					to   = null;
-				}
-				NumberRangeFilter dateFilter = null;
-				if (from != null || to != null)
-				{
-					dateFilter = LuceneSearcher.createNumberFilter(SearcherConstants.DATE, from, to);
-				}
-				
-				CompositeFilter filter = null;
-				if (sizeFilter != null || dateFilter != null)
-				{
-					filter = new CompositeFilter();
-					if (sizeFilter != null) filter.add(sizeFilter);
-					if (dateFilter != null) filter.add(dateFilter);
-				}
-				
-				LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
-				
-				Date startDate = new Date();
-				List<Document> results  = searcher.search(query, first, last, filter);
-				Date stopDate  = new Date();
-				long time = stopDate.getTime() - startDate.getTime();
-				
-				if (results != null && !results.isEmpty())
-				{
-					int	allCount = searcher.overallCount();
-					int cur      = (firstParam != null && firstParam.length() != 0)? Integer.valueOf(firstParam)/PAGE_SIZE : 0;
-				 	String pageNums = makePagesRow(cur, allCount, PAGE_SIZE);
-					%>
-						<table cellspacing="0" cellpadding="0" id="statsTable">
-							<tr>
-								<td style="font-size: 10pt;">
-									<span style="font-size: 14pt;"><%= allCount %></span> items (<%= (allCount%PAGE_SIZE == 0)? allCount/PAGE_SIZE : allCount/PAGE_SIZE + 1  %> pages) in <%= time/1000.0 %> secs
-								</td>
-								<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
-							</tr>
-						</table>
-						<table id="resultsTable" cellspacing="0" style="border-top: 5px solid #FF7B00;">
-							<!--tr>
-								<th>name</th>
-								<th width="10%" style="text-align:right; padding-right: 5px;">size<sub>Mb</sub></th>
-							</tr-->
-					<%
-					boolean dark = false;
-					for (Document doc: results)
-					{
-						String host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
-						String path = doc.get(SearcherConstants.PATH).replaceAll("&", "&amp;");
-						String name = doc.get(SearcherConstants.NAME).replaceAll("&", "&amp;");
-						String size = doc.get(SearcherConstants.SIZE);
-						String ex   = doc.get(SearcherConstants.EXTENSION);
-						String date = doc.get(SearcherConstants.DATE);
+					String host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
+					String path = doc.get(SearcherConstants.PATH).replaceAll("&", "&amp;");
+					String name = doc.get(SearcherConstants.NAME).replaceAll("&", "&amp;");
+					String size = doc.get(SearcherConstants.SIZE);
+					String ex   = doc.get(SearcherConstants.EXTENSION);
+					String date = doc.get(SearcherConstants.DATE);
 
-						if (ex.length() != 0)
-							name += "." + ex;
-						
-						String sizeStr = padWithZeroes(Long.valueOf(size));
-						
-						Calendar cal = new GregorianCalendar();
-						cal.setTimeInMillis(Long.valueOf(date));
-						String dateStr = cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH)+1) + "/" + cal.get(Calendar.YEAR);
-						%>
-							<tr class="<%= (dark)? "light" : "light" %>">
-								<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
-									<img src="images/<%= (ex.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
-								</td>
-								<td style="padding-left: 2px;">
-									<span style="font-size: 12pt;"><%= name %></span><%= (showScores)? "(" + doc.getBoost() + ")": "" %><br/>
-									<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= host + "/" + path %></span>
-								</td>
-								<!--td><a href="#"><%= host + "/" + path %></a></td-->
-								<td style="text-align: right;"><%= dateStr %></td>
-								<td style="text-align: right;"><%= sizeStr %> Mb</td>
-							</tr>
-						<%
-						
-						dark = !dark;
-					}
+					if (ex.length() != 0)
+						name += "." + ex;
+					
+					String sizeStr = padWithZeroes(Long.valueOf(size));
+					
+					Calendar cal = new GregorianCalendar();
+					cal.setTimeInMillis(Long.valueOf(date));
+					String dateStr = cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH)+1) + "/" + cal.get(Calendar.YEAR);
 					%>
-						</table>
+						<tr>
+							<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
+								<img src="images/<%= (ex.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
+							</td>
+							<td style="padding-left: 2px;">
+								<span style="font-size: 12pt;"><%= name %></span><%= (showScores)? "(" + doc.getBoost() + ")": "" %><br/>
+								<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= host + "/" + path %></span>
+							</td>
+							<!--td><a href="#"><%= host + "/" + path %></a></td-->
+							<td style="text-align: right;"><%= dateStr %></td>
+							<td style="text-align: right;"><%= sizeStr %> Mb</td>
+						</tr>
 					<%
 				}
+				%>
+					</table>
+				<%
+			} 
+			else
+			{
 			%>
-		</div>
+				<div class="infoMessage">Search yields no results</div>
+			<%					
+			}
+			
+		%>
 		<%@ include file="footer.jsp" %>
 	</body>
 </html>

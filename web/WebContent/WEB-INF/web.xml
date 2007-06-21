@@ -34,6 +34,10 @@
 		<param-value>123_456</param-value>
 	</context-param>
 
+	<welcome-file-list>
+		<welcome-file>search.jsp</welcome-file>
+	</welcome-file-list>
+		
 	<filter>
 		<filter-name>AuthFilter</filter-name>
 		<filter-class>ru.spbu.dorms.arpm.commons.AuthFilter</filter-class>
