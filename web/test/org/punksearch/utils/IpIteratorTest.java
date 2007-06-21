@@ -1,7 +1,11 @@
-package ru.spbu.dorms.arpm.utils;
+package org.punksearch.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.punksearch.utils.Ip;
+import org.punksearch.utils.IpIterator;
+import org.punksearch.utils.IpRange;
 
 import junit.framework.TestCase;
 

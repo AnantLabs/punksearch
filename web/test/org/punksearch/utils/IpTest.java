@@ -1,4 +1,6 @@
-package ru.spbu.dorms.arpm.utils;
+package org.punksearch.utils;
+
+import org.punksearch.utils.Ip;
 
 import junit.framework.TestCase;
 

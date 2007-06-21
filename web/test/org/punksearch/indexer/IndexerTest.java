@@ -1,4 +1,4 @@
-package ru.spbu.dorms.arpm.indexer;
+package org.punksearch.indexer;
 
 import junit.framework.TestCase;
 
