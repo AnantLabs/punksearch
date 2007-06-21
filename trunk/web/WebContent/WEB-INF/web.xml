@@ -7,7 +7,7 @@
 
 	<context-param>
 		<param-name>indexDirectory</param-name>
-		<param-value>/var/LanSearcherIndex</param-value>
+		<param-value></param-value>
 	</context-param>
 	<context-param>
 		<param-name>indexThreads</param-name>
@@ -33,6 +33,19 @@
 		<param-name>adminPassword</param-name>
 		<param-value>123_456</param-value>
 	</context-param>
+
+	<filter>
+		<filter-name>AuthFilter</filter-name>
+		<filter-class>ru.spbu.dorms.arpm.commons.AuthFilter</filter-class>
+	</filter>	
+	<filter-mapping>
+		<filter-name>AuthFilter</filter-name>
+		<url-pattern>/admin.jsp</url-pattern>
+	</filter-mapping>
+	<error-page>
+		<error-code>401</error-code>
+		<location>/401.jsp</location>
+	</error-page>		
 	
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>

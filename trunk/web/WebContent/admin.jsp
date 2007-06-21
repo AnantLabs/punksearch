@@ -3,21 +3,6 @@
 <%@ page import="ru.spbu.dorms.arpm.commons.*" %>
 <%@ page import="ru.spbu.dorms.arpm.indexer.*" %>
 <%@ page import="ru.spbu.dorms.arpm.utils.*" %>
-<%
-	// it is possible to conduct admin tasks without loggining first
-	// just submit admin password along with other parameters
-	// this is useful for automization (of indexing, for example, using wget & cron)
-	String adminPassword = getServletContext().getInitParameter("adminPassword");
-	String pass = request.getParameter("password");
-	if (pass == null || !pass.equals(adminPassword))
-	{
-		String loggedSessionAttribute = (String)session.getAttribute("logged");
-		if (loggedSessionAttribute == null || !loggedSessionAttribute.equals("true"))
-		{
-			pageContext.forward("login.jsp");
-		}
-	}
-%>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
