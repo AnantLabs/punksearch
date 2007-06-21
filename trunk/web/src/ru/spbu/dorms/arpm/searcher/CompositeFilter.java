@@ -8,8 +8,6 @@ import java.util.Set;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Filter;
 
-import com.sun.tools.corba.se.idl.InvalidArgument;
-
 public class CompositeFilter extends Filter
 {
 	private Set<Filter> filters = new HashSet<Filter>();
