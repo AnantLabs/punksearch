@@ -24,17 +24,6 @@ public class AuthFilter implements Filter
     this.filterConfig = filterConfig;
   }
 
-  /**
-   * This doFilter method works as explained below:
-   *
-   * First of all it checks for existing session. If it doesn't find it, then it redirects user to
-   * login procedure. If session exists, it validates presense of session attribute and if it is
-   * absent the same redirect is performed.
-   * @param request This parameter represents the request processed by this filters and transferred
-   *  to other filters in a filters chain
-   * @param response This parameter represents the response posed by the filters and transferred to
-   * other filters in the filters chain
-   * */
   public void doFilter(ServletRequest request, ServletResponse response,
                        FilterChain filterChain) {
     try {
@@ -42,10 +31,9 @@ public class AuthFilter implements Filter
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpSession httpSession = httpRequest.getSession(true);
-
-		String loggedSessionAttribute = (String)httpSession.getAttribute("logged");
-		if (loggedSessionAttribute == null || !loggedSessionAttribute.equals("true"))
-			httpResponse.sendError(401);
+        Boolean isLogged = (Boolean)httpSession.getAttribute("logged");
+		if (isLogged == null || isLogged==false)
+			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		else
           filterChain.doFilter(request, response);
 		
