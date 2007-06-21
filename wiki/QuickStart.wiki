@@ -1,7 +1,7 @@
 #summary Quick start guide
 
   * Download WAR file
-  * Put WAR into webapps directory
+  * Deploy WAR into your servlet container (tomcat: put WAR into webapps directory)
   * Open http://localhost:8080/punksearch/admin.jsp and login (password: "123_456" by default)
   * Setup indexer and index your LAN
   * Open http://localhost:8080/punksearch/search.jsp and try find something
