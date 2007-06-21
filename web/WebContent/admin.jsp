@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ page import="ru.spbu.dorms.arpm.commons.*" %>
@@ -19,11 +18,12 @@
 		}
 	}
 %>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
-		<title>LanSearch</title>
+		<title>PUNK LAN Search | Admin</title>
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 <body>
@@ -31,9 +31,7 @@
 		private static Thread indexThread = null;
 	%>
 	
-	<div id="queryContainer">
-		Admin Interface
-	</div>
+	<div id="header">Admin Interface</div>
 	
 	<%
 		boolean isIndexing = (indexThread != null && indexThread.isAlive());
@@ -164,5 +162,6 @@
 			<a href="admin.jsp?action=stop">Stop</a>
 		<% } %>
 	</div>
+	<%@ include file="footer.jsp" %>
 </body>
 </html>
