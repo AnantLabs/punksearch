@@ -13,7 +13,7 @@
 			String action = request.getParameter("action");
 			if (action != null && action.equals("logout"))
 			{
-				session.setAttribute("logged", "false");
+				session.setAttribute("logged", false);
 			}
 			else
 			{				
@@ -23,7 +23,7 @@
 					String adminPassword = getServletContext().getInitParameter("adminPassword");
 					if (password.equals(adminPassword))
 					{
-						session.setAttribute("logged", "true");
+						session.setAttribute("logged", true);
 						response.sendRedirect("admin.jsp");					
 					}
 					else
