@@ -3,8 +3,8 @@
 <%@ page import="org.apache.lucene.index.*" %>
 <%@ page import="org.apache.lucene.search.*" %>
 <%@ page import="org.apache.lucene.document.Document" %>
-<%@ page import="org.punksearch.search.*" %>
-<%@ page import="org.punksearch.search.filters.*" %>
+<%@ page import="org.punksearch.searcher.*" %>
+<%@ page import="org.punksearch.searcher.filters.*" %>
 <%@ page import="org.punksearch.commons.SearcherConstants" %>
 <%!
 	private static final int MIN_TERM_LENGTH = 3;
