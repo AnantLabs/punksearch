@@ -93,6 +93,10 @@
 				query.add(dirQuery, BooleanClause.Occur.SHOULD);
 			}
 		}
+		else
+		{
+			return null;
+		}
 		return query;
     }
     
@@ -290,76 +294,85 @@
 				if (dateFilter != null) filter.add(dateFilter);
 			}
 			
-			LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
-			
-			Date startDate = new Date();
-			List<Document> results  = searcher.search(query, first, last, filter);
-			Date stopDate  = new Date();
-			long time = stopDate.getTime() - startDate.getTime();
-			
-			if (results != null && !results.isEmpty())
+			if (query != null)
 			{
-				int	allCount = searcher.overallCount();
-				int cur      = (firstParam != null && firstParam.length() != 0)? Integer.valueOf(firstParam)/PAGE_SIZE : 0;
-			 	String pageNums = makePagesRow(cur, allCount, PAGE_SIZE);
-				%>
-					<table cellspacing="0" cellpadding="0" id="pager" align="center">
-						<tr>
-							<td style="font-size: 10pt;">
-								<span style="font-size: 14pt;"><%= allCount %></span> items (<%= (allCount%PAGE_SIZE == 0)? allCount/PAGE_SIZE : allCount/PAGE_SIZE + 1  %> pages) in <%= time/1000.0 %> secs
-							</td>
-							<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
-						</tr>
-					</table>
-					<table id="results" cellspacing="0" align="center">
-						<!--tr>
-							<th>name</th>
-							<th width="10%" style="text-align:right; padding-right: 5px;">size<sub>Mb</sub></th>
-						</tr-->
-				<%
-				for (Document doc: results)
+				LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
+				
+				Date startDate = new Date();
+				List<Document> results  = searcher.search(query, first, last, filter);
+				Date stopDate  = new Date();
+				long time = stopDate.getTime() - startDate.getTime();
+				
+				if (results != null && !results.isEmpty())
 				{
-					String host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
-					String path = doc.get(SearcherConstants.PATH).replaceAll("&", "&amp;");
-					String name = doc.get(SearcherConstants.NAME).replaceAll("&", "&amp;");
-					String size = doc.get(SearcherConstants.SIZE);
-					String ex   = doc.get(SearcherConstants.EXTENSION);
-					String date = doc.get(SearcherConstants.DATE);
-
-					if (ex.length() != 0)
-						name += "." + ex;
-					
-					String sizeStr = padWithZeroes(Long.valueOf(size));
-					
-					Calendar cal = new GregorianCalendar();
-					cal.setTimeInMillis(Long.valueOf(date));
-					String dateStr = cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH)+1) + "/" + cal.get(Calendar.YEAR);
+					int	allCount = searcher.overallCount();
+					int cur      = (firstParam != null && firstParam.length() != 0)? Integer.valueOf(firstParam)/PAGE_SIZE : 0;
+				 	String pageNums = makePagesRow(cur, allCount, PAGE_SIZE);
 					%>
-						<tr>
-							<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
-								<img src="images/<%= (ex.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
-							</td>
-							<td style="padding-left: 2px;">
-								<span style="font-size: 12pt;"><%= name %></span><%= (showScores)? "(" + doc.getBoost() + ")": "" %><br/>
-								<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= host + "/" + path %></span>
-							</td>
-							<!--td><a href="#"><%= host + "/" + path %></a></td-->
-							<td style="text-align: right;"><%= dateStr %></td>
-							<td style="text-align: right;"><%= sizeStr %> Mb</td>
-						</tr>
+						<table cellspacing="0" cellpadding="0" id="pager" align="center">
+							<tr>
+								<td style="font-size: 10pt;">
+									<span style="font-size: 14pt;"><%= allCount %></span> items (<%= (allCount%PAGE_SIZE == 0)? allCount/PAGE_SIZE : allCount/PAGE_SIZE + 1  %> pages) in <%= time/1000.0 %> secs
+								</td>
+								<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
+							</tr>
+						</table>
+						<table id="results" cellspacing="0" align="center">
+							<!--tr>
+								<th>name</th>
+								<th width="10%" style="text-align:right; padding-right: 5px;">size<sub>Mb</sub></th>
+							</tr-->
 					<%
-				}
+					for (Document doc: results)
+					{
+						String host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
+						String path = doc.get(SearcherConstants.PATH).replaceAll("&", "&amp;");
+						String name = doc.get(SearcherConstants.NAME).replaceAll("&", "&amp;");
+						String size = doc.get(SearcherConstants.SIZE);
+						String ex   = doc.get(SearcherConstants.EXTENSION);
+						String date = doc.get(SearcherConstants.DATE);
+	
+						if (ex.length() != 0)
+							name += "." + ex;
+						
+						String sizeStr = padWithZeroes(Long.valueOf(size));
+						
+						Calendar cal = new GregorianCalendar();
+						cal.setTimeInMillis(Long.valueOf(date));
+						
+						String month = Integer.toString(cal.get(Calendar.MONTH) + 1);
+						String mStr  = (month.length() == 1)? "0" + month : month;
+						
+						String day  = Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
+						String dStr = (day.length() == 1)? "0" + day : day;
+						
+						String dateStr = cal.get(Calendar.YEAR) + "-" + mStr + "-" + dStr;
+						%>
+							<tr>
+								<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
+									<img src="images/<%= (ex.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
+								</td>
+								<td style="padding-left: 2px;">
+									<span style="font-size: 12pt;"><%= name %></span><%= (showScores)? "(" + doc.getBoost() + ")": "" %><br/>
+									<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= host + "/" + path %></span>
+								</td>
+								<!--td><a href="#"><%= host + "/" + path %></a></td-->
+								<td style="text-align: right;"><%= dateStr %></td>
+								<td style="text-align: right;"><%= sizeStr %> Mb</td>
+							</tr>
+						<%
+					}
+					%>
+						</table>
+					<%
+				} 
+				else
+				{
 				%>
-					</table>
-				<%
-			} 
-			else
-			{
-			%>
-				<div class="infoMessage">Search yields no results</div>
-			<%					
+					<div class="infoMessage">Search yields no results</div>
+				<%					
+				}
 			}
-			
 		%>
 		<%@ include file="footer.jsp" %>
 	</body>
