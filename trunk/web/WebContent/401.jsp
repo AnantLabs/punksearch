@@ -7,7 +7,9 @@
 	<title>PUNK LAN Search | 401 Unautorized</title>
 </head>
 <body>
+
 <div class="errorMessage">401 Unautorized</div>
-<a href="login.jsp">Login</a>
+<%@ include file="login.html" %>
+
 </body>
 </html>
