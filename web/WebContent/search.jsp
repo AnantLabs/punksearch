@@ -50,11 +50,21 @@
 				for (String item : fileTerms)
 				{
 					BooleanQuery itemQuery = new BooleanQuery();
+					
+					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
+					if (item.startsWith("!"))
+					{
+						item = item.substring(1);
+						occurItem = BooleanClause.Occur.MUST_NOT;
+					}
+					
 					Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, "*" + item + "*"));
 					itemQuery.add(nameQuery, BooleanClause.Occur.MUST);
+					
 					Query extensionQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, SearcherConstants.DIRECTORY_EXTENSION));
 					itemQuery.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
-					fileQuery.add(itemQuery, BooleanClause.Occur.SHOULD);
+					
+					fileQuery.add(itemQuery, occurItem);
 				}
 				query.add(fileQuery, BooleanClause.Occur.MUST);
 			}
@@ -73,9 +83,24 @@
 			if (dirTerms.size() != 0) // restrict files to occur in specified directories only
 			{
 				BooleanQuery dirQuery = new BooleanQuery();
+				int negations = 0;
+				
 				for (String item : dirTerms)
 				{				
+					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
+					if (item.startsWith("!"))
+					{
+						item = item.substring(1);
+						occurItem = BooleanClause.Occur.MUST_NOT;
+						negations++;						
+					}
+					
 					Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, "*" + item + "*"));
+					dirQuery.add(pathQuery, occurItem);
+				}
+				if (dirTerms.size() == negations) // it must be at least one positive clause in query to be executed. so add one if all user clauses are nagative.
+				{
+					Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, "*"));
 					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(dirQuery, BooleanClause.Occur.MUST);
@@ -86,11 +111,21 @@
 			for (String item : dirTerms)
 			{				
 				BooleanQuery dirQuery = new BooleanQuery();
+				
+				BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
+				if (item.startsWith("!"))
+				{
+					item = item.substring(1);
+					occurItem = BooleanClause.Occur.MUST_NOT;
+				}
+				
 				Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, "*" + item + "*"));
 				dirQuery.add(nameQuery, BooleanClause.Occur.MUST);
+				
 				Query extensionQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, SearcherConstants.DIRECTORY_EXTENSION));
 				dirQuery.add(extensionQuery, BooleanClause.Occur.MUST);
-				query.add(dirQuery, BooleanClause.Occur.SHOULD);
+				
+				query.add(dirQuery, occurItem);
 			}
 		}
 		else
@@ -180,6 +215,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@page import="org.punksearch.commons.SearcherConfig"%>
+<%@page import="org.apache.lucene.search.BooleanClause;"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
@@ -214,43 +250,14 @@
 					size <span style="vertical-align: sub; font-size: 8pt;">Mb</span>&nbsp;<input type="text" id="min" name="min" value="<%= minParam %>" size="4" />&nbsp;:&nbsp;<input type="text" id="max" name="max" value="<%= maxParam %>" size="4" />
 					<input type="submit" value="search" class="button"/>&nbsp;
 			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="avi" />
-					<input type="hidden" name="min" value="300" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Films 7" class="button"/>
-			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="avi" />
-					<input type="hidden" name="min" value="300" />
-					<input type="hidden" name="from" value="<%= (new Date().getTime()) - (30L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Films 30" class="button"/>
-			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="mp3 wav ogg" />
-					<input type="hidden" name="min" value="1" />
-					<input type="hidden" name="max" value="100" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Music 7" class="button"/>
-			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="mp3 wav ogg" />
-					<input type="hidden" name="min" value="1" />
-					<input type="hidden" name="max" value="100" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (30L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Music 30" class="button"/>
-			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="iso mdf" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Iso 7" class="button"/>
-			</form>
-			<form action="search.jsp" method="get" style="display:inline;">
-					<input type="hidden" name="ext" value="iso mdf" />
-					<input type="hidden" name="from" value="<%= new Date().getTime() - (30L * 24 * 3600 * 1000) %>" />
-					<input type="submit" value="Iso 30" class="button"/>
-			</form>
+			<span id="quickLinks">
+				check latest
+				<a title="films added in last 7 days" href="search.jsp?ext=avi&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">films</a>,
+				<a title="music added in last 7 days" href="search.jsp?ext=mp3+wav+ogg&amp;max=100&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">music</a> and
+				<a title="disc images added in last 7 days" href="search.jsp?ext=iso+mdf&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">disc</a> images
+			</span>
 		</div>
+		<br/>
 		<%
 			List<String> dirTerms 	= prepareQueryParameter(dirParam);
 			List<String> fileTerms	= prepareQueryParameter(fileParam);

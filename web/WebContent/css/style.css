@@ -115,3 +115,12 @@ TABLE#pager A.pageCurrNumStyle
     font-size: 12pt; 
     padding: 5px;
 }
+
+#quickLinks
+{
+	font-size: 10pt;
+}
+#quickLinks A
+{
+	color: #FF7B00;
+}
