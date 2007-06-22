@@ -257,9 +257,9 @@
 			</form>
 			<div id="quickLinks" style="margin-top: 5px;">
 				check latest
-				<a title="films added in last 7 days" href="search.jsp?ext=avi&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">films</a>,
-				<a title="music added in last 7 days" href="search.jsp?ext=mp3+wav+ogg&amp;max=100&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">music</a> and
-				<a title="disc images added in last 7 days" href="search.jsp?ext=iso+mdf&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">disc</a> images
+				<a title="films added in last 7 days" href="search.jsp?ext=avi&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>&amp;to=<%= new Date().getTime() %>">films</a>,
+				<a title="music added in last 7 days" href="search.jsp?ext=mp3+wav+ogg&amp;max=100&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>&amp;to=<%= new Date().getTime() %>">music</a> and
+				<a title="disc images added in last 7 days" href="search.jsp?ext=iso+mdf&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>&amp;to=<%= new Date().getTime() %>">disc</a> images
 			</div>
 		</div>
 		<br/>
