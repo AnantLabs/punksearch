@@ -8,7 +8,6 @@
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 	<body>
-		<div id="header">Login</div>
 		<%		
 			String action = request.getParameter("action");
 			if (action != null && action.equals("logout"))
@@ -35,9 +34,6 @@
 				}
 			}
 		%>
-		<form action="login.jsp" method="post" style="margin:50px;">
-			Password: <input type="password" name="password" />&#160;<input type="submit" value="Login" />
-		</form>
-		<%@ include file="footer.jsp" %>
+		<%@ include file="login.html" %>	
 	</body>
 </html>
