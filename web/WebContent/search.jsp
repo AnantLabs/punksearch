@@ -240,7 +240,12 @@
 			String toParam    = getParameter("to");
 		%>
 		<div id="logo" style="position:absolute; top:10px; left:25px; font-weight:bold;font-size:15pt;color:#FFFFFF;">
-			PUNK<span style="color:#FF7B00;">Search</span>
+			PUNK<span style="color:#FF7B00;">Search</span><br/>
+			<span style="font-size: 8pt;">
+				<a style="color: #FFFFFF;" href="http://code.google.com/p/punksearch">project home</a>
+				&#160;
+				<a style="color: #FFFFFF;" href="http://code.google.com/p/punksearch/issues/list">issues</a>
+			</span>
 		</div>
 		<div id="queryContainer" style="padding-left: 100px;">
 			<form id="queryForm" action="search.jsp" method="get">
@@ -250,12 +255,12 @@
 					size <span style="vertical-align: sub; font-size: 8pt;">Mb</span>&nbsp;<input type="text" id="min" name="min" value="<%= minParam %>" size="4" />&nbsp;:&nbsp;<input type="text" id="max" name="max" value="<%= maxParam %>" size="4" />
 					<input type="submit" value="search" class="button"/>&nbsp;
 			</form>
-			<span id="quickLinks">
+			<div id="quickLinks" style="margin-top: 5px;">
 				check latest
 				<a title="films added in last 7 days" href="search.jsp?ext=avi&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">films</a>,
 				<a title="music added in last 7 days" href="search.jsp?ext=mp3+wav+ogg&amp;max=100&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">music</a> and
 				<a title="disc images added in last 7 days" href="search.jsp?ext=iso+mdf&amp;min=500&amp;from=<%= new Date().getTime() - (7L * 24 * 3600 * 1000) %>">disc</a> images
-			</span>
+			</div>
 		</div>
 		<br/>
 		<%
