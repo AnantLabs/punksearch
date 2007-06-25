@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <?xml version="1.0" encoding="UTF-8" ?>
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -28,6 +29,7 @@
 %>
 
 <div id="searchFormContainer">
+	<div style="margin-left:200px;">
 	<div id="searchTabs">
 		<%
 			for (String[] tab: searchTabs)
@@ -49,10 +51,13 @@
 	</div>
 	<div id="searchForm">
 		<form id="queryForm" action="search_new.jsp" method="get" style="margin:0px;">
+
 			<input type="hidden" name="type" value="<%=type%>"/>
 			<input type="text" name="query"  value="<%=query%>" style="width:500px; font-size:20px; margin-top:5px;"/>
 			<input type="submit" style="font-size:20px;" value="Search"/>
+
 		</form>	
+	</div>
 	</div>
 </div>
  
