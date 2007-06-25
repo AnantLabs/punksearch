@@ -5,24 +5,21 @@ BODY
 	margin: 0px;
 	font-family: Arial, sans-serif;
 	text-align: center;
-	font-size: 10pt;
-	padding-bottom: 50px;	
+	font-size: 12px;	
 }
 
 INPUT
 {
 	border: 1px solid #000000;
-	padding: 1px 2pt 1px 2pt;
-	font-size: 10pt;
 }
 
-INPUT.button
+A
 {
-	color: #000000;
-	background-color: #FFF2E6;
-	padding: 1px 8pt 1px 8pt;
+	color: white;
 }
-#queryContainer, #header
+
+
+#queryContainer
 {
 	background-color: #004368;
 	color: #FFFFFF;
@@ -82,6 +79,25 @@ TABLE#pager A.pageCurrNumStyle
 	font-weight: bold;
 }
 
+#header
+{
+	color: #FFFFFF;
+	font-size: 16px;
+}
+
+#header #logo
+{
+    position:absolute;
+    top:20px;
+    left:25px;
+    width: 150px;
+    height: 60px;
+    font-size:20px;
+    background-color: #004368;
+    border: 1px solid white;
+	font-weight: bold;    
+}
+
 #footer
 {
     /* position: absolute; */
@@ -93,11 +109,6 @@ TABLE#pager A.pageCurrNumStyle
 	font-size: 10pt;
 	background-color: #0070AD;
 	padding-top: 10pt;
-}
-
-A
-{
-	color: white;
 }
 
 .errorMessage
@@ -125,4 +136,48 @@ A
 #quickLinks A
 {
 	color: #FF7B00;
+}
+
+#searchFormContainer
+{
+    position:absolute; 
+    top:30px; 
+    left: 350px;
+    width:650px;
+}
+
+#searchForm
+{
+    background-color: #FF7B00; 
+    padding:5px;
+    border-top: 1px solid white;
+}
+
+#searchTabs
+{
+    height:20px;
+}
+
+#searchTabs span
+{
+    position:relative;
+	padding:2px 7px;
+    font-size:16px;
+    font-weight: bold;
+	border-top: 1px solid white;
+	border-right: 1px solid white;
+	border-left: 1px solid white;
+}
+#searchTabs span.selected
+{
+	color: #FFFFFF;
+	background-color: #FF7B00;
+}
+#searchTabs span a
+{
+	text-decoration:none;
+}
+#searchTabs span a:hover
+{
+	color:#FF7B00;
 }

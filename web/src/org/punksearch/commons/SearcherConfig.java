@@ -20,6 +20,7 @@ public class SearcherConfig
 	private String					smbUser			= "";
 	private String					smbPassword		= "";
 	private int						smbTimeout		= 5000;
+	private int						maxClauseCount  = 1000000;
 	private List<IpRange>			ipRanges		= new ArrayList<IpRange>();
 
 	private SearcherConfig()
@@ -138,4 +139,14 @@ public class SearcherConfig
 	{
 		this.smbTimeout = timeout;
 	}
+	
+	public int getMaxClauseCount()
+	{
+		return maxClauseCount;
+	}
+
+	public void setMaxClauseCount(int maxClauseCount)
+	{
+		this.maxClauseCount = maxClauseCount;
+	}	
 }

@@ -8,6 +8,7 @@
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 	<body>
+		<%@ include file="header.jsp" %>
 		<%		
 			String action = request.getParameter("action");
 			if (action != null && action.equals("logout"))
