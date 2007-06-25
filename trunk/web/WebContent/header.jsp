@@ -15,7 +15,7 @@
 				document.getElementById("logo.search").style.color = color;
 			}
 		</script>
-		<div style="padding:10px 10px 0px 10px;">
+		<div style="padding-top:10px; font-size: 20px;">
 		<span id="logo.punk" onmouseover="changeLogoColors()" style="color:#ffffff;">PUNK</span><span id="logo.search" onmouseover="changeLogoColors()" style="color:#FF7B00;">Search</span>
 		</div>
 		<span style="font-size: 10px;">

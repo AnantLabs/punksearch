@@ -92,7 +92,7 @@ TABLE#pager A.pageCurrNumStyle
     left:25px;
     width: 150px;
     height: 60px;
-    font-size:20px;
+    font-size:10px;
     background-color: #004368;
     border: 1px solid white;
 	font-weight: bold;    
@@ -140,10 +140,11 @@ TABLE#pager A.pageCurrNumStyle
 
 #searchFormContainer
 {
-    position:absolute; 
-    top:30px; 
-    left: 350px;
-    width:650px;
+    position:absolute;
+    text-align:center;
+    width:100%;
+    top:30px;
+    left:0px;
 }
 
 #searchForm
@@ -151,11 +152,14 @@ TABLE#pager A.pageCurrNumStyle
     background-color: #FF7B00; 
     padding:5px;
     border-top: 1px solid white;
+    margin:0px auto;
+    white-space: nowrap;
 }
 
 #searchTabs
 {
     height:20px;
+    white-space: nowrap;
 }
 
 #searchTabs span
