@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*" %>
 <%@ page import="org.apache.lucene.index.*" %>
 <%@ page import="org.apache.lucene.search.*" %>
@@ -153,7 +153,7 @@
     	return result;
     }
     
-    private String makePagesRow(int cur, int all, int size)
+    private String makePagesRow(int cur, int all, int size) throws UnsupportedEncodingException
     {
     	if (all <= size)
     		return "";
@@ -205,20 +205,21 @@
     	}
     }
 
-    String getParameter(String key)
+    String getParameter(String key) throws UnsupportedEncodingException
     {
     	String result = req.getParameter(key);
-    	return (result != null)? result.toString() : "";
+    	return (result != null)? new String(result.toString().getBytes("ISO-8859-1"), "UTF-8") : "";
     }
  
 %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@page import="org.punksearch.commons.SearcherConfig"%>
-<%@page import="org.apache.lucene.search.BooleanClause;"%>
+<%@page import="org.apache.lucene.search.BooleanClause"%>
+<%@page import="java.io.UnsupportedEncodingException"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
+		<meta http-equiv="content-type" content="application/xhtml+xml;charset=UTF-8" />	
 		<title>PUNK LAN Search</title>
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
