@@ -95,7 +95,8 @@ TABLE#pager A.pageCurrNumStyle
     font-size:10px;
     background-color: #004368;
     border: 1px solid white;
-	font-weight: bold;    
+	font-weight: bold;
+	overflow: hidden; 
 }
 
 #footer

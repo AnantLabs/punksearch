@@ -29,7 +29,7 @@
 
 <div id="searchFormContainer">
 	<div style="margin-left:180px;">
-	 <table cellspacing=0 id="searchTabs">
+	 <table cellspacing=0 id="searchTabs" style="border-collapse:collapse">
 	 <tr>
 	 <td class="spacer" width="50%">&#160;</td>
 		<%
