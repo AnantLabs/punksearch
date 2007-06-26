@@ -59,9 +59,14 @@ public abstract class ProtocolIndexer
 	
 	protected boolean isActive(String ip)
 	{
+		return isActive(ip, getPort());
+	}
+	
+	protected boolean isActive(String ip, int port)
+	{
 		try
 		{
-			SocketAddress sockaddr = new InetSocketAddress(ip, getPort());
+			SocketAddress sockaddr = new InetSocketAddress(ip, port);
 			Socket s = new Socket();
 			s.connect(sockaddr, 1000);
 			s.close();
