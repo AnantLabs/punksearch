@@ -1,7 +1,5 @@
 <div id="header">
-	<div style="height:50px; background-color: #004368;" >
-		<div style="border-top: 1px solid white;"></div>
-	</div>
+	<div style="height:50px; background-color: #004368; border-top: 1px solid white;" ></div>
 	<div style="height:50px; background-color: #FF7B00; border-bottom: 1px solid white; border-top: 1px solid white;" ></div>
 
 	<div id="logo">
