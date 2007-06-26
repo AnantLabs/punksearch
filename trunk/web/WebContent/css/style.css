@@ -144,7 +144,7 @@ TABLE#pager A.pageCurrNumStyle
     position:absolute;
     text-align:center;
     width:100%;
-    top:26px;
+    top:23px;
     left:0px;
 }
 
@@ -159,7 +159,7 @@ TABLE#pager A.pageCurrNumStyle
 #searchTabs TD.tab
 {
     border: 1px solid white;
-    padding: 2px 7px;
+    padding: 4px 8px;
     color: white;
     font-size:16px;
     font-weight: bold;
