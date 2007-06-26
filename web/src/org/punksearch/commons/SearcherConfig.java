@@ -1,7 +1,9 @@
 package org.punksearch.commons;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.punksearch.ip.IpRange;
 
@@ -22,6 +24,8 @@ public class SearcherConfig
 	private int						smbTimeout		= 5000;
 	private int						maxClauseCount  = 1000000;
 	private List<IpRange>			ipRanges		= new ArrayList<IpRange>();
+	private String					ftpDefaultEnc   = "";
+	private Map<String, String>     ftpCustomEnc    = new HashMap<String, String>();
 
 	private SearcherConfig()
 	{
@@ -148,5 +152,32 @@ public class SearcherConfig
 	public void setMaxClauseCount(int maxClauseCount)
 	{
 		this.maxClauseCount = maxClauseCount;
-	}	
+	}
+
+	public String getFtpDefaultEncoding()
+	{
+		return ftpDefaultEnc;
+	}
+
+	public void setFtpDefaultEncoding(String ftpDefaultEnc)
+	{
+		this.ftpDefaultEnc = ftpDefaultEnc;
+	}
+	
+	public void setFtpCustomEncodings(String encString)
+	{
+		if (encString == null || encString.length() == 0) return;
+		
+		String[] chunks = encString.split(",");
+		for (String chunk : chunks)
+		{
+			String[] parts = chunk.split(":");
+			ftpCustomEnc.put(parts[0], parts[1]);
+		}
+	}
+	
+	public Map<String, String> getFtpCustomEncodings()
+	{
+		return ftpCustomEnc;
+	}
 }
