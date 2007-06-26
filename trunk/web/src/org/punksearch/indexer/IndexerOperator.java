@@ -81,7 +81,7 @@ public class IndexerOperator
 		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), new KeywordAnalyzer(), !indexExists);
 	}
 
-	public static IndexerOperator getInstance() throws IOException
+	public synchronized static IndexerOperator getInstance() throws IOException
 	{
 		if (singleton == null)
 		{
