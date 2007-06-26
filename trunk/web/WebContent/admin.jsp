@@ -40,7 +40,7 @@
 				{
 					SearcherConfig.getInstance().setIpRanges(request.getParameter("ip"));
 					SearcherConfig.getInstance().setSmbLogin(request.getParameter("smbLogin"));
-					SearcherConfig.getInstance().setSmbTimeout(Integer.valueOf(request.getParameter("smbTimeout")));
+					//SearcherConfig.getInstance().setSmbTimeout(Integer.valueOf(request.getParameter("smbTimeout")));
 					SearcherConfig.getInstance().setIndexThreads(Integer.valueOf(request.getParameter("threads")));
 					SearcherConfig.getInstance().setIndexDeep(Integer.valueOf(request.getParameter("deep")));
 					SearcherConfig.getInstance().setIndexDirectory(request.getParameter("indexDir"));
@@ -132,13 +132,13 @@
 						<em>DOMAIN\login:password</em>
 					</td>
 				</tr>
-				<tr>
+				<!--tr>
 					<th>SMB Timeout</th>
 					<td>
 						<input type="text" name="smbTimeout" value="<%= SearcherConfig.getInstance().getSmbTimeout() %>"/><br/>
 						<em>in milliseconds</em>
 					</td>
-				</tr>
+				</tr-->
 			</table>
 		<% 	if (!isIndexing) { %>
 			<input type="submit" value="Start"/>

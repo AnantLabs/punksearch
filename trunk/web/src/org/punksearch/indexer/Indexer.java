@@ -27,8 +27,8 @@ public class Indexer implements Runnable
 	
 	public void run()
 	{
-		System.setProperty("jcifs.smb.client.responseTimeout", Integer.toString(SearcherConfig.getInstance().getSmbTimeout()));
-		System.setProperty("jcifs.smb.client.soTimeout", "6000");
+		//System.setProperty("jcifs.smb.client.responseTimeout", Integer.toString(SearcherConfig.getInstance().getSmbTimeout()));
+		//System.setProperty("jcifs.smb.client.soTimeout", "6000");		
 		ipIterator = new IpIterator(SearcherConfig.getInstance().getIpRanges());
 		threadList.clear();
 		
