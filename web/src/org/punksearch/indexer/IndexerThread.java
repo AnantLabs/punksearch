@@ -54,7 +54,7 @@ public class IndexerThread extends Thread
 				}
 				catch (SmbException e)
 				{
-					String reason = e.getRootCause().getMessage();
+					String reason = (e.getRootCause() != null)? e.getRootCause().getMessage() : e.getMessage();
 					
 					//String reason = (e.getCause() == null)? "unknown reason" : e.getCause().getMessage();
 					__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
