@@ -24,12 +24,20 @@ public class IndexerOperator
 		indexModifier = createIndexModifier();
 	}
 
+	public static void init() throws IOException
+	{
+		if (singleton == null)
+		{
+			singleton = new IndexerOperator();
+		}
+	}
+	
 	/**
 	 * Adds documents in index
 	 * @param documentList List of Document
 	 * @throws org.punksearch.commons.SearcherException Failed adding documents in index
 	 */
-	public synchronized void addDocuments(List<Document> documentList) throws SearcherException
+	public void addDocuments(List<Document> documentList) throws SearcherException
 	{
 		
 		try
@@ -60,7 +68,7 @@ public class IndexerOperator
 	 * @param host for ex. smb://10.20.0.155
 	 * @throws SearcherException Failed deleting documents
 	 */
-	public synchronized void deleteDocuments(String ip, String proto) throws SearcherException
+	public void deleteDocuments(String ip, String proto) throws SearcherException
 	{
 		try
 		{
@@ -81,23 +89,23 @@ public class IndexerOperator
 		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), new KeywordAnalyzer(), !indexExists);
 	}
 
-	public synchronized static IndexerOperator getInstance() throws IOException
+	public static IndexerOperator getInstance()
 	{
 		if (singleton == null)
 		{
-			singleton = new IndexerOperator();
+			throw new IllegalStateException("Not initialized");
 		}
 		return singleton;
 	}
 
-	public synchronized void optimizeIndex() throws IOException
+	public void optimizeIndex() throws IOException
 	{
 		indexModifier.optimize();
 		//indexModifier.flush();
 		//indexModifier.close();
 	}
 	
-	public synchronized void flushIndex() throws IOException
+	public void flushIndex() throws IOException
 	{
 		indexModifier.flush();
 	}
