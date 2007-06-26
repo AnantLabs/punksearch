@@ -34,6 +34,8 @@ public class Indexer implements Runnable
 		
 		try
 		{
+			IndexerOperator.init();
+			
 			long startTime = new Date().getTime();
 			__log.info("Indexing process started: " + SearcherConfig.getInstance().getIpRangesString());
 			

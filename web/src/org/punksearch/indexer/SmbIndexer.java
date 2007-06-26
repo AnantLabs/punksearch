@@ -220,15 +220,7 @@ public class SmbIndexer extends ProtocolIndexer
 			}
 		}
 
-		try
-		{
-			IndexerOperator.getInstance().addDocuments(documentList);
-		}
-		catch (IOException e)
-		{
-			__log.error("IOException (" + e.toString() + ") during adding documents into index");
-			throw new SearcherException("Can't add documents to index.", e);
-		}
+		IndexerOperator.getInstance().addDocuments(documentList);
 
 		return size;
 	}
