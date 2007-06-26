@@ -40,34 +40,13 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws MalformedURLException connection to smb failed
 	 * @throws SmbException 
 	 */
-	public SmbIndexer(String ip) throws IllegalArgumentException, MalformedURLException, SmbException
+	public SmbIndexer(String ip) throws IllegalArgumentException
 	{
 		if (ip == null)
 		{
 			throw new IllegalArgumentException("IP must not be null");
 		}
 		this.ip = ip;
-
-		if (!SearcherConfig.getInstance().getSmbUser().equals(""))
-		{
-			NtlmPasswordAuthentication pa = new NtlmPasswordAuthentication(SearcherConfig.getInstance().getSmbDomain(), SearcherConfig.getInstance().getSmbUser(), SearcherConfig.getInstance().getSmbPassword());
-			smb = new SmbFile("smb://" + ip + "/", pa);
-			/*
-			 try
-			 {
-			 smb.listFiles();
-			 }
-			 catch (SmbAuthException e)
-			 {
-			 smb = null;
-			 }
-			 */
-		}
-		else
-		{
-			smb = new SmbFile("smb://" + ip + "/");
-		}
-
 	}
 
 	/**
@@ -288,11 +267,22 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
 	 * @throws SearcherException Failed adding documents in index
 	 * @throws SmbException error processing with dir
+	 * @throws MalformedURLException 
 	 */
-	public long index() throws SearcherException, SmbException
+	public long index() throws SearcherException, SmbException, MalformedURLException
 	{
-		if (isActive(ip))
+		if (isActive(ip, 445) || isActive(ip, 139))
 		{
+			if (!SearcherConfig.getInstance().getSmbUser().equals(""))
+			{
+				NtlmPasswordAuthentication pa = new NtlmPasswordAuthentication(SearcherConfig.getInstance().getSmbDomain(), SearcherConfig.getInstance().getSmbUser(), SearcherConfig.getInstance().getSmbPassword());
+				smb = new SmbFile("smb://" + ip + "/", pa);
+			}
+			else
+			{
+				smb = new SmbFile("smb://" + ip + "/");
+			}
+			
 			return indexDirectoryContents(smb, 0);
 		}
 		else
