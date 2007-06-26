@@ -24,9 +24,11 @@ public class InitServlet extends HttpServlet
 		sc.setIndexDeep(Integer.parseInt(getServletContext().getInitParameter("indexDeep")));
 		sc.setIpRanges(getServletContext().getInitParameter("ipRange"));
 		sc.setSmbLogin(getServletContext().getInitParameter("smbLogin"));
+		sc.setFtpDefaultEncoding(getServletContext().getInitParameter("ftpDefaultEncoding"));
+		sc.setFtpCustomEncodings(getServletContext().getInitParameter("ftpCustomEncodings"));
 		sc.setMaxClauseCount(Integer.parseInt(getServletContext().getInitParameter("searchMaxClauseCount")));
 		
-		System.setProperty("jcifs.smb.client.responseTimeout", "2000");
+		//System.setProperty("jcifs.smb.client.responseTimeout", "5000");
 		System.setProperty("jcifs.util.loglevel", "0");
 		
 	}

@@ -11,13 +11,13 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
-
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.enterprisedt.net.ftp.FTPException;
@@ -83,7 +83,7 @@ public class FtpIndexer extends ProtocolIndexer
 			return null;
 		}
 		*/
-		String fullDirName = (ftp.pwd()).toLowerCase();
+		String fullDirName = ftp.pwd().toLowerCase();
 		//fullDirName = fullDirName.substring(0, fullDirName.length() - 1); // cut last "/"
 		
 		int lastSlash = fullDirName.lastIndexOf("/");
@@ -126,19 +126,16 @@ public class FtpIndexer extends ProtocolIndexer
 		}
 		*/
 
-		String fullFileName = (ftp.pwd() + "/" + file.getName()).toLowerCase();
+		String fullFileName = file.getName().toLowerCase(); // not from root, but both file name and file extension
+		int    dotIndex     = fullFileName.lastIndexOf('.');
 		
-		int dotIndex   = fullFileName.lastIndexOf('.');
-		int slashIndex = fullFileName.lastIndexOf('/');
-		
-		String fileName = (dotIndex != -1) ? fullFileName.substring(slashIndex + 1, dotIndex) : fullFileName;
-		String fileExt = (dotIndex != -1) ? fullFileName.substring(dotIndex + 1, fullFileName.length()) : "";
+		String fileName = (dotIndex > 0) ? fullFileName.substring(0, dotIndex) : fullFileName;
+		String fileExt  = (dotIndex > 0) ? fullFileName.substring(dotIndex + 1, fullFileName.length()) : "";
 		String fileSize = Long.toString(file.size());
 
-		String fileFolderPath = fullFileName.substring(1, slashIndex);
-		
 		String lastModified = Long.toString(file.lastModified().getTime());
 
+		String fileFolderPath = ftp.pwd();
 		String[] pathParts = fileFolderPath.split("/");
 		float boost = 1.0f;
 		for (int i = 0; i < pathParts.length; i++)
@@ -266,7 +263,7 @@ public class FtpIndexer extends ProtocolIndexer
 			}
 			catch (Exception e)
 			{
-				__log.info("Error processing resource: " + file.toString() + ". " + e.getMessage());
+				__log.info("Error processing resource: ftp://" + ip + dir + "/" + file.getName() + ". " + e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -298,7 +295,15 @@ public class FtpIndexer extends ProtocolIndexer
 		{
 			try
 			{
-				ftp.setControlEncoding("UTF-8"); // TODO: think about this
+				Map<String, String> customEncodings = SearcherConfig.getInstance().getFtpCustomEncodings();
+				if (customEncodings.containsKey(ip))
+				{
+					ftp.setControlEncoding(customEncodings.get(ip));
+				}
+				else
+				{
+					ftp.setControlEncoding(SearcherConfig.getInstance().getFtpDefaultEncoding());
+				}
 				ftp.setRemoteHost(ip);
 				ftp.connect();
 				
