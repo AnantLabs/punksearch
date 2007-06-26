@@ -1,10 +1,10 @@
 <div id="header">
-	<div style="height:50px; background-color: #004368; border-top: 1px solid white;" ></div>
+	<div style="height:50px; background-color: #004368;" >
+		<div style="border-top: 1px solid white;"></div>
+	</div>
 	<div style="height:50px; background-color: #FF7B00; border-bottom: 1px solid white; border-top: 1px solid white;" ></div>
-
-	<div id="logo">
-		<div style="background-color:white; position:absolute; left:75px; top:-21px; height:21px; width:1px; font-size:0px;" ></div>
-		<div style="background-color:white; position:absolute; left:75px; bottom:-361px; height:361px; width:1px; font-size:0px;" ></div>
+	<div style="background-color:white; position:absolute; left:100px; top:0px; height:100px; width:1px; font-size:0px;" ></div>
+	<div id="logo">	
 		<script>
 			function changeLogoColors()
 			{
