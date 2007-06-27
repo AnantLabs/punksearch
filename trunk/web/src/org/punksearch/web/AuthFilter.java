@@ -1,4 +1,4 @@
-package org.punksearch.commons;
+package org.punksearch.web;
 
 import java.io.IOException;
 

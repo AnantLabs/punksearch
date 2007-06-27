@@ -1,6 +1,7 @@
-package org.punksearch.commons;
+package org.punksearch.web;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.punksearch.commons.SearcherConfig;
 
 
 import javax.servlet.http.HttpServlet;
