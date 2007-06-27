@@ -142,20 +142,28 @@ TABLE#pager A.pageCurrNumStyle
 #searchFormContainer
 {
     position:absolute;
-    text-align:center;
-    width:100%;
     top:23px;
-    left:0px;
+    left:200px;
 }
 
 #searchForm
 {
     background-color: #FF7B00; 
     padding:5px;
-    margin:0px auto;
+    margin:0px;
+    margin-top:5px;
     white-space: nowrap;
 }
 
+#searchForm INPUT
+{
+    font-size:20px;
+}
+
+#searchTabs
+{
+    border-collapse:collapse;
+}
 #searchTabs TD.tab
 {
     border: 1px solid white;

@@ -8,14 +8,15 @@
 		<script>
 			function formSubmit(type)
 			{
-				document.forms["queryForm"].elements["type"].value = type;
-				document.forms["queryForm"].submit(); 
+				document.forms["searchForm"].elements["type"].value = type;
+				document.forms["searchForm"].submit(); 
 			}
-		</script>				
+		</script>
 	</head>
-	<body>
+<body>
 
-<%@ include file="header.jsp" %>
+<%@ include file="header.jsp"%>
+
 <%
 	String type = request.getParameter("type");
 	if (type == null) type = "everything";
@@ -27,44 +28,42 @@
 %>
 
 <div id="searchFormContainer">
-	<div style="margin-left:180px;">
-	 <table cellspacing=0 id="searchTabs" style="border-collapse:collapse">
-	 <tr>
-	 <td class="spacer" width="50%">&#160;</td>
+
+<table cellspacing=0 id="searchTabs">
+	<tr>
+		<td class="spacer" width="50%">&#160;</td>
 		<%
 			for (String[] tab: searchTabs)
 			{	
 				if (tab[1].equals(type))
 				{
 		%>
-				<td class="tab selected"><%= tab[0] %></d>
-		<%		
+		<td class="tab selected"><%= tab[0] %></d> <%		
 				}
 				else
 				{
 		%>
-				<td class="tab"><a href="search_new.jsp" onclick="formSubmit('<%= tab[1] %>'); return false;"><%= tab[0] %></a></td>
+		
+		<td class="tab"><a href="search_new.jsp"
+			onclick="formSubmit('<%= tab[1] %>'); return false;"><%= tab[0] %></a></td>
 		<%
 				}
-		%>		
-				<td class="spacer">&#160;</td>
+		%>
+		<td class="spacer">&#160;</td>
 		<%				
 			}
-		%>	 
-	 <td class="spacer" width="50%">&#160;</td>
-	 </tr>
-	 </table>
-	<div id="searchForm">
-		<form id="queryForm" action="search_new.jsp" method="get" style="margin:0px;">
+		%>
+		<td class="spacer" width="50%">&#160;</td>
+	</tr>
+</table>
 
-			<input type="hidden" name="type" value="<%=type%>"/>
-			<input type="text" name="query"  value="<%=query%>" style="width:500px; font-size:20px; margin-top:5px;"/>
-			<input type="submit" style="font-size:20px;" value="Search"/>
+<form id="searchForm" action="search_new.jsp" method="get">	
+	<input type="hidden" name="type" value="<%=type%>" />
+	<input type="text" name="query" value="<%=query%>" style="width:500px;" />
+	<input type="submit" value="Search" />	
+</form>
 
-		</form>	
-	</div>
-	</div>
 </div>
- 
-	</body>
+
+</body>
 </html>
