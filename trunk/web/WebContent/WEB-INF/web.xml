@@ -30,6 +30,14 @@
 		<param-value>1000000</param-value>
 	</context-param>
 	<context-param>
+		<param-name>ftpDefaultEncoding</param-name>
+		<param-value>UTF-8</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ftpCustomEncodings</param-name>
+		<param-value>195.19.254.80:KOI8-R,195.19.252.54:CP1251,195.19.255.204:KOI8-R,195.19.253.66:CP1251</param-value>
+	</context-param>
+	<context-param>
 		<param-name>adminPassword</param-name>
 		<param-value>123_456</param-value>
 	</context-param>
@@ -40,7 +48,7 @@
 		
 	<filter>
 		<filter-name>AuthFilter</filter-name>
-		<filter-class>org.punksearch.commons.AuthFilter</filter-class>
+		<filter-class>org.punksearch.web.AuthFilter</filter-class>
 	</filter>	
 	<filter-mapping>
 		<filter-name>AuthFilter</filter-name>
@@ -53,7 +61,7 @@
 	
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>
-		<servlet-class>org.punksearch.commons.InitServlet</servlet-class>
+		<servlet-class>org.punksearch.web.InitServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
