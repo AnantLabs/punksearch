@@ -1,23 +1,16 @@
 package org.punksearch.web;
 
-import org.apache.log4j.PropertyConfigurator;
-import org.punksearch.commons.SearcherConfig;
-
-
-import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import java.io.File;
+import javax.servlet.http.HttpServlet;
+
+import org.punksearch.commons.SearcherConfig;
 
 public class InitServlet extends HttpServlet
 {
 	public void init(ServletConfig config) throws ServletException
 	{
 		super.init(config);
-
-		String path = getServletContext().getRealPath("");
-		String configFileName = (path + "/WEB-INF/classes/log4j.properties").replace('/', File.separatorChar);
-		PropertyConfigurator.configure(configFileName);
 		
 		SearcherConfig sc = SearcherConfig.getInstance();
 		sc.setIndexDirectory(getServletContext().getInitParameter("indexDirectory"));
