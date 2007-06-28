@@ -82,7 +82,7 @@ TABLE#pager A.pageCurrNumStyle
 #header
 {
 	color: #FFFFFF;
-	font-size: 16px;
+	font-size: 10px;
 }
 
 #header #logo
@@ -142,16 +142,16 @@ TABLE#pager A.pageCurrNumStyle
 #searchFormContainer
 {
     position:absolute;
-    top:23px;
+    top:52px;
     left:200px;
+    margin-top:-2.5em;
 }
 
 #searchForm
 {
-    background-color: #FF7B00; 
-    padding:5px;
-    margin:0px;
-    margin-top:5px;
+    background-color: #FF7B00;
+    padding:5px; 
+    margin:5px 0px 0px 0px;
     white-space: nowrap;
 }
 
@@ -162,12 +162,12 @@ TABLE#pager A.pageCurrNumStyle
 
 #searchTabs
 {
-    border-collapse:collapse;
+    height:2.5em;
 }
 #searchTabs TD.tab
 {
-    border: 1px solid white;
-    padding: 4px 8px;
+    border-top: 1px solid white;
+    padding: 0px 12px;
     color: white;
     font-size:16px;
     font-weight: bold;
@@ -183,7 +183,8 @@ TABLE#pager A.pageCurrNumStyle
 #searchTabs TD.spacer
 {
     padding: 1px;
-    border-bottom: 1px solid white;
+    border-right: 1px solid white;
+    border-left: 1px solid white;    
 }
 
 #searchTabs TD a
