@@ -4,11 +4,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<title>PUNK LAN Search | Login</title>
+		<title>Login | PUNK LAN Search</title>
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 	<body>
-		<%@ include file="header.jsp" %>
+		<%@ include file="header.jsp" %>	
+		<div id="searchFormContainer" style="height:50px">
+			<form id="searchForm" action="login.jsp" method="post">
+				Password: <input type="password" name="password" />&#160;<input type="submit" value="Login" />
+			</form>
+		</div>
+		
 		<%		
 			String action = request.getParameter("action");
 			if (action != null && action.equals("logout"))
@@ -34,7 +40,6 @@
 					}
 				}
 			}
-		%>
-		<%@ include file="login.html" %>	
+		%>	
 	</body>
 </html>

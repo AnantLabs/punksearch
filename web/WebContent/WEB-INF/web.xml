@@ -56,7 +56,7 @@
 	</filter-mapping>
 	<error-page>
 		<error-code>401</error-code>
-		<location>/401.jsp</location>
+		<location>/login.jsp</location>
 	</error-page>		
 	
 	<servlet>

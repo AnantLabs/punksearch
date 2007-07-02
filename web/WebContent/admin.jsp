@@ -8,16 +8,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
-		<title>PUNK LAN Search | Admin</title>
+		<title>Admin | PUNK LAN Search</title>
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 <body>
+	<%@include file="header.jsp" %>
+
 	<%!
 		private static Thread indexThread = null;
-	%>
-
-	<div id="header">Admin Interface</div>
-	
+	%>	
 	<%
 		boolean isIndexing = (indexThread != null && indexThread.isAlive());
 		String action = request.getParameter("action");
@@ -147,6 +146,5 @@
 			<a href="admin.jsp?action=stop">Stop</a>
 		<% } %>
 	</div>
-	<%@ include file="footer.jsp" %>
 </body>
 </html>
