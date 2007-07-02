@@ -1,6 +1,7 @@
 package org.punksearch.web;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,8 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.punksearch.indexer.Indexer;
+
 public class AuthFilter implements Filter 
 {
+  private static Logger __log	= Logger.getLogger(AuthFilter.class.getName());
+  
   private FilterConfig filterConfig = null;
 
   /**
@@ -40,10 +45,10 @@ public class AuthFilter implements Filter
       } else { filterChain.doFilter(request, response); }
     }
     catch (ServletException sx) {
-      filterConfig.getServletContext().log(sx.getMessage());
+      __log.warning(sx.getMessage());	
     }
     catch (IOException iox) {
-      filterConfig.getServletContext().log(iox.getMessage());
+      __log.warning(iox.getMessage());
     }
   }
 

@@ -8,9 +8,9 @@ BODY
 	font-size: 12px;	
 }
 
-INPUT
+INPUT 
 {
-	border: 1px solid #000000;
+	border: 1px solid black;
 }
 
 A
@@ -28,7 +28,7 @@ A
 	font-weight: bold;
 }
 
-TABLE TD
+TABLE#results TD
 {
 	text-align: left;
 	padding: 2px;
@@ -79,13 +79,7 @@ TABLE#pager A.pageCurrNumStyle
 	font-weight: bold;
 }
 
-#header
-{
-	color: #FFFFFF;
-	font-size: 10px;
-}
-
-#header #logo
+#logo
 {
     position:absolute;
     top:20px;
@@ -139,54 +133,38 @@ TABLE#pager A.pageCurrNumStyle
 	color: #FF7B00;
 }
 
-#searchFormContainer
+/* searchTabs */
+#searchTabsContainer
 {
     position:absolute;
     top:52px;
     left:200px;
-    margin-top:-2.5em;
+    margin-top:-2em;
 }
-
-#searchForm
-{
-    background-color: #FF7B00;
-    padding:5px; 
-    margin:5px 0px 0px 0px;
-    white-space: nowrap;
-}
-
-#searchForm INPUT
-{
-    font-size:20px;
-}
-
 #searchTabs
 {
-    height:2.5em;
+    height:2em;
 }
 #searchTabs TD.tab
 {
     border-top: 1px solid white;
     padding: 0px 12px;
     color: white;
-    font-size:16px;
+    font-size:14px;
     font-weight: bold;
 }
-
 #searchTabs TD.selected
 {
 	color: #FFFFFF;
 	background-color: #FF7B00;
 	border-bottom: 1px solid #FF7B00;
 }
-
 #searchTabs TD.spacer
 {
     padding: 1px;
     border-right: 1px solid white;
     border-left: 1px solid white;    
 }
-
 #searchTabs TD a
 {
 	text-decoration:none;
@@ -194,4 +172,35 @@ TABLE#pager A.pageCurrNumStyle
 #searchTabs TD a:hover
 {
 	color:#FF7B00;
+}
+/* searchForm */
+#searchFormContainer
+{ 
+    background-color: #FF7B00; 
+    border-bottom: 1px solid white; 
+    border-top: 1px solid white;
+}
+#searchForm
+{
+    font-size:18px;
+    min-height:30px;    
+    background-color: #FF7B00;
+    padding:10px 20px 10px 100px;
+    margin:0px 0px 0px 100px;
+    border-left:1px solid white;
+    white-space: nowrap;     
+}
+#searchForm INPUT
+{
+    font-size:20px;
+}
+#searchForm .fieldset
+{
+    padding-bottom:4px;
+    font-size:20px;
+}
+/* searchResults */
+#searchResultsContainer
+{    
+    margin: 10px;
 }
