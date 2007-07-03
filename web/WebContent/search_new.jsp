@@ -68,6 +68,7 @@
 </div>
 
 <div id="searchFormContainer">
+	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; border-right:1px solid white;"></div>
 	<form id="searchForm" action="search_new.jsp" method="get" onsubmit="return validateQuery();">	
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	

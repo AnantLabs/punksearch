@@ -82,6 +82,7 @@ TABLE#pager A.pageCurrNumStyle
 #logo
 {
     position:absolute;
+    z-index:2007;
     top:20px;
     left:25px;
     width: 150px;
@@ -137,6 +138,7 @@ TABLE#pager A.pageCurrNumStyle
 #searchTabsContainer
 {
     position:absolute;
+    z-index:2007;
     top:52px;
     left:200px;
     margin-top:-2em;
@@ -179,16 +181,16 @@ TABLE#pager A.pageCurrNumStyle
     background-color: #FF7B00; 
     border-bottom: 1px solid white; 
     border-top: 1px solid white;
+    position:relative;     
 }
 #searchForm
 {
     font-size:18px;
     min-height:30px;    
     background-color: #FF7B00;
-    padding:10px 20px 10px 100px;
-    margin:0px 0px 0px 100px;
-    border-left:1px solid white;
-    white-space: nowrap;     
+    padding:10px 20px 10px 200px;
+    margin:0px;
+    white-space: nowrap;  
 }
 #searchForm INPUT
 {
