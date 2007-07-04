@@ -94,19 +94,6 @@ TABLE#pager A.pageCurrNumStyle
 	overflow: hidden; 
 }
 
-#footer
-{
-    /* position: absolute; */
-    width: 100%;
-    /*left: 0px;
-    bottom: 0px;*/
-	text-align: center;
-	color: white;
-	font-size: 10pt;
-	background-color: #0070AD;
-	padding-top: 10pt;
-}
-
 .errorMessage
 {
     background-color: red;
