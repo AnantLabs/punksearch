@@ -17,6 +17,8 @@ public class SearchResult {
 	public String date = null;
 	public String size = null;
 	
+	public float score = 0;
+	
 	public SearchResult(Document doc)
 	{
 		host = doc.get(SearcherConstants.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
@@ -31,6 +33,8 @@ public class SearchResult {
 		
 		//size = NumberFormat.getNumberInstance().format((Double.valueOf(size))/(1024*1024));
 		size = new DecimalFormat("###,##0.00").format((Double.valueOf(size))/(1024*1024));			
-		date = DateFormat.getDateInstance().format(Long.valueOf(date));		
+		date = DateFormat.getDateInstance().format(Long.valueOf(date));
+		
+		score = doc.getBoost();
 	}
 }
