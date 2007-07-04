@@ -131,8 +131,6 @@
 </div>
 
 <div id="searchResultsContainer">
-	<%=params.first %>
-	<%=params.getStringValue("first") %>
 	<%
 		SearchAction searchAction  = new SearchAction(params);
 		List<SearchResult> searchResults = searchAction.doSearch();
@@ -144,21 +142,35 @@
 				int overallCount = searchAction.getOverallCount();
 			 	String pageNums = searchPager.makePagesRow(overallCount);
 				%>
-					<table cellspacing="0" cellpadding="0" id="pager" align="center">
-						<tr>
-							<td style="font-size: 10pt;">
-								<span style="font-size: 14pt;"><%= overallCount %></span> items (<%= searchPager.getPageCount() %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
-							</td>
-							<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
-						</tr>
-					</table>
+				<table id="pager" cellspacing="0" cellpadding="0" align="center">
+					<tr>
+						<td style="font-size: 10pt;">
+							<span style="font-size: 14pt;"><%= overallCount %></span> items (<%= searchPager.getPageCount() %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
+						</td>
+						<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
+					</tr>
+				</table>
+				<table id="results" cellspacing="0" align="center">
 				<%								
-				for (SearchResult file : searchResults)
-				{
+					for (SearchResult file : searchResults)
+					{
+					%>
+					<tr>
+						<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
+							<img src="images/<%= (file.ext.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
+						</td>
+						<td style="padding-left: 2px;">
+							<span style="font-size: 12pt;"><%= file.name %></span><%= (showScores)? "(" + file.score + ")": "" %><br/>
+							<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= file.host + "/" + file.path %></span>
+						</td>
+						<td style="text-align: right;"><%= file.date %></td>
+						<td style="text-align: right;"><%= file.size %> Mb</td>
+					</tr>
+					<%
+					}
 				%>
-				<p><%=file.name%></p>
-				<%
-				}
+				</table>
+			<%	
 			}
 			else
 			{
