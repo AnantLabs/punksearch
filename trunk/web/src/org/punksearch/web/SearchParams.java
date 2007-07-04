@@ -11,7 +11,7 @@ public class SearchParams
 {
 	private static Logger __log	= Logger.getLogger(SearchParams.class.getName());
 	
-	private HttpServletRequest request = null;
+	public HttpServletRequest request = null;
 		
 	public String type = "everything";
 	public String query = null;
@@ -38,43 +38,84 @@ public class SearchParams
 	
 		String typeParam = request.getParameter("type");
 		if (typeParam != null) this.type = typeParam;
-
-		this.query = getStringValue("query");
-
-		this.dir = getStringValue("dir");
-		this.file = getStringValue("file");
-		this.ext = getStringValue("ext");
 		
+		/* first & last */
 		try
-		{			
-			this.maxSize = (Long)Math.round(Double.valueOf(getStringValue("maxSize"))*1024*1024);
-			this.minSize = (Long)Math.round(Double.valueOf(getStringValue("minSize"))*1024*1024);
-			this.fromDate = DateFormat.getDateInstance().parse(getStringValue("fromDate"));
-			this.toDate = DateFormat.getDateInstance().parse(getStringValue("toDate"));
-			
+		{
 			this.first = Integer.valueOf(getStringValue("first"));
-			this.last = Integer.valueOf(getStringValue("last"));
 		}
 		catch (NumberFormatException nfe)
 		{
 			__log.warning(nfe.getMessage());
 		}
-		catch (ParseException pe) 
+		try
 		{
-			__log.warning(pe.getMessage());
+			this.last = Integer.valueOf(getStringValue("last"));
 		}
+		catch (NumberFormatException nfe)
+		{
+			__log.warning(nfe.getMessage());
+		}		
 
-		this.smb = (request.getParameter("smb") != null);
-		this.ftp = (request.getParameter("ftp") != null);	
-		
-		if (this.minSize != null && this.maxSize != null && this.minSize > this.minSize)
+		if (type.equals("advanced"))
 		{
-			this.minSize = this.maxSize = null;
+			/* dir & file & ext*/		
+			this.dir = getStringValue("dir");
+			this.file = getStringValue("file");
+			this.ext = getStringValue("ext");
+			
+			/* maxSize & minSize */
+			try
+			{			
+				this.maxSize = (Long)Math.round(Double.valueOf(getStringValue("maxSize"))*1024*1024);
+			}
+			catch (NumberFormatException nfe)
+			{
+				__log.warning(nfe.getMessage());
+			}		
+			try
+			{
+				this.minSize = (Long)Math.round(Double.valueOf(getStringValue("minSize"))*1024*1024);
+			}
+			catch (NumberFormatException nfe)
+			{
+				__log.warning(nfe.getMessage());
+			}
+			if (this.minSize != null && this.maxSize != null && this.minSize > this.minSize)
+			{
+				this.minSize = this.maxSize = null;
+			}
+					
+			/* fromDate & toDate */
+			try
+			{
+				this.fromDate = DateFormat.getDateInstance().parse(getStringValue("fromDate"));
+			}
+			catch (ParseException pe) 
+			{
+				__log.warning(pe.getMessage());
+			}
+			try
+			{
+				this.toDate = DateFormat.getDateInstance().parse(getStringValue("toDate"));
+			}
+			catch (ParseException pe) 
+			{
+				__log.warning(pe.getMessage());
+			}
+			if (this.fromDate != null && this.toDate != null && this.fromDate.getTime() > this.toDate.getTime())
+			{
+				this.fromDate = this.toDate = null;
+			}		
+						
+			/* ftp & smb */
+			this.smb = (request.getParameter("smb") != null);
+			this.ftp = (request.getParameter("ftp") != null);	
 		}
-		if (this.fromDate != null && this.toDate != null && this.fromDate.getTime() > this.toDate.getTime())
+		else
 		{
-			this.fromDate = this.toDate = null;
-		}
+			this.query = getStringValue("query");			
+		}				
 	}
 	
 	public String getStringValue(String paramName)
@@ -93,4 +134,6 @@ public class SearchParams
 		
 		return paramValue;
 	}
+	
+
 }

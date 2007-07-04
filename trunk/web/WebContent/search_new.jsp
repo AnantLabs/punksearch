@@ -3,6 +3,7 @@
 <%@ page import="org.punksearch.web.SearchParams" %>
 <%@ page import="org.punksearch.web.SearchResult" %>
 <%@ page import="org.punksearch.web.SearchAction" %>
+<%@ page import="org.punksearch.web.SearchPager" %>
 
 <%! 
 	boolean showScores = false;
@@ -130,6 +131,8 @@
 </div>
 
 <div id="searchResultsContainer">
+	<%=params.first %>
+	<%=params.getStringValue("first") %>
 	<%
 		SearchAction searchAction  = new SearchAction(params);
 		List<SearchResult> searchResults = searchAction.doSearch();
@@ -137,6 +140,19 @@
 		{
 			if(!searchResults.isEmpty())
 			{
+				SearchPager searchPager  = new SearchPager(params);
+				int overallCount = searchAction.getOverallCount();
+			 	String pageNums = searchPager.makePagesRow(overallCount);
+				%>
+					<table cellspacing="0" cellpadding="0" id="pager" align="center">
+						<tr>
+							<td style="font-size: 10pt;">
+								<span style="font-size: 14pt;"><%= overallCount %></span> items (<%= searchPager.getPageCount() %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
+							</td>
+							<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
+						</tr>
+					</table>
+				<%								
 				for (SearchResult file : searchResults)
 				{
 				%>
