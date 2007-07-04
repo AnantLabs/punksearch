@@ -20,14 +20,17 @@ public class SearchParams
 	public String file = null;
 	public String ext = null;
 
-	public Integer minSize =  null;
-	public Integer maxSize = null;
+	public Long minSize =  null;
+	public Long maxSize = null;
 	
 	public Date fromDate = null;
 	public Date toDate = null;
 
 	public Boolean ftp = true;
 	public Boolean smb = true;
+	
+	public Integer first = 0;
+	public Integer last = SearchPager.PAGE_SIZE-1;
 		
 	public SearchParams(HttpServletRequest request)
 	{
@@ -43,11 +46,14 @@ public class SearchParams
 		this.ext = getStringValue("ext");
 		
 		try
-		{
-			this.maxSize = Integer.valueOf(getStringValue("maxSize"));
-			this.minSize = Integer.valueOf(getStringValue("mixSize"));			
+		{			
+			this.maxSize = (Long)Math.round(Double.valueOf(getStringValue("maxSize"))*1024*1024);
+			this.minSize = (Long)Math.round(Double.valueOf(getStringValue("minSize"))*1024*1024);
 			this.fromDate = DateFormat.getDateInstance().parse(getStringValue("fromDate"));
 			this.toDate = DateFormat.getDateInstance().parse(getStringValue("toDate"));
+			
+			this.first = Integer.valueOf(getStringValue("first"));
+			this.last = Integer.valueOf(getStringValue("last"));
 		}
 		catch (NumberFormatException nfe)
 		{
@@ -58,10 +64,17 @@ public class SearchParams
 			__log.warning(pe.getMessage());
 		}
 
-		String smbParam = request.getParameter("smb");
-		if (smbParam == null) this.smb = false;		
-		String ftpParam = request.getParameter("ftp");
-		if (ftpParam == null) this.ftp = false;
+		this.smb = (request.getParameter("smb") != null);
+		this.ftp = (request.getParameter("ftp") != null);	
+		
+		if (this.minSize != null && this.maxSize != null && this.minSize > this.minSize)
+		{
+			this.minSize = this.maxSize = null;
+		}
+		if (this.fromDate != null && this.toDate != null && this.fromDate.getTime() > this.toDate.getTime())
+		{
+			this.fromDate = this.toDate = null;
+		}
 	}
 	
 	public String getStringValue(String paramName)
