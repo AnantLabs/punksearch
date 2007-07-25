@@ -3,6 +3,7 @@ package org.punksearch.web;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -23,8 +24,8 @@ public class SearchParams
 	public Long minSize =  null;
 	public Long maxSize = null;
 	
-	public Date fromDate = null;
-	public Date toDate = null;
+	public Long fromDate = null;
+	public Long toDate = null;
 
 	public Boolean ftp = true;
 	public Boolean smb = true;
@@ -87,9 +88,10 @@ public class SearchParams
 			}
 					
 			/* fromDate & toDate */
+			DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 			try
 			{
-				this.fromDate = DateFormat.getDateInstance().parse(getStringValue("fromDate"));
+				this.fromDate = fmt.parse(getStringValue("fromDate")).getTime();
 			}
 			catch (ParseException pe) 
 			{
@@ -97,13 +99,13 @@ public class SearchParams
 			}
 			try
 			{
-				this.toDate = DateFormat.getDateInstance().parse(getStringValue("toDate"));
+				this.toDate = fmt.parse(getStringValue("toDate")).getTime();
 			}
 			catch (ParseException pe) 
 			{
 				__log.warning(pe.getMessage());
 			}
-			if (this.fromDate != null && this.toDate != null && this.fromDate.getTime() > this.toDate.getTime())
+			if (this.fromDate != null && this.toDate != null && this.fromDate > this.toDate)
 			{
 				this.fromDate = this.toDate = null;
 			}		
