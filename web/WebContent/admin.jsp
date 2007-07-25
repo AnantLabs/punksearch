@@ -5,6 +5,7 @@
 <%@ page import="org.punksearch.ip.*" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%@page import="org.punksearch.web.filters.TypeFilters"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
@@ -43,7 +44,14 @@
 					SearcherConfig.getInstance().setIndexThreads(Integer.valueOf(request.getParameter("threads")));
 					SearcherConfig.getInstance().setIndexDeep(Integer.valueOf(request.getParameter("deep")));
 					SearcherConfig.getInstance().setIndexDirectory(request.getParameter("indexDir"));
-					indexThread = new Thread(Indexer.getInstance(), "Indexer");
+					indexThread = new Thread(Indexer.getInstance(), "Indexer")
+					{
+						public void run()
+						{
+							super.run();
+							TypeFilters.reset();
+						}
+					};
 					indexThread.start();
 					//pageContext.forward("admin.jsp");
 				}
