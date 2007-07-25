@@ -12,6 +12,7 @@ import org.apache.lucene.document.Document;
 
 import org.punksearch.searcher.*;
 import org.punksearch.searcher.filters.*;
+import org.punksearch.web.filters.TypeFilters;
 import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
@@ -39,7 +40,7 @@ public class SearchAction {
 	public List<SearchResult> doSearch()
 	{
 		Query query = null;
-		CompositeFilter filter = null;
+		Filter filter = null;
 		
 		if (params.type.equals("advanced"))
 		{
@@ -48,25 +49,27 @@ public class SearchAction {
 			NumberRangeFilter sizeFilter = null;
 			if (params.minSize != null || params.maxSize != null)
 			{
-				sizeFilter = LuceneSearcher.createNumberFilter(SearcherConstants.SIZE, params.minSize, params.maxSize);
+				sizeFilter = FilterFactory.createNumberFilter(SearcherConstants.SIZE, params.minSize, params.maxSize);
 			}
 			
 			NumberRangeFilter dateFilter = null;
 			if (params.fromDate != null || params.toDate != null)
 			{
-				dateFilter = LuceneSearcher.createNumberFilter(SearcherConstants.DATE, params.fromDate.getTime(), params.toDate.getTime());
+				dateFilter = FilterFactory.createNumberFilter(SearcherConstants.DATE, params.fromDate, params.toDate);
 			}
 			
 			if (sizeFilter != null || dateFilter != null)
 			{
-				filter = new CompositeFilter();
-				if (sizeFilter != null) filter.add(sizeFilter);
-				if (dateFilter != null) filter.add(dateFilter);
+				CompositeFilter resultFilter = new CompositeFilter();
+				if (sizeFilter != null) resultFilter.add(sizeFilter);
+				if (dateFilter != null) resultFilter.add(dateFilter);
+				filter = resultFilter;
 			}			
 		}
 		else
 		{
-			//query = makeSimpleQuery(); TODO:implement
+			query = makeSimpleQuery();
+			filter = TypeFilters.get(params.type);
 		}
 					
 		List<SearchResult> searchResults = null;
@@ -139,6 +142,36 @@ public class SearchAction {
     	return searchResults;
     }
         
+
+    private Query makeSimpleQuery()
+    {
+		BooleanQuery query = new BooleanQuery(false);
+		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
+
+		List<String> terms 	= prepareQueryParameter(params.query);
+		
+		for (String item : terms)
+		{
+			BooleanQuery itemQuery = new BooleanQuery();
+			
+			BooleanClause.Occur occurItem = BooleanClause.Occur.MUST;
+			if (item.startsWith("!"))
+			{
+				item = item.substring(1);
+				occurItem = BooleanClause.Occur.MUST_NOT;
+			}
+			
+			Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, "*" + item + "*"));
+			itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
+			
+			Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, "*" + item + "*"));
+			itemQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
+			
+			query.add(itemQuery, occurItem);
+		}
+		
+		return query;
+    }
     
     private Query makeAdvancedQuery()
     {
