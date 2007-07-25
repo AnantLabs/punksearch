@@ -80,7 +80,7 @@
 <div id="searchFormContainer">
 	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; /*border-right:1px solid white;*/"></div -->
 	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00;"></div>
-	<form id="searchForm" action="search_new.jsp" method="get" onsubmit="return validateQuery();">	
+	<form id="searchForm" action="search.jsp" method="get" onsubmit="return validateQuery();">	
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	
 		if (params.type.equals("advanced"))
