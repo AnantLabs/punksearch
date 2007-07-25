@@ -283,7 +283,7 @@
 			NumberRangeFilter sizeFilter = null;
 			if (min != null || max != null)
 			{
-				sizeFilter = LuceneSearcher.createNumberFilter(SearcherConstants.SIZE, min, max);
+				sizeFilter = FilterFactory.createNumberFilter(SearcherConstants.SIZE, min, max);
 			}
 			
 			Long  from = ((fromParam != null) && (fromParam.length() > 0))? Long.valueOf(fromParam) : null;
@@ -296,7 +296,7 @@
 			NumberRangeFilter dateFilter = null;
 			if (from != null || to != null)
 			{
-				dateFilter = LuceneSearcher.createNumberFilter(SearcherConstants.DATE, from, to);
+				dateFilter = FilterFactory.createNumberFilter(SearcherConstants.DATE, from, to);
 			}
 			
 			CompositeFilter filter = null;
