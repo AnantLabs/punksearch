@@ -122,23 +122,4 @@ public class LuceneSearcher
 	}
 	*/
 	
-	public static NumberRangeFilter createNumberFilter(String fieldName, Long min, Long max)
-	{
-		if (min == null && max == null)
-		{
-			throw new IllegalArgumentException("Both min and max can't be null at the same time");
-		}
-		if (min != null && max != null && min > max)
-		{
-			throw new IllegalArgumentException("min > max");
-		}
-		
-		NumberRangeFilter<Long> filter = new NumberRangeFilter<Long>(fieldName, min, max, false, false) {
-			public Long termTextToNumber(String text) {
-				return Long.valueOf(text);
-			}
-		};
-		__log.info("SizeFilter: " + filter.toString());
-		return filter;
-	}
 }
