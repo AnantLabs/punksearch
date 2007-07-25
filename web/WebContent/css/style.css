@@ -83,13 +83,13 @@ TABLE#pager A.pageCurrNumStyle
 {
     position:absolute;
     z-index:2007;
-    top:20px;
+    top:0px;
     left:25px;
     width: 150px;
     height: 60px;
     font-size:10px;
     background-color: #004368;
-    border: 1px solid white;
+    /*border: 1px solid white;*/
 	font-weight: bold;
 	overflow: hidden; 
 }
@@ -126,8 +126,8 @@ TABLE#pager A.pageCurrNumStyle
 {
     position:absolute;
     z-index:2007;
-    top:52px;
-    left:200px;
+    top:30px;
+    left:0px;
     margin-top:-2em;
 }
 #searchTabs
@@ -136,7 +136,7 @@ TABLE#pager A.pageCurrNumStyle
 }
 #searchTabs TD.tab
 {
-    border-top: 1px solid white;
+    /*border-top: 1px solid white;*/
     padding: 0px 12px;
     color: white;
     font-size:14px;
@@ -151,8 +151,8 @@ TABLE#pager A.pageCurrNumStyle
 #searchTabs TD.spacer
 {
     padding: 1px;
-    border-right: 1px solid white;
-    border-left: 1px solid white;    
+    /*border-right: 1px solid white;
+    border-left: 1px solid white;*/    
 }
 #searchTabs TD a
 {
@@ -166,8 +166,8 @@ TABLE#pager A.pageCurrNumStyle
 #searchFormContainer
 { 
     background-color: #FF7B00; 
-    border-bottom: 1px solid white; 
-    border-top: 1px solid white;
+    /*border-bottom: 1px solid white; 
+    border-top: 1px solid white;*/
     position:relative;     
 }
 #searchForm
@@ -175,8 +175,8 @@ TABLE#pager A.pageCurrNumStyle
     font-size:18px;
     min-height:30px;    
     background-color: #FF7B00;
-    padding:10px 20px 10px 200px;
-    margin:0px;
+    padding: 5px 140px 5px 200px;
+    margin: 0px;
     white-space: nowrap;  
 }
 #searchForm INPUT

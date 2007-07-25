@@ -1,5 +1,6 @@
-<div style="height:50px; background-color: #004368; border-top: 1px solid white; position:relative" >
-	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00; border-right:1px solid white;"></div>
+<div style="height:30px; background-color: #004368; /*border-top: 1px solid white;*/ position:relative" >
+	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00; border-right:1px solid white;"></div-->
+	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368;"></div>
 </div>
 
 <div id="logo">	

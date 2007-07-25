@@ -10,6 +10,7 @@
 %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<%@page import="org.punksearch.web.filters.TypeFilters"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -41,7 +42,7 @@
 	
 <%	
 	SearchParams params = new SearchParams(request);
-	String[][] searchTabs = {{"Everything","everything"},{"Films","films"},{"Music","music"},{"Advanced","advanced"}};
+	String[][] searchTabs = {{"everything","everything"},{"films",TypeFilters.TYPE_FILM},{"music",TypeFilters.TYPE_MUSIC},{"advanced","advanced"}};
 %>
 	
 <body>
@@ -51,7 +52,7 @@
 <div id="searchTabsContainer">
 	<table cellspacing=0 id="searchTabs">
 		<tr>
-			<td style="border-right: 1px solid white; width:50%">&#160;</td>
+			<td style="/*border-right: 1px solid white;*/ width:50%">&#160;</td>
 			<%
 			for (String[] tab: searchTabs)
 			{			
@@ -66,18 +67,19 @@
 				if (searchTabs[searchTabs.length-1]!=tab)
 				{
 					int padding = 2;
-					if (searchTabs[searchTabs.length-2]==tab) padding = 20; // spacer before "Advanced" tab
+					if (searchTabs[searchTabs.length-2]==tab) padding = 50; // spacer before "Advanced" tab
 					%><td class="spacer" style="padding-left:<%=padding%>px;">&#160;</td><%		
 				}
 			}
 			%>
-			<td style="border-left: 1px solid white; width:50%">&#160;</td>
+			<td style="/*border-left: 1px solid white;*/ width:50%">&#160;</td>
 		</tr>
 	</table>
 </div>
 
 <div id="searchFormContainer">
-	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; border-right:1px solid white;"></div>
+	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; /*border-right:1px solid white;*/"></div -->
+	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00;"></div>
 	<form id="searchForm" action="search_new.jsp" method="get" onsubmit="return validateQuery();">	
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	
@@ -85,37 +87,43 @@
 		{
 		%>
 			<div class="fieldset">
-				path&nbsp;<input type="text" id="dir"  name="dir"  value="<%= params.dir  %>" size="20" />
-				file&nbsp;<input type="text" id="file" name="file" value="<%= params.file %>" size="20" />
-				ext&nbsp;<input  type="text" id="ext"  name="ext"  value="<%= params.ext  %>" size="20" />
 			</div>	
 			<table class="fieldset" width="100%" style="font-size:16px; font-weight:bold;">
 				<tr>
 					<td>
-						size<span style="vertical-align: sub; font-size: 12px;">Mb</span>						
+						path<br/><input type="text" id="dir"  name="dir"  value="<%= params.dir  %>" size="20" />
 					</td>
 					<td>
-						Hint<span style="color:white; font-weight:normal"> use "!" to negate search terms</span>				
+						filename<br/><input type="text" id="file" name="file" value="<%= params.file %>" size="20" />
 					</td>
 					<td>
-						date<span style="vertical-align: sub; font-size: 12px;">dd.mm.yy</span>
-					</td>						
-				</tr>				
+						extension<br/><input  type="text" id="ext"  name="ext"  value="<%= params.ext  %>" size="10" />
+					</td>
+				</tr>
 				<tr>
 					<td>
+						date<span style="vertical-align: sub; font-size: 12px;">yyyy-mm-dd</span><br/>
+						<input type="text" id="fromDate" name="fromDate" value="<%= params.getStringValue("fromDate") %>" size="11" style="font-size:16px; font-weight:bold"/>&nbsp;-
+						<input type="text" id="toDate" name="toDate" value="<%= params.getStringValue("toDate") %>" size="11" style="font-size:16px; font-weight:bold"/>						
+					</td>
+					<td>
+						size<span style="vertical-align: sub; font-size: 12px;">Mb</span><br/>
 						<input type="text" id="minSize" name="minSize" value="<%= params.getStringValue("minSize") %>" size="6" style="font-size:16px; font-weight:bold"/>&nbsp;-
 						<input type="text" id="maxSize" name="maxSize" value="<%= params.getStringValue("maxSize") %>" size="6" style="font-size:16px; font-weight:bold"/>						
 					</td>
 					<td>
+						<input type="submit" value="search"/>
+					</td>						
+				</tr>				
+				<!--tr>
+					<td>
 						ftp<input type="checkbox" id="ftp" name="ftp" <%= params.ftp ? "checked" : "" %> style="border:0px;"/>
-						&nbsp;<input type="submit" value="search"/>&nbsp;
 						<input type="checkbox" id="smb" name="smb" <%= params.smb ? "checked" : "" %> style="border:0px;"/>smb
 					</td>
 					<td>
-						<input type="text" id="fromDate" name="fromDate" value="<%= params.getStringValue("fromDate") %>" size="6" style="font-size:16px; font-weight:bold"/>&nbsp;-
-						<input type="text" id="toDate" name="toDate" value="<%= params.getStringValue("toDate") %>" size="6" style="font-size:16px; font-weight:bold"/>						
+						Hint<span style="color:white; font-weight:normal"> use "!" to negate search terms</span>				
 					</td>
-				</tr>						
+				</tr-->						
 			</table>						
 		<%									
 		}
