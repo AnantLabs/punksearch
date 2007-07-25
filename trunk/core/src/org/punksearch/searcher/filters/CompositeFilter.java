@@ -44,5 +44,49 @@ public class CompositeFilter extends Filter
 		}
 		return result;
 	}
+	
+	@Override
+	public String toString()
+	{
+		String result = "";
+		for (Filter filter : filters)
+		{
+			result += "; " + filter.toString();
+		}
+		return result;
+	}
+	
+	public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+		if (!(o instanceof CompositeFilter))
+			return false;
+		
+		CompositeFilter other = (CompositeFilter) o;
+		if (other.filters.size() != this.filters.size())
+		{
+			return false;
+		}
+		else
+		{
+			for (Filter myFilter : this.filters)
+			{
+				if (!other.filters.contains(myFilter))
+				{
+					return false;
+				}
+			}
+			for (Filter hisFilter : other.filters)
+			{
+				if (!this.filters.contains(hisFilter))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+	}
 
 }
