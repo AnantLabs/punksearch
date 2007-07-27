@@ -21,6 +21,7 @@ public class InitServlet extends HttpServlet
 		sc.setFtpDefaultEncoding(getServletContext().getInitParameter("ftpDefaultEncoding"));
 		sc.setFtpCustomEncodings(getServletContext().getInitParameter("ftpCustomEncodings"));
 		sc.setMaxClauseCount(Integer.parseInt(getServletContext().getInitParameter("searchMaxClauseCount")));
+		sc.setGoogleAnalyticsId(getServletContext().getInitParameter("googleAnalyticsId"));
 		
 		//System.setProperty("jcifs.smb.client.responseTimeout", "5000");
 		System.setProperty("jcifs.util.loglevel", "0");

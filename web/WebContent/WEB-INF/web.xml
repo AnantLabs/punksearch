@@ -7,7 +7,7 @@
 
 	<context-param>
 		<param-name>indexDirectory</param-name>
-		<param-value>W:\punksearchIndex</param-value>
+		<param-value>/Users/sky/tmp/LanSearcherIndex</param-value>
 	</context-param>
 	<context-param>
 		<param-name>indexThreads</param-name>
@@ -40,6 +40,10 @@
 	<context-param>
 		<param-name>adminPassword</param-name>
 		<param-value>123_456</param-value>
+	</context-param>
+	<context-param>
+		<param-name>googleAnalyticsId</param-name>
+		<param-value></param-value>
 	</context-param>
 
 	<welcome-file-list>
