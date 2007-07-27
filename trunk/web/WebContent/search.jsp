@@ -11,6 +11,7 @@
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <%@page import="org.punksearch.web.filters.TypeFilters"%>
+<%@page import="org.punksearch.commons.SearcherConfig"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -140,6 +141,8 @@
 
 <div id="searchResultsContainer">
 	<%
+		if (!request.getParameterMap().isEmpty())
+		{	
 		SearchAction searchAction  = new SearchAction(params);
 		List<SearchResult> searchResults = searchAction.doSearch();
 		if (searchResults != null)
@@ -185,7 +188,16 @@
 				%><div class="infoMessage">Search yields no results</div><%	
 			}
 		}
+		}
 	%>
 </div>
+<% if (SearcherConfig.getInstance().getGoogleAnalyticsId().length() > 0) { %>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "<%= SearcherConfig.getInstance().getGoogleAnalyticsId() %>";
+urchinTracker();
+</script>
+<% } %>
 </body>
 </html>
