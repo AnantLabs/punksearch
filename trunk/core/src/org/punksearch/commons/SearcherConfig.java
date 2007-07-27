@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.punksearch.ip.IpRange;
 
-
 /**
  * Class for storing indexer config
  */
@@ -16,16 +15,17 @@ public class SearcherConfig
 	private static SearcherConfig	singleton;
 
 	private String					indexDirectory;
-	private int						indexThreads	= 1;
-	private int						indexDeep		= 5;
-	private String					smbDomain		= "";
-	private String					smbUser			= "";
-	private String					smbPassword		= "";
-	private int						smbTimeout		= 5000;
-	private int						maxClauseCount  = 1000000;
-	private List<IpRange>			ipRanges		= new ArrayList<IpRange>();
-	private String					ftpDefaultEnc   = "";
-	private Map<String, String>     ftpCustomEnc    = new HashMap<String, String>();
+	private int						indexThreads		= 1;
+	private int						indexDeep			= 5;
+	private String					smbDomain			= "";
+	private String					smbUser				= "";
+	private String					smbPassword			= "";
+	private int						smbTimeout			= 5000;
+	private int						maxClauseCount		= 1000000;
+	private List<IpRange>			ipRanges			= new ArrayList<IpRange>();
+	private String					ftpDefaultEnc		= "";
+	private Map<String, String>		ftpCustomEnc		= new HashMap<String, String>();
+	private String					googleAnalyticsId	= "";
 
 	private SearcherConfig()
 	{
@@ -83,9 +83,9 @@ public class SearcherConfig
 		{
 			ranges += "," + range.toString();
 		}
-		return (ranges.length() != 0)? ranges.substring(1) : "";
+		return (ranges.length() != 0) ? ranges.substring(1) : "";
 	}
-	
+
 	public void setSmbLogin(String smbLogin)
 	{
 		if (smbLogin.length() != 0 && smbLogin.contains("\\") && smbLogin.contains(":"))
@@ -143,7 +143,7 @@ public class SearcherConfig
 	{
 		this.smbTimeout = timeout;
 	}
-	
+
 	public int getMaxClauseCount()
 	{
 		return maxClauseCount;
@@ -163,11 +163,12 @@ public class SearcherConfig
 	{
 		this.ftpDefaultEnc = ftpDefaultEnc;
 	}
-	
+
 	public void setFtpCustomEncodings(String encString)
 	{
-		if (encString == null || encString.length() == 0) return;
-		
+		if (encString == null || encString.length() == 0)
+			return;
+
 		String[] chunks = encString.split(",");
 		for (String chunk : chunks)
 		{
@@ -175,9 +176,19 @@ public class SearcherConfig
 			ftpCustomEnc.put(parts[0], parts[1]);
 		}
 	}
-	
+
 	public Map<String, String> getFtpCustomEncodings()
 	{
 		return ftpCustomEnc;
+	}
+
+	public String getGoogleAnalyticsId()
+	{
+		return googleAnalyticsId;
+	}
+
+	public void setGoogleAnalyticsId(String googleAnalyticsId)
+	{
+		this.googleAnalyticsId = googleAnalyticsId;
 	}
 }
