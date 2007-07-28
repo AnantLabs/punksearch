@@ -3,7 +3,9 @@ package org.punksearch.indexer;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
+import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexModifier;
 import org.apache.lucene.index.IndexReader;
@@ -86,7 +88,15 @@ public class IndexerOperator
 	{
 		
 		boolean indexExists = IndexReader.indexExists(SearcherConfig.getInstance().getIndexDirectory());
-		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), new KeywordAnalyzer(), !indexExists);
+		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), createAnalyzer(), !indexExists);
+	}
+	
+	private Analyzer createAnalyzer()
+	{
+		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
+		paw.addAnalyzer(SearcherConstants.NAME, new FilenameAnalyzer());
+		paw.addAnalyzer(SearcherConstants.PATH, new FilenameAnalyzer());
+		return paw;
 	}
 
 	public static IndexerOperator getInstance()
