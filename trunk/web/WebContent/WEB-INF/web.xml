@@ -45,6 +45,10 @@
 		<param-name>googleAnalyticsId</param-name>
 		<param-value></param-value>
 	</context-param>
+	<context-param>
+		<param-name>fastSearch</param-name>
+		<param-value>true</param-value>
+	</context-param>
 
 	<welcome-file-list>
 		<welcome-file>search.jsp</welcome-file>
