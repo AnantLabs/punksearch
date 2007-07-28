@@ -38,10 +38,10 @@ public abstract class ProtocolIndexer
 	{
 		Document document = new Document();
 		document.add(new Field(SearcherConstants.HOST, getProtocol()+ "_" + getIp(), Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.NAME, name, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(SearcherConstants.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(SearcherConstants.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(SearcherConstants.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.PATH, path, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(SearcherConstants.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(SearcherConstants.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.setBoost(boost);
 		return document;
