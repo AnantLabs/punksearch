@@ -26,6 +26,7 @@ public class SearcherConfig
 	private String					ftpDefaultEnc		= "";
 	private Map<String, String>		ftpCustomEnc		= new HashMap<String, String>();
 	private String					googleAnalyticsId	= "";
+	private boolean					fastSearch			= true;
 
 	private SearcherConfig()
 	{
@@ -190,5 +191,15 @@ public class SearcherConfig
 	public void setGoogleAnalyticsId(String googleAnalyticsId)
 	{
 		this.googleAnalyticsId = googleAnalyticsId;
+	}
+
+	public boolean isFastSearch()
+	{
+		return fastSearch;
+	}
+
+	public void setFastSearch(boolean fastSearch)
+	{
+		this.fastSearch = fastSearch;
 	}
 }
