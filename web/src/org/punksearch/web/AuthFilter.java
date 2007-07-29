@@ -13,50 +13,75 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.punksearch.commons.SearcherConfig;
 import org.punksearch.indexer.Indexer;
 
-public class AuthFilter implements Filter 
+public class AuthFilter implements Filter
 {
-  private static Logger __log	= Logger.getLogger(AuthFilter.class.getName());
-  
-  private FilterConfig filterConfig = null;
+	private static Logger	__log			= Logger.getLogger(AuthFilter.class.getName());
 
-  /**
-   * This method initiates filters by passing it a FilterConfig object
-   * @see javax.servlet.FilterConfig
-   * */
-  public void init(FilterConfig filterConfig) {
-    this.filterConfig = filterConfig;
-  }
+	private FilterConfig	filterConfig	= null;
 
-  public void doFilter(ServletRequest request, ServletResponse response,
-                       FilterChain filterChain) {
-    try {
-      if (request instanceof HttpServletRequest) {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        HttpSession httpSession = httpRequest.getSession(true);
-        Boolean isLogged = (Boolean)httpSession.getAttribute("logged");
-		if (isLogged == null || isLogged==false)
-			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-		else
-          filterChain.doFilter(request, response);
-		
-      } else { filterChain.doFilter(request, response); }
-    }
-    catch (ServletException sx) {
-      __log.warning(sx.getMessage());	
-    }
-    catch (IOException iox) {
-      __log.warning(iox.getMessage());
-    }
-  }
+	/**
+	 * This method initiates filters by passing it a FilterConfig object
+	 * @see javax.servlet.FilterConfig
+	 * */
+	public void init(FilterConfig filterConfig)
+	{
+		this.filterConfig = filterConfig;
+	}
 
-  /**
-   * This method deactivates filters by assigning null to its FilterConfig object reference
-   * @see javax.servlet.FilterConfig
-   * */
-  public void destroy() {
-    filterConfig = null;
-  }
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+	{
+		try
+		{
+			if (request instanceof HttpServletRequest)
+			{
+				// first check if it is request with correct password specified (this can be request from cron)
+				String specifiedPass = request.getParameter("password");
+				String correctPass   = filterConfig.getServletContext().getInitParameter("adminPassword");
+				if (specifiedPass != null && specifiedPass.equals(correctPass))
+				{
+					filterChain.doFilter(request, response);
+					return;
+				}
+				
+				// check if user is logged in
+				HttpServletRequest httpRequest = (HttpServletRequest) request;
+				HttpServletResponse httpResponse = (HttpServletResponse) response;
+				HttpSession httpSession = httpRequest.getSession(true);
+				Boolean isLogged = (Boolean) httpSession.getAttribute("logged");
+				if (isLogged == null || isLogged == false)
+				{
+					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				}
+				else
+				{
+					filterChain.doFilter(request, response);
+				}
+
+			}
+			else
+			{
+				filterChain.doFilter(request, response);
+			}
+		}
+		catch (ServletException sx)
+		{
+			__log.warning(sx.getMessage());
+		}
+		catch (IOException iox)
+		{
+			__log.warning(iox.getMessage());
+		}
+	}
+
+	/**
+	 * This method deactivates filters by assigning null to its FilterConfig object reference
+	 * @see javax.servlet.FilterConfig
+	 * */
+	public void destroy()
+	{
+		filterConfig = null;
+	}
 }
