@@ -9,7 +9,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
-		<title>Admin | PUNK LAN Search</title>
+		<title>Admin - PUNKSearch</title>
 		<link href="css/style.css" type=text/css rel=stylesheet />		
 	</head>
 <body>
