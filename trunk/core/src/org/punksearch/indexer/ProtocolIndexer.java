@@ -16,11 +16,11 @@ public abstract class ProtocolIndexer
 {
 	protected String[] goodExtensions = {
 			"avi", "mov", "mpg", "vob", "wmv", "wmf", 
-			"mp3", "wav", "ogg",
+			"mp3", "wav", "ogg", "flac", "wma",
 			"exe", 
 			"iso", "bin", "dmg", "mdf",
 			"txt", "xml", "doc", "rtf", "xls", "pdf", "ps",
-			"jpg", "gif", "png",
+			"jpg", "gif", "png", "tif",
 			"zip", "rar", "tar", "gz", "tgz"};
 	
 	protected abstract String getProtocol();
