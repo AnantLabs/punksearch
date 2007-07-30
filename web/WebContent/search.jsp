@@ -20,7 +20,7 @@
 			{
 				var params = "?type="+type;
 				var queryElement = document.forms["searchForm"].elements["query"];
-				var queryParam = ((queryElement==null)||(queryElement.value.length==0)) ? "" : "&query=" + queryElement.value;				
+				if ((queryElement != null)&&(queryElement.value.length != 0)) params += "&query=" + queryElement.value;								
 				window.location = params;
 			}
 			function validateQuery()
