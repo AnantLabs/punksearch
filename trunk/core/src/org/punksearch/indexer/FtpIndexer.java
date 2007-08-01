@@ -20,6 +20,7 @@ import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
 
 import com.enterprisedt.net.ftp.FTPClient;
+import com.enterprisedt.net.ftp.FTPConnectMode;
 import com.enterprisedt.net.ftp.FTPException;
 import com.enterprisedt.net.ftp.FTPFile;
 
@@ -216,17 +217,15 @@ public class FtpIndexer extends ProtocolIndexer
 		
 	}
 	
-	private long indexDirectoryContents(String dir, int deep) throws SearcherException, FTPException, ParseException
+	private long indexDirectoryContents(String dir, int deep) throws SearcherException, IOException, FTPException, ParseException
 	{
-		
 		try
 		{
-			//String pathInUpperCase = path.toUpperCase(); // TODO: think about it
 			ftp.chdir(dir);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			__log.info("IOException (" + e.toString() + ") during changing working directory to: " + dir);
+			__log.info("Exception (" + e.toString() + ") during changing working directory to: " + dir);
 			return 0L;
 		}
 		
@@ -237,9 +236,9 @@ public class FtpIndexer extends ProtocolIndexer
 		{
 			items = ftp.dirDetails(dir);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
-			__log.info("IOException (" + e.toString() + ") during listing directory: " + dir);
+			__log.info("Exception (" + e.toString() + ") during listing directory: " + dir);
 			return 0L;
 		}
 		
@@ -254,7 +253,6 @@ public class FtpIndexer extends ProtocolIndexer
 
 		for (FTPFile file : items)
 		{
-			//__log.debug(dir + "/" + file.getName());
 			Document doc = null;
 			try
 			{
@@ -287,16 +285,10 @@ public class FtpIndexer extends ProtocolIndexer
 		{
 			try
 			{
-				Map<String, String> customEncodings = SearcherConfig.getInstance().getFtpCustomEncodings();
-				if (customEncodings.containsKey(ip))
-				{
-					ftp.setControlEncoding(customEncodings.get(ip));
-				}
-				else
-				{
-					ftp.setControlEncoding(SearcherConfig.getInstance().getFtpDefaultEncoding());
-				}
+				setupControlEncoding();
+				setupConnectMode();
 				ftp.setRemoteHost(ip);
+				ftp.setTimeout(SearcherConfig.getInstance().getFtpTimeout());
 				ftp.connect();
 				
 				ftp.login("anonymous", "arpmipg@gmail.com");
@@ -305,7 +297,7 @@ public class FtpIndexer extends ProtocolIndexer
 			}
 			catch (Exception e)
 			{
-				__log.info("Can't connect to active ftp server: " + ip);
+				__log.info("FTP: Exception (" + e.toString() + ") during indexing server: " + ip);
 			}
 			finally
 			{
@@ -322,6 +314,43 @@ public class FtpIndexer extends ProtocolIndexer
 		return result;
 	}
 
+	private void setupControlEncoding() throws FTPException
+	{
+		Map<String, String> customEncodings = SearcherConfig.getInstance().getFtpCustomEncodings();
+		if (customEncodings.containsKey(ip))
+		{
+			ftp.setControlEncoding(customEncodings.get(ip));
+		}
+		else
+		{
+			ftp.setControlEncoding(SearcherConfig.getInstance().getFtpDefaultEncoding());
+		}
+	}
+	
+	private void setupConnectMode()
+	{
+		String mode;
+		
+		Map<String, String> customModes = SearcherConfig.getInstance().getFtpCustomModes();
+		if (customModes.containsKey(ip))
+		{
+			mode = customModes.get(ip);
+		}
+		else
+		{
+			mode = SearcherConfig.getInstance().getFtpDefaultMode();
+		}
+		
+		if (mode.equalsIgnoreCase("active"))
+		{
+			ftp.setConnectMode(FTPConnectMode.ACTIVE);
+		}
+		else
+		{
+			ftp.setConnectMode(FTPConnectMode.PASV);
+		}
+	}
+	
 	@Override
 	protected String getIp()
 	{
