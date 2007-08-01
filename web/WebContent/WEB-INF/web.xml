@@ -38,6 +38,18 @@
 		<param-value>195.19.254.80:KOI8-R,195.19.252.54:CP1251,195.19.255.204:KOI8-R,195.19.253.66:CP1251</param-value>
 	</context-param>
 	<context-param>
+		<param-name>ftpDefaultMode</param-name>
+		<param-value>Passive</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ftpCustomModes</param-name>
+		<param-value>10.0.0.1:Active</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ftpTimeout</param-name>
+		<param-value>2000</param-value>
+	</context-param>
+	<context-param>
 		<param-name>adminPassword</param-name>
 		<param-value>123_456</param-value>
 	</context-param>

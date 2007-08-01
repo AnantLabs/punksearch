@@ -20,6 +20,9 @@ public class InitServlet extends HttpServlet
 		sc.setSmbLogin(getServletContext().getInitParameter("smbLogin"));
 		sc.setFtpDefaultEncoding(getServletContext().getInitParameter("ftpDefaultEncoding"));
 		sc.setFtpCustomEncodings(getServletContext().getInitParameter("ftpCustomEncodings"));
+		sc.setFtpDefaultMode(getServletContext().getInitParameter("ftpDefaultMode"));
+		sc.setFtpCustomModes(getServletContext().getInitParameter("ftpCustomModes"));
+		sc.setFtpTimeout(Integer.parseInt(getServletContext().getInitParameter("ftpTimeout")));
 		sc.setMaxClauseCount(Integer.parseInt(getServletContext().getInitParameter("searchMaxClauseCount")));
 		sc.setGoogleAnalyticsId(getServletContext().getInitParameter("googleAnalyticsId"));
 		sc.setFastSearch(Boolean.parseBoolean(getServletContext().getInitParameter("fastSearch")));
