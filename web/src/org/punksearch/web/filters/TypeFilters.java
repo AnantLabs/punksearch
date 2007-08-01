@@ -94,7 +94,7 @@ public class TypeFilters
 		}
 		else if (type.equals(Types.DOC))
 		{
-			ext = "doc xls ppt pdf ps djvu odt txt htm html xhtml";
+			ext = "rtf doc xls ppt pdf ps djvu odt ods odp odg odf txt htm html xhtml";
 		}
 		else if (type.equals(Types.DIR))
 		{
