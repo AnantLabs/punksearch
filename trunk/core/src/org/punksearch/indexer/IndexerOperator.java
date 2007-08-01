@@ -14,23 +14,36 @@ import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
 
-
+// TODO: think about this wrapper class. it seems it can be full static or entirely refactored
 public class IndexerOperator
 {
 	private static IndexerOperator	singleton		= null;
 	private static IndexModifier	indexModifier	= null;
 	
 	
-	private IndexerOperator() throws IOException
+	private IndexerOperator()
 	{
-		indexModifier = createIndexModifier();
 	}
 
-	public static void init() throws IOException
+	public static synchronized void init() throws IOException
 	{
 		if (singleton == null)
 		{
 			singleton = new IndexerOperator();
+		}
+		indexModifier = createIndexModifier();
+	}
+	
+	public static synchronized void close()
+	{
+		singleton = null;
+		try
+		{
+			indexModifier.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -84,14 +97,14 @@ public class IndexerOperator
 		}
 	}
 
-	private IndexModifier createIndexModifier() throws IOException
+	private static IndexModifier createIndexModifier() throws IOException
 	{
 		
 		boolean indexExists = IndexReader.indexExists(SearcherConfig.getInstance().getIndexDirectory());
 		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), createAnalyzer(), !indexExists);
 	}
 	
-	private Analyzer createAnalyzer()
+	private static Analyzer createAnalyzer()
 	{
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
 		paw.addAnalyzer(SearcherConstants.NAME, new FilenameAnalyzer());

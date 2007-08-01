@@ -50,8 +50,9 @@ public class Indexer implements Runnable
 			{
 				indexerThread.join();
 			}
-			//IndexerOperator.getInstance().optimizeIndex();
-			//IndexerOperator.getInstance().flushIndex();
+			
+			IndexerOperator.getInstance().optimizeIndex();
+			IndexerOperator.getInstance().flushIndex();
 
 			long finishTime = new Date().getTime();
 			__log.info("Index process is finished in " + ((finishTime - startTime) / 1000) + " sec");
@@ -59,6 +60,10 @@ public class Indexer implements Runnable
 		catch (Exception e)
 		{
 			__log.warning("Indexer.run(): exception occured. " + e.getMessage());
+		}
+		finally
+		{
+			IndexerOperator.close();
 		}
 	}
 	
