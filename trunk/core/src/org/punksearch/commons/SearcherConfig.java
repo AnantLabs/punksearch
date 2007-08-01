@@ -17,15 +17,18 @@ public class SearcherConfig
 	private String					indexDirectory;
 	private int						indexThreads		= 1;
 	private int						indexDeep			= 5;
+	private List<IpRange>			ipRanges			= new ArrayList<IpRange>();
 	private String					smbDomain			= "";
 	private String					smbUser				= "";
 	private String					smbPassword			= "";
 	private int						smbTimeout			= 5000;
-	private int						maxClauseCount		= 1000000;
-	private List<IpRange>			ipRanges			= new ArrayList<IpRange>();
 	private String					ftpDefaultEnc		= "";
 	private Map<String, String>		ftpCustomEnc		= new HashMap<String, String>();
+	private String					ftpDefaultMode		= "";
+	private Map<String, String>		ftpCustomModes		= new HashMap<String, String>();
+	private int						ftpTimeout			= 2000;
 	private String					googleAnalyticsId	= "";
+	private int						maxClauseCount		= 1000000;
 	private boolean					fastSearch			= true;
 
 	private SearcherConfig()
@@ -155,14 +158,14 @@ public class SearcherConfig
 		this.maxClauseCount = maxClauseCount;
 	}
 
-	public String getFtpDefaultEncoding()
-	{
-		return ftpDefaultEnc;
-	}
-
 	public void setFtpDefaultEncoding(String ftpDefaultEnc)
 	{
 		this.ftpDefaultEnc = ftpDefaultEnc;
+	}
+
+	public String getFtpDefaultEncoding()
+	{
+		return ftpDefaultEnc;
 	}
 
 	public void setFtpCustomEncodings(String encString)
@@ -183,6 +186,34 @@ public class SearcherConfig
 		return ftpCustomEnc;
 	}
 
+	public void setFtpDefaultMode(String mode)
+	{
+		ftpDefaultMode = mode;
+	}
+
+	public String getFtpDefaultMode()
+	{
+		return ftpDefaultMode;
+	}
+
+	public void setFtpCustomModes(String modString)
+	{
+		if (modString == null || modString.length() == 0)
+			return;
+
+		String[] chunks = modString.split(",");
+		for (String chunk : chunks)
+		{
+			String[] parts = chunk.split(":");
+			ftpCustomModes.put(parts[0], parts[1]);
+		}
+	}
+
+	public Map<String, String> getFtpCustomModes()
+	{
+		return ftpCustomModes;
+	}
+
 	public String getGoogleAnalyticsId()
 	{
 		return googleAnalyticsId;
@@ -201,5 +232,15 @@ public class SearcherConfig
 	public void setFastSearch(boolean fastSearch)
 	{
 		this.fastSearch = fastSearch;
+	}
+
+	public int getFtpTimeout()
+	{
+		return ftpTimeout;
+	}
+
+	public void setFtpTimeout(int ftpTimeout)
+	{
+		this.ftpTimeout = ftpTimeout;
 	}
 }
