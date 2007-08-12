@@ -18,6 +18,7 @@ import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
 import org.punksearch.searcher.LuceneSearcher;
+import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
@@ -85,17 +86,13 @@ public class SearchAction
 			__log.info("query constructed: " + query.toString());
 			try
 			{
-				LuceneSearcher searcher = new LuceneSearcher(config.getIndexDirectory());
+				//LuceneSearcher searcher = new LuceneSearcher(config.getIndexDirectory());
 				Date startDate = new Date();
-				List<Document> results = searcher.search(query, params.first, params.last, filter);
+				SearcherResult result = LuceneSearcher.search(query, params.first, params.last, filter);
 				Date stopDate = new Date();
 				searchTime = stopDate.getTime() - startDate.getTime();
-				overallCount = searcher.overallCount();
-				searchResults = prepareResults(results);
-			}
-			catch (IOException ioe)
-			{
-				__log.warning(ioe.getMessage());
+				overallCount = result.getHitCount();
+				searchResults = prepareResults(result.getChunk());
 			}
 			catch (SearcherException se)
 			{

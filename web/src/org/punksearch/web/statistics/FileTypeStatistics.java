@@ -6,9 +6,9 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherConstants;
 import org.punksearch.searcher.LuceneSearcher;
+import org.punksearch.searcher.SearcherResult;
 import org.punksearch.web.filters.TypeFilters;
 
 public class FileTypeStatistics
@@ -26,9 +26,9 @@ public class FileTypeStatistics
 		
 		try
 		{
-			LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
-			searcher.search(query, 0, 1, filter);
-			return searcher.overallCount();
+			//LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
+			SearcherResult result = LuceneSearcher.search(query, 0, 1, filter);
+			return result.getHitCount();
 		}
 		catch (Exception e)
 		{
