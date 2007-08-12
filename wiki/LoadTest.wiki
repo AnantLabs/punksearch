@@ -11,7 +11,7 @@ I modelled the setting as follows:
 || *Software* || Debian GNU/Linux, Java 1.5, Tomcat 5.5 ||
 
 = Tools =
-Apache JMeter
+[http://jakarta.apache.org/jmeter/ Apache JMeter]
 
 = Experiments =
 10 users, 100 requests for each, 1 sec ramp-up period.
