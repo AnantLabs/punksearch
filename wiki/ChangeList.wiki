@@ -1,0 +1,13 @@
+#summary changelist for application versions
+#labels Featured
+
+= 0.6.2 (2007-08-13) =
+  * usability: "search yields no results" message redesigned
+  * usability: set focus on input box after page loaded
+
+= 0.6.1 (2007-08-12) =
+  * core: 10x speedup on search (~10 msec per request on 160Mb index)
+  * usability: hint about negation of search terms using "!"
+
+= 0.6 =
+  * core: ftp indexing
