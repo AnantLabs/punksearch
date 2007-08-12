@@ -1,0 +1,25 @@
+#summary heavy load simulation.
+#labels Featured
+
+= Introduction =
+It was interesting to check the application throughput on heavy load setting.
+
+= Environment =
+I modelled the setting as follows:
+|| *Index* || 944429 items including folders and files (average local network), 160Mb on disk ||
+|| *Hardware* || AMD Duron 1000Gz, 256Mb, 7200 rpm ||
+|| *Software* || Debian GNU/Linux, Java 1.5, Tomcat 5.5 ||
+
+= Tools =
+Apache JMeter
+
+= Experiments =
+10 users, 100 requests for each, 1 sec ramp-up period.
+
+I searched for "potter" in _everything_.
+Resulting graph is following:
+
+todo
+
+= Extra =
+jmeter test plan
