@@ -22,4 +22,4 @@ Resulting graph is following:
 todo
 
 = Extra =
-jmeter test plan
+  * [http://punksearch.googlecode.com/files/PunkSearch_2007-08-13.jmx jmeter test plan]
