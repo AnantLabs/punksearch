@@ -9,5 +9,18 @@
   * core: 10x speedup on search (~10 msec per request on 160Mb index)
   * usability: hint about negation of search terms using "!"
 
-= 0.6 =
-  * core: ftp indexing
+= 0.6 (2007-07-30) =
+  * core: filename & path tokenization during indexing (index format changed)
+  * usability: interface redesigned -- tabs with predefined searches, tab with advanced search
+  * statistics: statistics.jsp -- very simple statistics about index
+
+= 0.5.2 (2007-06-26) =
+  * non-latin1 fixed
+  * custom encodings for ftp
+  * other small fixes
+
+= 0.5.1 (2007-06-21) =
+  * some small fixes
+
+= 0.5 (2007-06-21) =
+_first publicly available release_
