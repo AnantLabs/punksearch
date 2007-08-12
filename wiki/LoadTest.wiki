@@ -16,7 +16,7 @@ I modelled the setting as follows:
 = Experiments =
 10 users, 100 requests for each, 1 sec ramp-up period.
 
-I searched for "potter" in _everything_.
+I searched for "potter" in _everything_. It was found, that actual query means nothing for load test results. The single exception is query, which returns no results -- it is evaluated faster. This can be explained by additional routines used by case with non-zero results to represent them and send the _big_ page to the user.
 
 == Resulting (main) graph ==
 http://punksearch.googlecode.com/files/everything-potter_graph.png
@@ -24,6 +24,8 @@ http://punksearch.googlecode.com/files/everything-potter_graph.png
 == Distribution graph ==
 http://punksearch.googlecode.com/files/everything-potter_distribution.png
 
+= Conclusions =
+PUNKSearch shows acceptable performance (even on old hardware). It takes only 100 msec in average to answer a query when 10 users search something simultaneously. Distribution graph reveals good behaviour, since major part of samples are closely grouped.
 
 = Extra =
   * [http://punksearch.googlecode.com/files/PunkSearch_2007-08-13.jmx JMeter test plan used]
