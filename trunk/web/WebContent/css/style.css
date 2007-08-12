@@ -105,11 +105,16 @@ TABLE#pager A.pageCurrNumStyle
 
 .infoMessage
 {
-    background-color: blue;
-    color: white;
+    background-color: #CCCCCC;
+    color: black;
     font-weight: bold;
     font-size: 12pt; 
-    padding: 5px;
+    padding: 20px;
+    margin-top: -10px;
+    width: 300px;
+    left: 50%;
+    margin-left: -170px;
+    position: absolute;
 }
 
 #quickLinks
@@ -192,4 +197,12 @@ TABLE#pager A.pageCurrNumStyle
 #searchResultsContainer
 {    
     margin: 10px;
+}
+
+#hint
+{
+	color: #DDDDDD;
+	font-family: sans-serif;
+	font-weight: bold;
+	padding-bottom: 10px;
 }

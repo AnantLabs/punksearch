@@ -35,6 +35,12 @@
 												  "If you are older than 14 press 'OK' else press 'Cancel'");
 				return allowed;
 			}
+			function setFocus(type)
+			{
+				var id = (type != null && type == 'advanced')? 'dir' : 'query';
+				var input = document.getElementById(id);
+				input.focus();
+			}
 		</script>
 	</head>
 	
@@ -43,7 +49,7 @@
 	String[][] searchTabs = {{"everything","everything"},{"films",Types.FILM},{"music",Types.MUSIC},{"advanced","advanced"}};
 %>
 	
-<body>
+<body onLoad="setFocus('<%= params.type %>')">
 
 <%@ include file="header.jsp"%>
 
@@ -124,7 +130,7 @@
 		else
 		{
 		%>
-			<input type="text" name="query" value="<%=params.query%>" style="width:480px;" />
+			<input id="query" type="text" name="query" value="<%=params.query%>" style="width:480px;" />
 			<input type="submit" value="search"/>					
 		<%					
 		}
@@ -179,13 +185,15 @@
 				}
 				else
 				{
-					%><div class="infoMessage">Search yields no results</div><%	
+					%><div class="infoMessage">search yields no results</div><%	
 				}
 			}
 		}
-		//System.gc();
 	%>
 </div>
+
+<div id="hint">use "!" to negate search terms, like: "pink !floyd"</div>
+
 <% if (SearcherConfig.getInstance().getGoogleAnalyticsId().length() > 0) { %>
 	<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 	</script>
