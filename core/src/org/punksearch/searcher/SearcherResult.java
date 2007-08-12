@@ -2,6 +2,8 @@ package org.punksearch.searcher;
 
 import java.util.List;
 
+import org.apache.lucene.document.Document;
+
 /**
  * Date: 17.06.2006
  *
@@ -9,29 +11,22 @@ import java.util.List;
  */
 public class SearcherResult
 {
-	private int resultsAmount;
-	private int pagesAmount;
-	private List<SearcherResultData> results;
+	private int				hits;
+	private List<Document>	chunk;
 
-	public SearcherResult(int resultAmount, int pagesAmount, List<SearcherResultData> results)
+	public SearcherResult(int allHits, List<Document> thisChunk)
 	{
-		this.resultsAmount = resultAmount;
-		this.pagesAmount = pagesAmount;
-		this.results = results;
+		this.hits = allHits;
+		this.chunk = thisChunk;
 	}
 
-	public int getResultsAmount()
+	public int getHitCount()
 	{
-		return resultsAmount;
+		return hits;
 	}
 
-	public int getPagesAmount()
+	public List<Document> getChunk()
 	{
-		return pagesAmount;
-	}
-
-	public List<SearcherResultData> getResults()
-	{
-		return results;
+		return chunk;
 	}
 }
