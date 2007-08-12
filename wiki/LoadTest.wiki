@@ -19,7 +19,7 @@ Apache JMeter
 I searched for "potter" in _everything_.
 Resulting graph is following:
 
-todo
+http://punksearch.googlecode.com/files/everything-potter_graph.png
 
 = Extra =
   * [http://punksearch.googlecode.com/files/PunkSearch_2007-08-13.jmx jmeter test plan]
