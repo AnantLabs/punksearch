@@ -17,10 +17,11 @@ Apache JMeter
 10 users, 100 requests for each, 1 sec ramp-up period.
 
 I searched for "potter" in _everything_.
-Resulting graph is following:
+
+== Resulting (main) graph ==
 http://punksearch.googlecode.com/files/everything-potter_graph.png
 
-And the distribution graph:
+== Distribution graph ==
 http://punksearch.googlecode.com/files/everything-potter_distribution.png
 
 
