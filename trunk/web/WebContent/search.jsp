@@ -183,14 +183,17 @@
 				}
 			}
 		}
+		//System.gc();
 	%>
 </div>
 <% if (SearcherConfig.getInstance().getGoogleAnalyticsId().length() > 0) { %>
 	<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 	</script>
 	<script type="text/javascript">
-	_uacct = "<%= SearcherConfig.getInstance().getGoogleAnalyticsId() %>";
-	urchinTracker();
+		_uacct = "<%= SearcherConfig.getInstance().getGoogleAnalyticsId() %>";
+		if (typeof(urchinTracker) == 'function') {
+		  urchinTracker();
+		}
 	</script>
 <% } %>
 </body>
