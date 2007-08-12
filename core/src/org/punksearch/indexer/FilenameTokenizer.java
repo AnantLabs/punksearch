@@ -19,7 +19,7 @@ public class FilenameTokenizer extends CharTokenizer
 		if (Character.isWhitespace(c))
 			return false;
 		
-		if (CHARS_TO_DROP.indexOf(c) > 0)
+		if (CHARS_TO_DROP.indexOf(c) >= 0)
 			return false;
 		
 		return true;

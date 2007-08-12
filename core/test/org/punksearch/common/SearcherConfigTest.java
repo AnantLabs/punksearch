@@ -22,29 +22,32 @@ public class SearcherConfigTest extends TestCase
 		assertEquals("1.2.3.4-2.3.4.5,10.20.30.40", SearcherConfig.getInstance().getIpRangesString());
 	}
 
-	public void testSetSmbLogin()
+	public void testSmbLogin()
 	{
-		fail("Not yet implemented");
-	}
-
-	public void testGetSmbLogin()
-	{
-		fail("Not yet implemented");
+		String smbLogin = "DOMAIN1\\user2:password3";
+		SearcherConfig.getInstance().setSmbLogin(smbLogin);
+		assertEquals(smbLogin, SearcherConfig.getInstance().getSmbLogin());
 	}
 
 	public void testGetSmbDomain()
 	{
-		fail("Not yet implemented");
+		String smbLogin = "DOMAIN1\\user2:password3";
+		SearcherConfig.getInstance().setSmbLogin(smbLogin);
+		assertEquals("DOMAIN1", SearcherConfig.getInstance().getSmbDomain());
 	}
 
 	public void testGetSmbUser()
 	{
-		fail("Not yet implemented");
+		String smbLogin = "DOMAIN1\\user2:password3";
+		SearcherConfig.getInstance().setSmbLogin(smbLogin);
+		assertEquals("user2", SearcherConfig.getInstance().getSmbUser());
 	}
 
 	public void testGetSmbPassword()
 	{
-		fail("Not yet implemented");
+		String smbLogin = "DOMAIN1\\user2:password3";
+		SearcherConfig.getInstance().setSmbLogin(smbLogin);
+		assertEquals("password3", SearcherConfig.getInstance().getSmbPassword());
 	}
 
 }
