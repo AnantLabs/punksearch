@@ -18,7 +18,7 @@ It was interesting to check the application throughput on heavy load setting.
 I searched for "potter" in _everything_. It was found, that actual query means nothing for load test results. The single exception is query, which returns no results -- it is evaluated faster. This can be explained by additional routines used by case with non-zero results to represent them and send the _big_ page to the user.
 
 == Resulting (main) graph ==
-http://punksearch.googlecode.com/files/everything-potter_graph.png
+[http://punksearch.googlecode.com/files/everything-potter_graph.png http://punksearch.googlecode.com/files/everything-potter_graph_thumb.png]
 
 == Distribution graph ==
 http://punksearch.googlecode.com/files/everything-potter_distribution.png
