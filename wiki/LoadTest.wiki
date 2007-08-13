@@ -21,7 +21,7 @@ I searched for "potter" in _everything_. It was found, that actual query means n
 [http://punksearch.googlecode.com/files/everything-potter_graph.png http://punksearch.googlecode.com/files/everything-potter_graph_thumb.png]
 
 == Distribution graph ==
-http://punksearch.googlecode.com/files/everything-potter_distribution.png
+[http://punksearch.googlecode.com/files/everything-potter_distribution.png http://punksearch.googlecode.com/files/everything-potter_distribution_thumb.png]
 
 = Conclusions =
 PUNKSearch shows acceptable performance (even on old hardware). It takes only 100 msec in average to answer a query when 10 users search something simultaneously. Distribution graph reveals good behaviour, since major part of samples are closely grouped.
