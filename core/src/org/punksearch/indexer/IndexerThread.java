@@ -40,7 +40,7 @@ public class IndexerThread extends Thread
 			{
 				__log.info(ip + " start indexing");
 
-				IndexerOperator.getInstance().deleteDocuments(ip, "smb");
+				IndexOperator.getInstance().deleteDocuments(ip, "smb");
 
 				try
 				{
@@ -59,7 +59,7 @@ public class IndexerThread extends Thread
 					__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
 				}
 
-				IndexerOperator.getInstance().deleteDocuments(ip, "ftp");
+				IndexOperator.getInstance().deleteDocuments(ip, "ftp");
 				FtpIndexer ftpIndexer = new FtpIndexer(ip);
 				long sizeFtp = ftpIndexer.index();
 				if (sizeFtp > 0)
@@ -68,7 +68,7 @@ public class IndexerThread extends Thread
 				}
 
 				//IndexerOperator.getInstance().optimizeIndex();
-				IndexerOperator.getInstance().flushIndex();
+				IndexOperator.getInstance().flushIndex();
 			}
 			catch (IllegalArgumentException e)
 			{

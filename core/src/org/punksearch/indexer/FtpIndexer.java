@@ -272,7 +272,7 @@ public class FtpIndexer extends ProtocolIndexer
 			}
 		}
 
-		IndexerOperator.getInstance().addDocuments(documentList);
+		IndexOperator.getInstance().addDocuments(documentList);
 
 		return size;
 	}

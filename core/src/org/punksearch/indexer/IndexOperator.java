@@ -14,13 +14,13 @@ import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
 
 // TODO: think about this wrapper class. it seems it can be full static or entirely refactored
-public class IndexerOperator
+public class IndexOperator
 {
-	private static IndexerOperator	singleton		= null;
+	private static IndexOperator	singleton		= null;
 	private static IndexModifier	indexModifier	= null;
 	
 	
-	private IndexerOperator()
+	private IndexOperator()
 	{
 	}
 
@@ -28,7 +28,7 @@ public class IndexerOperator
 	{
 		if (singleton == null)
 		{
-			singleton = new IndexerOperator();
+			singleton = new IndexOperator();
 		}
 		indexModifier = createIndexModifier(dir);
 	}
@@ -111,7 +111,7 @@ public class IndexerOperator
 		return paw;
 	}
 
-	public static IndexerOperator getInstance()
+	public static IndexOperator getInstance()
 	{
 		if (singleton == null)
 		{

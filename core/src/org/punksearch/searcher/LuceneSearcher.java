@@ -11,27 +11,41 @@ import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherException;
 
 public class LuceneSearcher
 {
 	private static final Logger		__log	= Logger.getLogger(LuceneSearcher.class.getName());
-	private static IndexSearcher	searcher;
-	
-	static
+	private static LuceneSearcher	instance;
+
+	private IndexSearcher			searcher;
+
+	public static LuceneSearcher getInstance()
+	{
+		if (instance == null)
+		{
+			instance = new LuceneSearcher();
+		}
+		return instance;
+	}
+
+	private LuceneSearcher()
+	{
+	}
+
+	public void init(String dir)
 	{
 		try
 		{
-			searcher = new IndexSearcher(FSDirectory.getDirectory(SearcherConfig.getInstance().getIndexDirectory()));
+			searcher = new IndexSearcher(FSDirectory.getDirectory(dir));
 		}
 		catch (IOException e)
 		{
 			__log.severe("Problem with index directory, can't init searcher! " + e.getMessage());
 		}
 	}
-	
-	public static SearcherResult search(Query query, Integer first, Integer last, Filter filter) throws SearcherException
+
+	public SearcherResult search(Query query, Integer first, Integer last, Filter filter) throws SearcherException
 	{
 		if (null != first && null != last && (first > last || first < 0 || last < 0))
 		{
@@ -46,7 +60,6 @@ public class LuceneSearcher
 			//Sort sort = (null != sortFieldId)? new Sort(new SortField(sortFieldId + SearcherConstants.SORT_SUFFIX)) : null;
 			Hits hits = searcher.search(query, filter);
 
-
 			if (null == first)
 			{
 				first = 0;
@@ -57,7 +70,7 @@ public class LuceneSearcher
 				last = hits.length() - 1;
 			}
 
-			List<Document> docs = new ArrayList<Document>(last-first+1);
+			List<Document> docs = new ArrayList<Document>(last - first + 1);
 			for (int i = first; i <= last; i++)
 			{
 				Document doc = hits.doc(i);
@@ -76,9 +89,6 @@ public class LuceneSearcher
 		{
 			__log.warning(e.getMessage());
 			throw new SearcherException("Exception during search: " + e.getMessage(), e);
-		}
-		finally
-		{
 		}
 	}
 }
