@@ -5,14 +5,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.ip.Ip;
 import org.punksearch.ip.IpIterator;
+import org.punksearch.ip.IpRange;
 
 public class Indexer implements Runnable
 {
 	private static Logger		__log		= Logger.getLogger(Indexer.class.getName());
 	private static Indexer		instance	= null;
+
+	private String				indexDirectory;
+	private List<IpRange>		ipRanges;
+	private int					threadCount;
 
 	private IpIterator			ipIterator;
 	private List<IndexerThread>	threadList	= new ArrayList<IndexerThread>();
@@ -25,24 +29,33 @@ public class Indexer implements Runnable
 		}
 		return instance;
 	}
-	
-	private Indexer() {};
+
+	private Indexer()
+	{
+	};
+
+	public void init(String indexDir, List<IpRange> ipRanges, int threadCount)
+	{
+		this.indexDirectory = indexDir;
+		this.ipRanges = ipRanges;
+		this.threadCount = threadCount;
+	}
 
 	public void run()
 	{
 		//System.setProperty("jcifs.smb.client.responseTimeout", Integer.toString(SearcherConfig.getInstance().getSmbTimeout()));
 		//System.setProperty("jcifs.smb.client.soTimeout", "6000");		
-		ipIterator = new IpIterator(SearcherConfig.getInstance().getIpRanges());
+		ipIterator = new IpIterator(ipRanges);
 		threadList.clear();
 
 		try
 		{
-			IndexerOperator.init(SearcherConfig.getInstance().getIndexDirectory());
+			IndexOperator.init(indexDirectory);
 
 			long startTime = new Date().getTime();
-			__log.info("Indexing process started: " + SearcherConfig.getInstance().getIpRangesString());
+			__log.info("Indexing process started");
 
-			for (int i = 0; i < SearcherConfig.getInstance().getIndexThreads(); i++)
+			for (int i = 0; i < threadCount; i++)
 			{
 				IndexerThread indexerThread = new IndexerThread("IndexerThread" + i);
 				//indexerThread.setDaemon(true);
@@ -54,8 +67,8 @@ public class Indexer implements Runnable
 				indexerThread.join();
 			}
 
-			IndexerOperator.getInstance().optimizeIndex();
-			IndexerOperator.getInstance().flushIndex();
+			IndexOperator.getInstance().optimizeIndex();
+			IndexOperator.getInstance().flushIndex();
 
 			long finishTime = new Date().getTime();
 			__log.info("Index process is finished in " + ((finishTime - startTime) / 1000) + " sec");
@@ -66,7 +79,7 @@ public class Indexer implements Runnable
 		}
 		finally
 		{
-			IndexerOperator.close();
+			IndexOperator.close();
 		}
 	}
 
