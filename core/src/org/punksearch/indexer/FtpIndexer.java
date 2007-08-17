@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.commons.SearcherConfig;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
 
 import com.enterprisedt.net.ftp.FTPClient;
@@ -92,7 +92,7 @@ public class FtpIndexer extends ProtocolIndexer
 		String dirName = fullDirName.substring(lastSlash + 1);
 		String dirPath = (lastSlash > 1)? fullDirName.substring(1, lastSlash) : "";
 		
-		String dirExtension = SearcherConstants.DIRECTORY_EXTENSION;
+		String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 		String dirSizeStr = Long.toString(dirSize);
 		
 		//String tempDirPath = dir.getPath().toLowerCase();
@@ -268,7 +268,7 @@ public class FtpIndexer extends ProtocolIndexer
 			if (doc != null)
 			{
 				documentList.add(doc);
-				size += Long.parseLong(doc.get(SearcherConstants.SIZE));
+				size += Long.parseLong(doc.get(IndexFields.SIZE));
 			}
 		}
 

@@ -9,36 +9,39 @@ import org.punksearch.commons.SearcherConfig;
 import org.punksearch.ip.Ip;
 import org.punksearch.ip.IpIterator;
 
-
 public class Indexer implements Runnable
 {
-	private static Logger	__log		= Logger.getLogger(Indexer.class.getName());
-	private static Indexer	instance	= null;
-	
-	private IpIterator ipIterator;
-	private List<IndexerThread> threadList = new ArrayList<IndexerThread>();	
-	
+	private static Logger		__log		= Logger.getLogger(Indexer.class.getName());
+	private static Indexer		instance	= null;
+
+	private IpIterator			ipIterator;
+	private List<IndexerThread>	threadList	= new ArrayList<IndexerThread>();
+
 	public static Indexer getInstance()
 	{
-		if (null == instance)
+		if (instance == null)
+		{
 			instance = new Indexer();
+		}
 		return instance;
 	}
 	
+	private Indexer() {};
+
 	public void run()
 	{
 		//System.setProperty("jcifs.smb.client.responseTimeout", Integer.toString(SearcherConfig.getInstance().getSmbTimeout()));
 		//System.setProperty("jcifs.smb.client.soTimeout", "6000");		
 		ipIterator = new IpIterator(SearcherConfig.getInstance().getIpRanges());
 		threadList.clear();
-		
+
 		try
 		{
-			IndexerOperator.init();
-			
+			IndexerOperator.init(SearcherConfig.getInstance().getIndexDirectory());
+
 			long startTime = new Date().getTime();
 			__log.info("Indexing process started: " + SearcherConfig.getInstance().getIpRangesString());
-			
+
 			for (int i = 0; i < SearcherConfig.getInstance().getIndexThreads(); i++)
 			{
 				IndexerThread indexerThread = new IndexerThread("IndexerThread" + i);
@@ -50,7 +53,7 @@ public class Indexer implements Runnable
 			{
 				indexerThread.join();
 			}
-			
+
 			IndexerOperator.getInstance().optimizeIndex();
 			IndexerOperator.getInstance().flushIndex();
 
@@ -66,12 +69,12 @@ public class Indexer implements Runnable
 			IndexerOperator.close();
 		}
 	}
-	
+
 	public void stop()
 	{
 		ipIterator = null;
 	}
-	
+
 	public synchronized String nextIp()
 	{
 		if (ipIterator != null && ipIterator.hasNext())
@@ -81,12 +84,12 @@ public class Indexer implements Runnable
 		}
 		return null;
 	}
-	
+
 	public List<IndexerThread> getThreads()
 	{
 		return threadList;
 	}
-	
+
 	/*
 	public float getProgress()
 	{

@@ -10,8 +10,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexModifier;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.punksearch.commons.SearcherConfig;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
 
 // TODO: think about this wrapper class. it seems it can be full static or entirely refactored
@@ -25,13 +24,13 @@ public class IndexerOperator
 	{
 	}
 
-	public static synchronized void init() throws IOException
+	public static synchronized void init(String dir) throws IOException
 	{
 		if (singleton == null)
 		{
 			singleton = new IndexerOperator();
 		}
-		indexModifier = createIndexModifier();
+		indexModifier = createIndexModifier(dir);
 	}
 	
 	public static synchronized void close()
@@ -87,7 +86,7 @@ public class IndexerOperator
 	{
 		try
 		{
-			indexModifier.deleteDocuments(new Term(SearcherConstants.HOST, proto + "_" + ip));
+			indexModifier.deleteDocuments(new Term(IndexFields.HOST, proto + "_" + ip));
 			//indexModifier.flush();
 			//indexModifier.close();
 		}
@@ -97,18 +96,18 @@ public class IndexerOperator
 		}
 	}
 
-	private static IndexModifier createIndexModifier() throws IOException
+	private static IndexModifier createIndexModifier(String dir) throws IOException
 	{
 		
-		boolean indexExists = IndexReader.indexExists(SearcherConfig.getInstance().getIndexDirectory());
-		return new IndexModifier(SearcherConfig.getInstance().getIndexDirectory(), createAnalyzer(), !indexExists);
+		boolean indexExists = IndexReader.indexExists(dir);
+		return new IndexModifier(dir, createAnalyzer(), !indexExists);
 	}
 	
 	private static Analyzer createAnalyzer()
 	{
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
-		paw.addAnalyzer(SearcherConstants.NAME, new FilenameAnalyzer());
-		paw.addAnalyzer(SearcherConstants.PATH, new FilenameAnalyzer());
+		paw.addAnalyzer(IndexFields.NAME, new FilenameAnalyzer());
+		paw.addAnalyzer(IndexFields.PATH, new FilenameAnalyzer());
 		return paw;
 	}
 

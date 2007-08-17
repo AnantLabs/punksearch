@@ -15,34 +15,33 @@ import jcifs.smb.SmbException;
 
 import org.punksearch.commons.SearcherException;
 
-
 /**
  * Class represents indexer thread
  */
 public class IndexerThread extends Thread
 {
-	private Logger __log = Logger.getLogger(IndexerThread.class.getName());
+	private Logger	__log	= Logger.getLogger(IndexerThread.class.getName());
 
-	private String ip;
-	
+	private String	ip;
+
 	public IndexerThread(String name)
 	{
 		super(name);
 	}
-	
+
 	/**
 	 * Indexes net (smb and ftp)
 	 */
 	public void run()
 	{
-		while ((ip = Indexer.getInstance().nextIp()) != null)
+		while ( (ip = Indexer.getInstance().nextIp()) != null )
 		{
 			try
 			{
 				__log.info(ip + " start indexing");
-				
+
 				IndexerOperator.getInstance().deleteDocuments(ip, "smb");
-				
+
 				try
 				{
 					SmbIndexer smbIndexer = new SmbIndexer(ip);
@@ -54,22 +53,20 @@ public class IndexerThread extends Thread
 				}
 				catch (SmbException e)
 				{
-					String reason = (e.getRootCause() != null)? e.getRootCause().getMessage() : e.getMessage();
-					
+					String reason = (e.getRootCause() != null) ? e.getRootCause().getMessage() : e.getMessage();
+
 					//String reason = (e.getCause() == null)? "unknown reason" : e.getCause().getMessage();
 					__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
 				}
-				
-				FtpIndexer ftpIndexer = new FtpIndexer(ip);
-				//String ftpHost = "ftp://" + ip;
-				//__log.debug(ftpHost + " is indexing");
+
 				IndexerOperator.getInstance().deleteDocuments(ip, "ftp");
+				FtpIndexer ftpIndexer = new FtpIndexer(ip);
 				long sizeFtp = ftpIndexer.index();
 				if (sizeFtp > 0)
 				{
 					__log.info("FTP: " + ip + " indexed: " + sizeFtp + " bytes");
 				}
-				
+
 				//IndexerOperator.getInstance().optimizeIndex();
 				IndexerOperator.getInstance().flushIndex();
 			}
@@ -87,11 +84,11 @@ public class IndexerThread extends Thread
 			}
 			catch (IOException e)
 			{
-				__log.warning("Can't flush index! "+e.getMessage());
+				__log.warning("Can't flush index! " + e.getMessage());
 			}
 		}
 	}
-	
+
 	public String getIp()
 	{
 		return ip;

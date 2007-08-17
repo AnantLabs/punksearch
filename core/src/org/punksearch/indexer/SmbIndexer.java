@@ -19,7 +19,7 @@ import jcifs.smb.SmbFile;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.commons.SearcherConfig;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
 
 
@@ -65,7 +65,7 @@ public class SmbIndexer extends ProtocolIndexer
 			}
 			String tempDirName = dir.getName().toLowerCase();
 			String dirName = tempDirName.substring(0, tempDirName.length() - 1);
-			String dirExtension = SearcherConstants.DIRECTORY_EXTENSION;
+			String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 			String dirSizeStr = Long.toString(dirSize);
 			String tempDirPath = dir.getPath().toLowerCase();
 			String dirPath = tempDirPath.substring(ip.length() + 7, tempDirPath.length() - 1 - dirName.length());
@@ -216,7 +216,7 @@ public class SmbIndexer extends ProtocolIndexer
 			if (doc != null)
 			{
 				documentList.add(doc);
-				size += Long.parseLong(doc.get(SearcherConstants.SIZE));
+				size += Long.parseLong(doc.get(IndexFields.SIZE));
 			}
 		}
 
