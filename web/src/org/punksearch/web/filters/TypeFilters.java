@@ -11,7 +11,7 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.QueryFilter;
 import org.apache.lucene.search.TermQuery;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
@@ -109,7 +109,7 @@ public class TypeFilters
 
 		if (min != null || max != null)
 		{
-			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(SearcherConstants.SIZE, min, max);
+			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
 			filter.add(sizeFilter);
 		}
 
@@ -120,11 +120,11 @@ public class TypeFilters
 				Query extQuery;
 				if (ext.length() != 0)
 				{
-					extQuery = new QueryParser(SearcherConstants.EXTENSION, new StandardAnalyzer()).parse(ext);
+					extQuery = new QueryParser(IndexFields.EXTENSION, new StandardAnalyzer()).parse(ext);
 				}
 				else
 				{
-					extQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, ""));
+					extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
 				}
 				System.out.println(extQuery);
 				QueryFilter extFilter = new QueryFilter(extQuery);
