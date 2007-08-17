@@ -6,7 +6,7 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.searcher.LuceneSearcher;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.web.filters.TypeFilters;
@@ -17,8 +17,8 @@ public class FileTypeStatistics
 	public static int count(String type)
 	{
 		BooleanQuery query = new BooleanQuery();
-		Query smbQuery = new WildcardQuery(new Term(SearcherConstants.HOST, "smb_*"));
-		Query ftpQuery = new WildcardQuery(new Term(SearcherConstants.HOST, "ftp_*"));
+		Query smbQuery = new WildcardQuery(new Term(IndexFields.HOST, "smb_*"));
+		Query ftpQuery = new WildcardQuery(new Term(IndexFields.HOST, "ftp_*"));
 		query.add(smbQuery, Occur.SHOULD);
 		query.add(ftpQuery, Occur.SHOULD);
 		
@@ -27,7 +27,7 @@ public class FileTypeStatistics
 		try
 		{
 			//LuceneSearcher searcher = new LuceneSearcher(SearcherConfig.getInstance().getIndexDirectory());
-			SearcherResult result = LuceneSearcher.search(query, 0, 1, filter);
+			SearcherResult result = LuceneSearcher.getInstance().search(query, 0, 1, filter);
 			return result.getHitCount();
 		}
 		catch (Exception e)

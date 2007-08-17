@@ -1,6 +1,5 @@
 package org.punksearch.web;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,8 +13,8 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
+import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherConfig;
-import org.punksearch.commons.SearcherConstants;
 import org.punksearch.commons.SearcherException;
 import org.punksearch.searcher.LuceneSearcher;
 import org.punksearch.searcher.SearcherResult;
@@ -54,13 +53,13 @@ public class SearchAction
 			NumberRangeFilter<Long> sizeFilter = null;
 			if (params.minSize != null || params.maxSize != null)
 			{
-				sizeFilter = FilterFactory.createNumberFilter(SearcherConstants.SIZE, params.minSize, params.maxSize);
+				sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, params.minSize, params.maxSize);
 			}
 
 			NumberRangeFilter<Long> dateFilter = null;
 			if (params.fromDate != null || params.toDate != null)
 			{
-				dateFilter = FilterFactory.createNumberFilter(SearcherConstants.DATE, params.fromDate, params.toDate);
+				dateFilter = FilterFactory.createNumberFilter(IndexFields.DATE, params.fromDate, params.toDate);
 			}
 
 			if (sizeFilter != null || dateFilter != null)
@@ -88,7 +87,7 @@ public class SearchAction
 			{
 				//LuceneSearcher searcher = new LuceneSearcher(config.getIndexDirectory());
 				Date startDate = new Date();
-				SearcherResult result = LuceneSearcher.search(query, params.first, params.last, filter);
+				SearcherResult result = LuceneSearcher.getInstance().search(query, params.first, params.last, filter);
 				Date stopDate = new Date();
 				searchTime = stopDate.getTime() - startDate.getTime();
 				overallCount = result.getHitCount();
@@ -164,10 +163,10 @@ public class SearchAction
 				occurItem = BooleanClause.Occur.MUST_NOT;
 			}
 
-			Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, prepareItem(item)));
+			Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 			itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
 
-			Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, prepareItem(item)));
+			Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
 			itemQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 
 			query.add(itemQuery, occurItem);
@@ -198,7 +197,7 @@ public class SearchAction
 						item = item.substring(1);
 						occurItem = BooleanClause.Occur.MUST_NOT;
 					}
-					Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, prepareItem(item)));
+					Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 					fileQuery.add(nameQuery, occurItem);
 				}
 				query.add(fileQuery, BooleanClause.Occur.MUST);
@@ -209,14 +208,14 @@ public class SearchAction
 				BooleanQuery extQuery = new BooleanQuery();
 				for (String item : extTerms)
 				{
-					Query termQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, item));
+					Query termQuery = new TermQuery(new Term(IndexFields.EXTENSION, item));
 					extQuery.add(termQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(extQuery, BooleanClause.Occur.MUST);
 			}
 			else
 			{
-				Query extensionQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, SearcherConstants.DIRECTORY_EXTENSION));
+				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
 				query.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
 			}
 
@@ -235,12 +234,12 @@ public class SearchAction
 						negations++;
 					}
 
-					Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, prepareItem(item)));
+					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
 					dirQuery.add(pathQuery, occurItem);
 				}
 				if (dirTerms.size() == negations) // it must be at least one positive clause in query to be executed. so add one if all user clauses are nagative.
 				{
-					Query pathQuery = new WildcardQuery(new Term(SearcherConstants.PATH, "*"));
+					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, "*"));
 					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(dirQuery, BooleanClause.Occur.MUST);
@@ -259,10 +258,10 @@ public class SearchAction
 					occurItem = BooleanClause.Occur.MUST_NOT;
 				}
 
-				Query nameQuery = new WildcardQuery(new Term(SearcherConstants.NAME, prepareItem(item)));
+				Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 				dirQuery.add(nameQuery, BooleanClause.Occur.MUST);
 
-				Query extensionQuery = new TermQuery(new Term(SearcherConstants.EXTENSION, SearcherConstants.DIRECTORY_EXTENSION));
+				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
 				dirQuery.add(extensionQuery, BooleanClause.Occur.MUST);
 
 				query.add(dirQuery, occurItem);
