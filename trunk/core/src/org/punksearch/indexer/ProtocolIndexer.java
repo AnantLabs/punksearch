@@ -8,7 +8,7 @@ import java.net.SocketException;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.punksearch.commons.SearcherConstants;
+import org.punksearch.commons.IndexFields;
 
 
 
@@ -37,12 +37,12 @@ public abstract class ProtocolIndexer
 	protected Document makeDocument(String name, String ext, String size, String path, String date, float boost)
 	{
 		Document document = new Document();
-		document.add(new Field(SearcherConstants.HOST, getProtocol()+ "_" + getIp(), Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
-		document.add(new Field(SearcherConstants.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
-		document.add(new Field(SearcherConstants.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
-		document.add(new Field(SearcherConstants.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.HOST, getProtocol()+ "_" + getIp(), Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
+		document.add(new Field(IndexFields.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
+		document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.setBoost(boost);
 		return document;
 	}
