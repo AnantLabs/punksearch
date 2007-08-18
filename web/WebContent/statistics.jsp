@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <%@page import="org.punksearch.web.statistics.FileTypeStatistics"%>
 <%@page import="org.punksearch.web.Types"%>
-<%@page import="org.punksearch.commons.SearcherConfig"%>
+<%@page import="org.punksearch.web.SearcherConfig"%>
 <%@page import="org.apache.lucene.index.IndexReader"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
