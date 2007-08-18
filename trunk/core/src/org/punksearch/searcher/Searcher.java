@@ -13,27 +13,13 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.commons.SearcherException;
 
-public class LuceneSearcher
+public class Searcher
 {
-	private static final Logger		__log	= Logger.getLogger(LuceneSearcher.class.getName());
-	private static LuceneSearcher	instance;
+	private static final Logger		__log	= Logger.getLogger(Searcher.class.getName());
 
 	private IndexSearcher			searcher;
 
-	public static LuceneSearcher getInstance()
-	{
-		if (instance == null)
-		{
-			instance = new LuceneSearcher();
-		}
-		return instance;
-	}
-
-	private LuceneSearcher()
-	{
-	}
-
-	public void init(String dir)
+	public Searcher(String dir)
 	{
 		try
 		{
