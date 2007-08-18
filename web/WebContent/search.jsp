@@ -49,7 +49,7 @@
 	String[][] searchTabs = {{"everything","everything"},{"films",Types.FILM},{"music",Types.MUSIC},{"advanced","advanced"}};
 %>
 	
-<body onLoad="setFocus('<%= params.type %>')">
+<body onload="setFocus('<%= params.type %>')">
 
 <%@ include file="header.jsp"%>
 

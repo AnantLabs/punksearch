@@ -4,7 +4,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import org.punksearch.searcher.LuceneSearcher;
+import org.punksearch.searcher.Searcher;
 
 public class InitServlet extends HttpServlet
 {
@@ -30,6 +30,6 @@ public class InitServlet extends HttpServlet
 		//System.setProperty("jcifs.smb.client.responseTimeout", "5000");
 		System.setProperty("jcifs.util.loglevel", "0");
 		
-		LuceneSearcher.getInstance().init(SearcherConfig.getInstance().getIndexDirectory());
+		SearcherWrapper.init(SearcherConfig.getInstance().getIndexDirectory());
 	}
 }

@@ -7,7 +7,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@page import="org.punksearch.web.filters.TypeFilters"%>
-<%@page import="org.punksearch.searcher.LuceneSearcher"%>
+<%@page import="org.punksearch.web.SearcherWrapper"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
@@ -56,7 +56,7 @@
 						{
 							super.run();
 							TypeFilters.reset();
-							LuceneSearcher.getInstance().init(SearcherConfig.getInstance().getIndexDirectory());
+							SearcherWrapper.init(SearcherConfig.getInstance().getIndexDirectory());
 						}
 					};
 					indexThread.start();
