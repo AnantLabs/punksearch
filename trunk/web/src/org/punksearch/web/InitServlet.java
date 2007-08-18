@@ -4,7 +4,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.searcher.LuceneSearcher;
 
 public class InitServlet extends HttpServlet

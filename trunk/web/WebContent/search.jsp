@@ -8,7 +8,7 @@
 	<%@ page import="org.punksearch.web.SearchAction" %>
 	<%@ page import="org.punksearch.web.SearchPager" %>
 	<%@ page import="org.punksearch.web.filters.TypeFilters" %>
-	<%@ page import="org.punksearch.commons.SearcherConfig" %>
+	<%@ page import="org.punksearch.web.SearcherConfig" %>
 	<%@ page import="java.util.Map" %>
 	<%! boolean showScores = false; %>
 	<head>

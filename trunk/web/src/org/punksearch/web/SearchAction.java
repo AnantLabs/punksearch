@@ -14,7 +14,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.commons.IndexFields;
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.SearcherException;
 import org.punksearch.searcher.LuceneSearcher;
 import org.punksearch.searcher.SearcherResult;

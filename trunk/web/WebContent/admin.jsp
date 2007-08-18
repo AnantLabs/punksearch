@@ -3,6 +3,7 @@
 <%@ page import="org.punksearch.commons.*" %>
 <%@ page import="org.punksearch.indexer.*" %>
 <%@ page import="org.punksearch.ip.*" %>
+<%@ page import="org.punksearch.web.SearcherConfig" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@page import="org.punksearch.web.filters.TypeFilters"%>
@@ -18,6 +19,7 @@
 
 	<%!
 		private static Thread indexThread = null;
+		private static Indexer    indexer = null;
 	%>	
 	<%
 		boolean isIndexing = (indexThread != null && indexThread.isAlive());
@@ -28,7 +30,7 @@
 			{
 				if (isIndexing)
 				{
-					Indexer.getInstance().stop();
+					indexer.stop();
 				}
 				else
 				{
@@ -46,8 +48,7 @@
 					SearcherConfig.getInstance().setIndexDeep(Integer.valueOf(request.getParameter("deep")));
 					SearcherConfig.getInstance().setIndexDirectory(request.getParameter("indexDir"));
 					
-					Indexer indexer = Indexer.getInstance();
-					indexer.init(SearcherConfig.getInstance().getIndexDirectory(), SearcherConfig.getInstance().getIpRanges(), SearcherConfig.getInstance().getIndexThreads());
+					indexer = new Indexer(SearcherConfig.getInstance().getIndexDirectory(), SearcherConfig.getInstance().getCrawlerConfig());
 					
 					indexThread = new Thread(indexer, "Indexer")
 					{
@@ -86,7 +87,7 @@
 	<%=(isIndexing)? "Indexing" : "Stopped"%>
 	<%
 		if (isIndexing) {
-		List<IndexerThread> threads = Indexer.getInstance().getThreads();
+		List<IndexerThread> threads = indexer.getThreads();
 	%>
 		<table>
 			<tr><th>thread</th><th>ip</th></tr>
