@@ -5,47 +5,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.punksearch.ip.Ip;
-import org.punksearch.ip.IpIterator;
-import org.punksearch.ip.IpRange;
-
 public class Indexer implements Runnable
 {
 	private static Logger		__log		= Logger.getLogger(Indexer.class.getName());
-	private static Indexer		instance	= null;
 
 	private String				indexDirectory;
-	private List<IpRange>		ipRanges;
-	private int					threadCount;
+	private CrawlerConfig		crawlerConfig;
 
-	private IpIterator			ipIterator;
 	private List<IndexerThread>	threadList	= new ArrayList<IndexerThread>();
 
-	public static Indexer getInstance()
-	{
-		if (instance == null)
-		{
-			instance = new Indexer();
-		}
-		return instance;
-	}
-
-	private Indexer()
-	{
-	};
-
-	public void init(String indexDir, List<IpRange> ipRanges, int threadCount)
+	public Indexer(String indexDir, CrawlerConfig crawlerConfig)
 	{
 		this.indexDirectory = indexDir;
-		this.ipRanges = ipRanges;
-		this.threadCount = threadCount;
+		this.crawlerConfig = crawlerConfig;
 	}
 
 	public void run()
 	{
-		//System.setProperty("jcifs.smb.client.responseTimeout", Integer.toString(SearcherConfig.getInstance().getSmbTimeout()));
-		//System.setProperty("jcifs.smb.client.soTimeout", "6000");		
-		ipIterator = new IpIterator(ipRanges);
+		IpIteratorWrapper iter = new IpIteratorWrapper(crawlerConfig.getIpRanges());
 		threadList.clear();
 
 		try
@@ -55,9 +32,9 @@ public class Indexer implements Runnable
 			long startTime = new Date().getTime();
 			__log.info("Indexing process started");
 
-			for (int i = 0; i < threadCount; i++)
+			for (int i = 0; i < crawlerConfig.getIndexThreads(); i++)
 			{
-				IndexerThread indexerThread = new IndexerThread("IndexerThread" + i);
+				IndexerThread indexerThread = new IndexerThread("IndexerThread" + i, crawlerConfig, iter);
 				//indexerThread.setDaemon(true);
 				indexerThread.start();
 				threadList.add(indexerThread);
@@ -85,42 +62,15 @@ public class Indexer implements Runnable
 
 	public void stop()
 	{
-		ipIterator = null;
-	}
-
-	public synchronized String nextIp()
-	{
-		if (ipIterator != null && ipIterator.hasNext())
+		for (Thread thread : threadList)
 		{
-			Ip ip = ipIterator.next();
-			return ip.toString();
+			thread.interrupt();
 		}
-		return null;
 	}
 
 	public List<IndexerThread> getThreads()
 	{
 		return threadList;
 	}
-
-	/*
-	public float getProgress()
-	{
-		List<Long> startIps  = IndexerConfig.getInstance().getStartIpList();
-		List<Long> finishIps = IndexerConfig.getInstance().getFinishIpList();
-		
-		long total = 0;
-		long passed = 0;
-		for (int i = 0; i < startIps.size(); i++)
-		{
-			if (startIps.get(i) <= currentIp && currentIp <= finishIps.get(i))
-			{
-				passed = total + currentIp - startIps.get(i) + 1;
-			}
-			total += finishIps.get(i) - startIps.get(i) + 1;
-		}
-		return (passed + 0.0f) / total;
-	}
-	*/
 
 }

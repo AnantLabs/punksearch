@@ -1,8 +1,6 @@
 /**
- * SmbIndexer.java
- * Created on 25.06.2006
- * Author     Evgeny Shiriaev
- * Email      arpmipg@gmail.com
+ * SmbIndexer.java Created on 25.06.2006 Author Evgeny Shiriaev Email
+ * arpmipg@gmail.com
  */
 
 package org.punksearch.indexer;
@@ -18,10 +16,8 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
 import org.apache.lucene.document.Document;
-import org.punksearch.commons.SearcherConfig;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
-
 
 /**
  * Class for smb indexing and storing information
@@ -31,7 +27,7 @@ public class SmbIndexer extends ProtocolIndexer
 	private static Logger	__log	= Logger.getLogger(SmbIndexer.class.getName());
 
 	private String			ip;
-	private SmbFile			smb		= null;
+	private int				maxDeep	= 5;
 
 	/**
 	 * Constructor
@@ -40,13 +36,8 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws MalformedURLException connection to smb failed
 	 * @throws SmbException 
 	 */
-	public SmbIndexer(String ip) throws IllegalArgumentException
+	public SmbIndexer() throws IllegalArgumentException
 	{
-		if (ip == null)
-		{
-			throw new IllegalArgumentException("IP must not be null");
-		}
-		this.ip = ip;
 	}
 
 	/**
@@ -137,14 +128,14 @@ public class SmbIndexer extends ProtocolIndexer
 	private boolean isGoodDirectory(SmbFile[] items)
 	{
 		boolean goodFileFound = false;
-		boolean badFileFound  = false;
+		boolean badFileFound = false;
 		for (SmbFile item : items)
 		{
 			try
 			{
 				if (item.isFile() && !item.getName().startsWith("."))
 				{
-					String ext = item.getName().substring(item.getName().lastIndexOf(".")+1);
+					String ext = item.getName().substring(item.getName().lastIndexOf(".") + 1);
 					if (isGoodExtension(ext))
 					{
 						goodFileFound = true;
@@ -161,7 +152,7 @@ public class SmbIndexer extends ProtocolIndexer
 				__log.info("Error processing resource: " + item.toString() + ". " + e.getMessage());
 			}
 		}
-		
+
 		if (!goodFileFound && badFileFound)
 		{
 			return false;
@@ -170,9 +161,9 @@ public class SmbIndexer extends ProtocolIndexer
 		{
 			return true;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Processes a directory
 	 * @param dir instance of SmbFile for parsing
@@ -186,12 +177,12 @@ public class SmbIndexer extends ProtocolIndexer
 	private long indexDirectoryContents(SmbFile dir, int deep) throws SearcherException, SmbException
 	{
 		SmbFile[] items = dir.listFiles();
-		
+
 		if (!isGoodDirectory(items))
 		{
 			return 0L;
 		}
-		
+
 		// start actual indexing
 		long size = 0L;
 		List<Document> documentList = new ArrayList<Document>();
@@ -236,7 +227,7 @@ public class SmbIndexer extends ProtocolIndexer
 
 		if (file.isDirectory())
 		{
-			if (deep > SearcherConfig.getInstance().getIndexDeep() || file.getName().contains("$"))
+			if (deep > maxDeep || file.getName().contains("$"))
 			{
 				return null;
 			}
@@ -255,27 +246,45 @@ public class SmbIndexer extends ProtocolIndexer
 	}
 
 	/**
-	 * Indexes smb
+	 * Indexes particular smb host
+	 * 
 	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
 	 * @throws SearcherException Failed adding documents in index
 	 * @throws SmbException error processing with dir
 	 * @throws MalformedURLException 
 	 */
-	public long index() throws SearcherException, SmbException, MalformedURLException
+	public long index(String ip, CrawlerConfig config) throws SearcherException, MalformedURLException
 	{
+		if (ip == null)
+		{
+			throw new IllegalArgumentException("IP must not be null");
+		}
+
+		this.ip = ip;
+		this.maxDeep = config.getIndexDeep();
+
 		if (isActive(ip, 445) || isActive(ip, 139))
 		{
-			if (!SearcherConfig.getInstance().getSmbUser().equals(""))
+			SmbFile smb;
+
+			if (!config.getSmbUser().equals(""))
 			{
-				NtlmPasswordAuthentication pa = new NtlmPasswordAuthentication(SearcherConfig.getInstance().getSmbDomain(), SearcherConfig.getInstance().getSmbUser(), SearcherConfig.getInstance().getSmbPassword());
+				NtlmPasswordAuthentication pa = new NtlmPasswordAuthentication(config.getSmbDomain(), config.getSmbUser(), config.getSmbPassword());
 				smb = new SmbFile("smb://" + ip + "/", pa);
 			}
 			else
 			{
 				smb = new SmbFile("smb://" + ip + "/");
 			}
-			
-			return indexDirectoryContents(smb, 0);
+
+			try
+			{
+				return indexDirectoryContents(smb, 0);
+			}
+			catch (SmbException se)
+			{
+				throw new SearcherException(se);
+			}
 		}
 		else
 		{
@@ -293,11 +302,5 @@ public class SmbIndexer extends ProtocolIndexer
 	protected String getProtocol()
 	{
 		return "smb";
-	}
-
-	@Override
-	protected int getPort()
-	{
-		return 139;
 	}
 }
