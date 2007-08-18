@@ -1,8 +1,6 @@
 /**
- * IndexerThread.java
- * Created on 25.06.2006
- * Author     Evgeny Shiriaev
- * Email      arpmipg@gmail.com
+ * IndexerThread.java Created on 25.06.2006 Author Evgeny Shiriaev Email
+ * arpmipg@gmail.com
  */
 
 package org.punksearch.indexer;
@@ -11,8 +9,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
-import jcifs.smb.SmbException;
-
 import org.punksearch.commons.SearcherException;
 
 /**
@@ -20,13 +16,17 @@ import org.punksearch.commons.SearcherException;
  */
 public class IndexerThread extends Thread
 {
-	private Logger	__log	= Logger.getLogger(IndexerThread.class.getName());
+	private Logger				__log	= Logger.getLogger(IndexerThread.class.getName());
 
-	private String	ip;
+	private String				ip;
+	private CrawlerConfig		crawlerConfig;
+	private IpIteratorWrapper	iterator;
 
-	public IndexerThread(String name)
+	public IndexerThread(String name, CrawlerConfig conf, IpIteratorWrapper iter)
 	{
 		super(name);
+		crawlerConfig = conf;
+		this.iterator = iter;
 	}
 
 	/**
@@ -34,40 +34,30 @@ public class IndexerThread extends Thread
 	 */
 	public void run()
 	{
-		while ( (ip = Indexer.getInstance().nextIp()) != null )
+		SmbIndexer smbIndexer = new SmbIndexer();
+		FtpIndexer ftpIndexer = new FtpIndexer();
+
+		while ((ip = iterator.next()) != null)
 		{
 			try
 			{
 				__log.info(ip + " start indexing");
 
 				IndexOperator.getInstance().deleteDocuments(ip, "smb");
-
-				try
-				{
-					SmbIndexer smbIndexer = new SmbIndexer(ip);
-					long sizeSmb = smbIndexer.index();
-					if (sizeSmb > 0)
-					{
-						__log.info("SMB: " + ip + " indexed: " + sizeSmb + " bytes");
-					}
-				}
-				catch (SmbException e)
-				{
-					String reason = (e.getRootCause() != null) ? e.getRootCause().getMessage() : e.getMessage();
-
-					//String reason = (e.getCause() == null)? "unknown reason" : e.getCause().getMessage();
-					__log.info("Indexing of smb host " + ip + " failed due to: " + reason);
-				}
-
 				IndexOperator.getInstance().deleteDocuments(ip, "ftp");
-				FtpIndexer ftpIndexer = new FtpIndexer(ip);
-				long sizeFtp = ftpIndexer.index();
+
+				long sizeSmb = smbIndexer.index(ip, crawlerConfig);
+				if (sizeSmb > 0)
+				{
+					__log.info("SMB: " + ip + " indexed: " + sizeSmb + " bytes");
+				}
+
+				long sizeFtp = ftpIndexer.index(ip, crawlerConfig);
 				if (sizeFtp > 0)
 				{
 					__log.info("FTP: " + ip + " indexed: " + sizeFtp + " bytes");
 				}
 
-				//IndexerOperator.getInstance().optimizeIndex();
 				IndexOperator.getInstance().flushIndex();
 			}
 			catch (IllegalArgumentException e)
@@ -87,6 +77,11 @@ public class IndexerThread extends Thread
 				__log.warning("Can't flush index! " + e.getMessage());
 			}
 		}
+	}
+
+	public void finish()
+	{
+		iterator = null;
 	}
 
 	public String getIp()

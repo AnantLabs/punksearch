@@ -25,7 +25,7 @@ public abstract class ProtocolIndexer
 	
 	protected abstract String getProtocol();
 	protected abstract String getIp();
-	protected abstract int    getPort();
+	//protected abstract int    getPort();
 	
 	/**
 	 * Creates <code>Document</code> instance and adds it to <code>documentList</code>
@@ -56,12 +56,12 @@ public abstract class ProtocolIndexer
 		}
 		return false;
 	}
-	
+	/*
 	protected boolean isActive(String ip)
 	{
 		return isActive(ip, getPort());
 	}
-	
+	*/
 	protected boolean isActive(String ip, int port)
 	{
 		try
