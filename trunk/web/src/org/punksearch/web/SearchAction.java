@@ -15,7 +15,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
-import org.punksearch.searcher.LuceneSearcher;
+import org.punksearch.searcher.Searcher;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
@@ -86,7 +86,7 @@ public class SearchAction
 			{
 				//LuceneSearcher searcher = new LuceneSearcher(config.getIndexDirectory());
 				Date startDate = new Date();
-				SearcherResult result = LuceneSearcher.getInstance().search(query, params.first, params.last, filter);
+				SearcherResult result = SearcherWrapper.search(query, params.first, params.last, filter);
 				Date stopDate = new Date();
 				searchTime = stopDate.getTime() - startDate.getTime();
 				overallCount = result.getHitCount();
