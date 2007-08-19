@@ -1,5 +1,6 @@
 package org.punksearch.web;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
-import org.punksearch.searcher.Searcher;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
@@ -47,7 +47,7 @@ public class SearchAction
 
 		if (params.type.equals("advanced"))
 		{
-			query = makeAdvancedQuery();
+			query = makeAdvancedQuery(params.dir, params.file, params.ext);
 
 			NumberRangeFilter<Long> sizeFilter = null;
 			if (params.minSize != null || params.maxSize != null)
@@ -73,11 +73,11 @@ public class SearchAction
 		}
 		else
 		{
-			query = makeSimpleQuery();
+			query = makeSimpleQuery(params.query);
 			filter = TypeFilters.get(params.type);
 		}
 
-		List<SearchResult> searchResults = null;
+		List<SearchResult> searchResults = new ArrayList<SearchResult>();
 
 		if (query != null)
 		{
@@ -96,7 +96,6 @@ public class SearchAction
 			{
 				__log.warning(se.getMessage());
 			}
-
 		}
 
 		return searchResults;
@@ -133,10 +132,7 @@ public class SearchAction
 
 	private static List<SearchResult> prepareResults(List<Document> results)
 	{
-		if (results == null)
-			return null;
-
-		List<SearchResult> searchResults = new LinkedList<SearchResult>();
+		List<SearchResult> searchResults = new ArrayList<SearchResult>(results.size());
 		for (Document doc : results)
 		{
 			searchResults.add(new SearchResult(doc));
@@ -144,18 +140,23 @@ public class SearchAction
 		return searchResults;
 	}
 
-	private Query makeSimpleQuery()
+	private Query makeSimpleQuery(String userQuery)
 	{
+		List<String> terms = prepareQueryParameter(userQuery);
+		
+		if (terms.size() == 0)
+		{
+			return null;
+		}
+		
 		BooleanQuery query = new BooleanQuery(false);
 		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
-
-		List<String> terms = prepareQueryParameter(params.query);
-
+		
 		for (String item : terms)
 		{
 			BooleanQuery itemQuery = new BooleanQuery();
 
-			BooleanClause.Occur occurItem = BooleanClause.Occur.MUST;
+			BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
 			if (item.startsWith("!"))
 			{
 				item = item.substring(1);
@@ -174,14 +175,14 @@ public class SearchAction
 		return query;
 	}
 
-	private Query makeAdvancedQuery()
+	private Query makeAdvancedQuery(String dir, String file, String ext)
 	{
 		BooleanQuery query = new BooleanQuery(false);
 		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
 
-		List<String> dirTerms = prepareQueryParameter(params.dir);
-		List<String> fileTerms = prepareQueryParameter(params.file);
-		List<String> extTerms = prepareQueryParameter(params.ext);
+		List<String> dirTerms  = prepareQueryParameter(dir);
+		List<String> fileTerms = prepareQueryParameter(file);
+		List<String> extTerms  = prepareQueryParameter(ext);
 
 		if (fileTerms.size() != 0 || extTerms.size() != 0) // search for files
 		{
