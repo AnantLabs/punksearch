@@ -73,20 +73,20 @@ public class TypeFilters
 		{
 			min = 1 * MB;
 			max = 100 * MB;
-			ext = "mp3 ogg wav wma flac";
+			ext = "flac mp3 ogg wav wma";
 		}
 		else if (type.equals(Types.ISO))
 		{
 			min = 10 * MB;
-			ext = "iso mdf";
+			ext = "iso mdf nrg dmg img daa pqi";
 		}
 		else if (type.equals(Types.PICTURE))
 		{
-			ext = "jpg jpeg gif png bmp tif";
+			ext = "bmp gif jpeg jpg png tif tiff";
 		}
 		else if (type.equals(Types.ARCHIVE))
 		{
-			ext = "zip rar arj gz tgz tar bz2";
+			ext = "7z, arj bz2 gz rar tar tgz zip";
 		}
 		else if (type.equals(Types.EXE))
 		{
@@ -94,7 +94,7 @@ public class TypeFilters
 		}
 		else if (type.equals(Types.DOC))
 		{
-			ext = "rtf doc xls ppt pdf ps djvu odt ods odp odg odf txt htm html xhtml";
+			ext = "djvu doc htm html rtf odg odp ods odt pdf ppt ps txt xhtml xls";
 		}
 		else if (type.equals(Types.DIR))
 		{
