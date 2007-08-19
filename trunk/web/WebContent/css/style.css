@@ -5,7 +5,7 @@ BODY
 	margin: 0px;
 	font-family: Arial, sans-serif;
 	text-align: center;
-	font-size: 12px;	
+	font-size: 10px;	
 }
 
 INPUT 
@@ -23,7 +23,7 @@ A
 {
 	background-color: #004368;
 	color: #FFFFFF;
-	font-size: 12pt;
+	font-size: 12px;
 	padding: 10px;
 	font-weight: bold;
 }
@@ -32,9 +32,9 @@ TABLE#results TD
 {
 	text-align: left;
 	padding: 2px;
-	font-size: 9pt;
-	padding-left: 10pt;
-	padding-right: 10pt;	
+	font-size: 9px;
+	padding-left: 10px;
+	padding-right: 10px;	
 }
 
 TABLE#results
@@ -65,7 +65,8 @@ TABLE#pager A
 	color: #000000;
 	padding: 1px 8pt 1px 8pt;
 	margin: 0px;
-	font-size: 8pt;
+	vertical-align: bottom;
+	font-size: 10px;
 }
 TABLE#pager A.pageNumStyle
 {
@@ -99,7 +100,7 @@ TABLE#pager A.pageCurrNumStyle
     background-color: red;
     color: white;
     font-weight: bold;
-    font-size: 12pt; 
+    font-size: 14px; 
     padding: 5px;
 }
 
@@ -108,7 +109,7 @@ TABLE#pager A.pageCurrNumStyle
     background-color: #CCCCCC;
     color: black;
     font-weight: bold;
-    font-size: 12pt; 
+    font-size: 14px; 
     padding: 20px;
     margin-top: -10px;
     width: 300px;
@@ -119,7 +120,7 @@ TABLE#pager A.pageCurrNumStyle
 
 #quickLinks
 {
-	font-size: 10pt;
+	font-size: 10px;
 }
 #quickLinks A
 {

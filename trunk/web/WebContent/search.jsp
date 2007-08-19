@@ -136,8 +136,8 @@
 				%>
 				<table id="pager" cellspacing="0" cellpadding="0" align="center">
 					<tr>
-						<td style="font-size: 10pt; text-align: left; padding-left: 2px;">
-							<span style="font-size: 14pt;"><%= searchAction.getOverallCount() %></span> items (<%= SearchPager.getPageCount(searchAction.getOverallCount()) %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
+						<td style="font-size: 12px; text-align: left; padding-left: 2px;">
+							<span style="font-size: 18px;"><%= searchAction.getOverallCount() %></span> items (<%= SearchPager.getPageCount(searchAction.getOverallCount()) %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
 						</td>
 						<td style="text-align: right; vertical-align: bottom;"><%= SearchPager.makePagesRow(request, searchAction.getOverallCount()) %></td>
 					</tr>
