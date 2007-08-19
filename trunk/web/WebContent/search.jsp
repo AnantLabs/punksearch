@@ -23,18 +23,6 @@
 				if ((queryElement != null)&&(queryElement.value.length != 0)) params += "&query=" + queryElement.value;								
 				window.location = params;
 			}
-			function validateQuery()
-			{
-				var queryElement = document.forms["searchForm"].elements["query"];
-				var query = queryElement==null ? "" : queryElement.value;
-				var adultsOnlyRegExp = /.*(?:porno)|(?:sex)|(?:xxx).*/i
-				var xxx = query.match(adultsOnlyRegExp);
-				var allowed = true;
-				if (xxx !=null) allowed = confirm("Attention! \n" + 
-												  "You are trying to search files that may contains information allowed for adult persons only. \n" +
-												  "If you are older than 14 press 'OK' else press 'Cancel'");
-				return allowed;
-			}
 			function setFocus(type)
 			{
 				var id = (type != null && type == 'advanced')? 'dir' : 'query';
@@ -46,7 +34,7 @@
 	
 <%	
 	SearchParams params = new SearchParams(request);
-	String[][] searchTabs = {{"everything","everything"},{"films",Types.FILM},{"music",Types.MUSIC},{"advanced","advanced"}};
+	String[][] searchTabs = {{"everything","everything"},{"films",Types.FILM},{"music",Types.MUSIC},{"disks",Types.ISO},{"pictures",Types.PICTURE},{"advanced","advanced"}};
 %>
 	
 <body onload="setFocus('<%= params.type %>')">
@@ -84,7 +72,7 @@
 <div id="searchFormContainer">
 	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; /*border-right:1px solid white;*/"></div -->
 	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00;"></div>
-	<form id="searchForm" action="search.jsp" method="get" onsubmit="return validateQuery();">
+	<form id="searchForm" action="search.jsp" method="get">
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	
 		if (params.type.equals("advanced"))
