@@ -14,14 +14,16 @@ import org.punksearch.commons.IndexFields;
 
 public abstract class ProtocolIndexer
 {
-	protected String[] goodExtensions = {
-			"avi", "mov", "mpg", "vob", "wmv", "wmf", 
-			"mp3", "wav", "ogg", "flac", "wma",
-			"exe", 
-			"iso", "bin", "dmg", "mdf",
-			"txt", "xml", "doc", "rtf", "xls", "pdf", "ps",
-			"jpg", "gif", "png", "tif",
-			"zip", "rar", "tar", "gz", "tgz"};
+	protected String[] goodExtensions =
+	{
+		"avi", "mov", "mpeg", "mpg", "vob", "wmv", "wmf", 
+		"flac", "mp3", "ogg", "wav", "wma",
+		"exe", 
+		"iso", "dmg", "mdf", "nrg", "img", "daa", "pqi",
+		"djvu", "doc", "htm", "html", "rtf", "odg", "odp", "ods", "odt", "pdf", "ppt", "ps", "txt", "xhtml", "xls",
+		"bmp", "gif", "jpeg", "jpg", "png", "tif", "tiff",
+		"7z", "arj", "bz2", "gz", "rar", "tar", "tgz", "zip"
+	};
 	
 	protected abstract String getProtocol();
 	protected abstract String getIp();
