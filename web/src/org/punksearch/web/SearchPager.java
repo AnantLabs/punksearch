@@ -6,12 +6,9 @@ public class SearchPager {
 
 	private static final int PAGE_LINKS_PER_SIDE = 10;
 	public static final int PAGE_SIZE = 15;
-
-	private int pageCount = 0;
 	
-    public String makePagesRow(HttpServletRequest request, int all)
+    public static String makePagesRow(HttpServletRequest request, int all)
     {
-    	pageCount = (all%PAGE_SIZE == 0)? all/PAGE_SIZE : all/PAGE_SIZE + 1; 
 		int cur = SearchParams.getIntegerValue(request, "first", 0)/PAGE_SIZE;
     	
     	if (all <= PAGE_SIZE)
@@ -49,9 +46,9 @@ public class SearchPager {
      	return result+"</div>";
     }
     
-    public int getPageCount()
+    public static int getPageCount(int all)
     {
-    	return pageCount;
+    	return (all%PAGE_SIZE == 0)? all/PAGE_SIZE : all/PAGE_SIZE + 1;
     }
 
     private static String makePageLink(String url, int num)
