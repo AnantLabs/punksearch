@@ -1,0 +1,29 @@
+<!-- Ant build file for ServletViewer -->
+<project name="punksearch-core" default="jar">
+
+	<tstamp>
+		<format property="dateIso" pattern="yyyy-MM-dd" />
+	</tstamp>
+	
+	<property name="srcDir" location="src" />
+	<property name="buildDir" location="build" />
+	<property name="docDir" location="doc" />
+
+	<target name="jar" description="Compiles the Java sources and builds the JAR file.">
+		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+			<classpath>
+				<pathelement location="lib/lucene-core-2.1.0.jar" />
+				<pathelement location="lib/jcifs-1.2.14.jar" />
+				<pathelement location="lib/edtftpj.jar" />
+			</classpath>
+		</javac>
+		<jar destfile="punksearch-core.jar">
+			<fileset dir="${buildDir}/classes" />
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${buildDir}" failonerror="true" />
+	</target>
+
+</project>
