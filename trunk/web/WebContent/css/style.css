@@ -188,10 +188,15 @@ TABLE#pager A.pageCurrNumStyle
 {
     font-size:20px;
 }
-#searchForm .fieldset
+#searchForm TABLE.fieldset
 {
     padding-bottom:4px;
     font-size:20px;
+}
+
+#searchForm TABLE.fieldset TD
+{
+	text-align: left;
 }
 /* searchResults */
 #searchResultsContainer

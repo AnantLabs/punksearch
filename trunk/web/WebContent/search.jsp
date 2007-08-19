@@ -84,14 +84,12 @@
 <div id="searchFormContainer">
 	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; /*border-right:1px solid white;*/"></div -->
 	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00;"></div>
-	<form id="searchForm" action="search.jsp" method="get" onsubmit="return validateQuery();">	
+	<form id="searchForm" action="search.jsp" method="get" onsubmit="return validateQuery();">
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	
 		if (params.type.equals("advanced"))
 		{
 		%>
-			<div class="fieldset">
-			</div>	
 			<table class="fieldset" width="100%" style="font-size:16px; font-weight:bold;">
 				<tr>
 					<td>
@@ -145,48 +143,42 @@
 		{	
 			SearchAction searchAction  = new SearchAction(params);
 			List<SearchResult> searchResults = searchAction.doSearch();
-			if (searchResults != null)
+			if(!searchResults.isEmpty())
 			{
-				if(!searchResults.isEmpty())
-				{
-					SearchPager searchPager  = new SearchPager();
-					int overallCount = searchAction.getOverallCount();
-				 	String pageNums = searchPager.makePagesRow(request, overallCount);
+				%>
+				<table id="pager" cellspacing="0" cellpadding="0" align="center">
+					<tr>
+						<td style="font-size: 10pt; text-align: left; padding-left: 2px;">
+							<span style="font-size: 14pt;"><%= searchAction.getOverallCount() %></span> items (<%= SearchPager.getPageCount(searchAction.getOverallCount()) %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
+						</td>
+						<td style="text-align: right; vertical-align: bottom;"><%= SearchPager.makePagesRow(request, searchAction.getOverallCount()) %></td>
+					</tr>
+				</table>
+				<table id="results" cellspacing="0" align="center">
+				<%								
+					for (SearchResult file : searchResults)
+					{
 					%>
-					<table id="pager" cellspacing="0" cellpadding="0" align="center">
-						<tr>
-							<td style="font-size: 10pt; text-align: left; padding-left: 2px;">
-								<span style="font-size: 14pt;"><%= overallCount %></span> items (<%= searchPager.getPageCount() %> pages) in <%= searchAction.getSearchTime()/1000.0 %> secs
-							</td>
-							<td style="text-align: right; vertical-align: bottom;"><%= pageNums %></td>
-						</tr>
-					</table>
-					<table id="results" cellspacing="0" align="center">
-					<%								
-						for (SearchResult file : searchResults)
-						{
-						%>
-						<tr>
-							<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
-								<img src="images/<%= (file.ext.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
-							</td>
-							<td style="padding-left: 2px;">
-								<span style="font-size: 12pt;"><%= file.name %></span><%= (showScores)? "(" + file.score + ")": "" %><br/>
-								<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= file.host + "/" + file.path %></span>
-							</td>
-							<td style="text-align: right;"><%= file.date %></td>
-							<td style="text-align: right;"><%= file.size %> Mb</td>
-						</tr>
-						<%
-						}
-					%>
-					</table>
-				<%	
-				}
-				else
-				{
-					%><div class="infoMessage">search yields no results</div><%	
-				}
+					<tr>
+						<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
+							<img src="images/<%= (file.ext.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
+						</td>
+						<td style="padding-left: 2px;">
+							<span style="font-size: 12pt;"><%= file.name %></span><%= (showScores)? "(" + file.score + ")": "" %><br/>
+							<span style="font-size: 8pt; color:#0070AD; padding-left: 0pt;"><%= file.host + "/" + file.path %></span>
+						</td>
+						<td style="text-align: right;"><%= file.date %></td>
+						<td style="text-align: right;"><%= file.size %> Mb</td>
+					</tr>
+					<%
+					}
+				%>
+				</table>
+			<%	
+			}
+			else
+			{
+				%><div class="infoMessage">search yields no results</div><%	
 			}
 		}
 	%>
