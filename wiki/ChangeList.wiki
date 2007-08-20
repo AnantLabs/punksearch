@@ -1,8 +1,15 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.6.3 (2007-08-20) =
+  * core: internal refactorings
+  * search: simple (i.e. with predefined filters, like "films") search query relaxed: it is not required for term to match filename, it should at least match filepath; _this particularly useful then you search for singer or album, while no any file inside a folder contains singer name or album title_
+  * gui: crossbrowser interface enhancements
+  * usability: 2 more tabs - disks & pictures
+  * core: file extensions updated (both indexer "good" extensions and search filters)
+
 = 0.6.2 (2007-08-13) =
-  * usability: "search yields no results" message redesigned
+  * gui: "search yields no results" message redesigned
   * usability: set focus on input box after page loaded
 
 = 0.6.1 (2007-08-12) =
