@@ -44,7 +44,7 @@
 <div id="searchTabsContainer">
 	<table cellspacing=0 id="searchTabs">
 		<tr>
-			<td style="/*border-right: 1px solid white;*/ width:50%">&#160;</td>
+			<td style="width:50%">&#160;</td>
 			<%
 			for (String[] tab: searchTabs)
 			{			
@@ -64,14 +64,13 @@
 				}
 			}
 			%>
-			<td style="/*border-left: 1px solid white;*/ width:50%">&#160;</td>
+			<td style="width:50%">&#160;</td>
 		</tr>
 	</table>
 </div>
 
 <div id="searchFormContainer">
-	<!-- div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#004368; /*border-right:1px solid white;*/"></div -->
-	<div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00;"></div>
+	<!--div style="position:absolute; left:0px; top:0px; width:100px; height:100%; background-color:#FF7B00; font-size:1px;"></div-->
 	<form id="searchForm" action="search.jsp" method="get">
 		<input type="hidden" name="type" value="<%=params.type%>" />
 		<% 	
@@ -149,7 +148,7 @@
 					%>
 					<tr>
 						<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
-							<img src="images/<%= (file.ext.length() != 0)? "stock_new-16.png" : "stock_folder-16.png" %>"/>
+							<img src="images/<%= (file.ext.length() != 0)? "stock_new-16.gif" : "stock_folder-16.gif" %>"/>
 						</td>
 						<td style="padding-left: 2px;">
 							<span style="font-size: 12pt;"><%= file.name %></span><%= (showScores)? "(" + file.score + ")": "" %><br/>
