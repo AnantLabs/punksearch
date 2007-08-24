@@ -1,6 +1,9 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.6.4 (2007-08-24) =
+  * usability: IE compatibility (gif for transparency, font-sizes, markup artifacts)
+
 = 0.6.3 (2007-08-20) =
   * core: internal refactorings
   * search: simple (i.e. with predefined filters, like "films") search query relaxed: it is not required for term to match filename, it should at least match filepath (this particularly useful then you search for singer or album, while no any file inside a folder contains singer name or album title)
@@ -31,4 +34,3 @@
 
 = 0.5 (2007-06-21) =
 _first publicly available release_
-
