@@ -6,6 +6,7 @@
 package org.punksearch.indexer;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -225,6 +226,10 @@ public class FtpIndexer extends ProtocolIndexer
 		try
 		{
 			items = ftp.dirDetails(dir);
+		}
+		catch (SocketException e) {
+			// host communication problem occured, rethrow the exception so indexer will give up indexing this host
+			throw e;
 		}
 		catch (Exception e)
 		{
