@@ -28,24 +28,21 @@ A
 	font-weight: bold;
 }
 
-TABLE#results TD
-{
-	text-align: left;
-	padding: 2px;
-	font-size: 10px;
-	padding-left: 10px;
-	padding-right: 10px;	
-}
-
 TABLE#results
 {
     border-top: 5px solid #FF7B00;
 	width: 90%;
 }
+
 TABLE#results TD
 {
+    text-align: left;
+    padding: 2px;
+    font-size: 10px;
+    padding-left: 10px;
+    padding-right: 10px;    
     background-color: #E6F6FF;
-	border-bottom: 1px solid #0070AD;
+    border-bottom: 1px solid #0070AD;
 }
 
 TABLE#pager
@@ -211,4 +208,35 @@ TABLE#pager A.pageCurrNumStyle
 	font-family: sans-serif;
 	font-weight: bold;
 	padding-bottom: 10px;
+}
+
+SPAN.name {
+	font-weight: normal;
+}
+
+SPAN.path {
+	color:#0070AD;
+    padding-left: 0pt;
+}
+
+SPAN.more A:link {
+	color:#FF7B00;
+}
+
+DIV.othersInGroup {
+	/*padding-left: 10pt;*/
+	padding-top: 5pt;
+}
+
+TABLE#results TD DIV.othersInGroup TD {
+	border-bottom: none;
+	padding: 2pt;
+}
+
+DIV.othersInGroup SPAN.name {
+    font-size: 10pt;
+}
+
+DIV.othersInGroup SPAN.path {
+    font-size: 8pt;
 }

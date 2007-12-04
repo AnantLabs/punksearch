@@ -22,78 +22,74 @@ import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 import org.punksearch.web.filters.TypeFilters;
 
-public class SearchAction
-{
+public class SearchAction {
 
-	private static final int	MIN_TERM_LENGTH	= 3;
+	private static final int MIN_TERM_LENGTH = 3;
 
-	private static Logger		__log			= Logger.getLogger(SearchParams.class.getName());
+	private static Logger    __log           = Logger.getLogger(SearchParams.class.getName());
 
-	private SearchParams		params;
-	private SearcherConfig		config			= SearcherConfig.getInstance();
+	private SearchParams     params;
+	private SearcherConfig   config          = SearcherConfig.getInstance();
 
-	private long				searchTime		= 0;
-	private int					overallCount	= 0;
+	private long             searchTime      = 0;
+	private int              overallCount    = 0;
 
-	public SearchAction(SearchParams params)
-	{
+	public SearchAction(SearchParams params) {
 		this.params = params;
 	}
 
-	public List<SearchResult> doSearch()
-	{
-		Query query = null;
-		Filter filter = null;
-
-		if (params.type.equals("advanced"))
-		{
-			query = makeAdvancedQuery(params.dir, params.file, params.ext);
+	private Filter makeFilter() {
+		if (params.type.equals("advanced")) {
 
 			NumberRangeFilter<Long> sizeFilter = null;
-			if (params.minSize != null || params.maxSize != null)
-			{
+			if (params.minSize != null || params.maxSize != null) {
 				sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, params.minSize, params.maxSize);
 			}
 
 			NumberRangeFilter<Long> dateFilter = null;
-			if (params.fromDate != null || params.toDate != null)
-			{
+			if (params.fromDate != null || params.toDate != null) {
 				dateFilter = FilterFactory.createNumberFilter(IndexFields.DATE, params.fromDate, params.toDate);
 			}
 
-			if (sizeFilter != null || dateFilter != null)
-			{
+			if (sizeFilter != null || dateFilter != null) {
 				CompositeFilter resultFilter = new CompositeFilter();
 				if (sizeFilter != null)
 					resultFilter.add(sizeFilter);
 				if (dateFilter != null)
 					resultFilter.add(dateFilter);
-				filter = resultFilter;
+				return resultFilter;
+			} else {
+				return null;
 			}
+		} else {
+			return TypeFilters.get(params.type);
 		}
-		else
-		{
-			query = makeSimpleQuery(params.query);
-			filter = TypeFilters.get(params.type);
+	}
+
+	private Query makeQuery() {
+		if (params.type.equals("advanced")) {
+			return makeAdvancedQuery(params.dir, params.file, params.ext);
+		} else {
+			return makeSimpleQuery(params.query);
 		}
+	}
+
+	public List<SearchResult> doSearch() {
+		Query query = makeQuery();
+		Filter filter = makeFilter();
 
 		List<SearchResult> searchResults = new ArrayList<SearchResult>();
 
-		if (query != null)
-		{
+		if (query != null) {
 			__log.info("query constructed: " + query.toString());
-			try
-			{
-				//LuceneSearcher searcher = new LuceneSearcher(config.getIndexDirectory());
+			try {
 				Date startDate = new Date();
 				SearcherResult result = SearcherWrapper.search(query, params.first, params.last, filter);
 				Date stopDate = new Date();
 				searchTime = stopDate.getTime() - startDate.getTime();
 				overallCount = result.getHitCount();
 				searchResults = prepareResults(result.getChunk());
-			}
-			catch (SearcherException se)
-			{
+			} catch (SearcherException se) {
 				__log.warning(se.getMessage());
 			}
 		}
@@ -101,28 +97,50 @@ public class SearchAction
 		return searchResults;
 	}
 
-	public int getOverallCount()
-	{
+	public List<ItemGroup> doSearchGroupped() {
+		Query query = makeQuery();
+		Filter filter = makeFilter();
+		
+		List<ItemGroup> searchResults = new ArrayList<ItemGroup>();
+		
+		if (query != null) {
+			__log.info("query constructed: " + query.toString());
+			try {
+				
+				Date startDate = new Date();
+				SearcherResult result = SearcherWrapper.search(query, filter, 1000, params.showoffline);
+				Date stopDate = new Date();
+				
+				searchTime = stopDate.getTime() - startDate.getTime();
+				
+				searchResults = makeGroupsFromDocs(result.getChunk());
+				
+				overallCount = searchResults.size();
+				
+			} catch (SearcherException se) {
+				__log.warning(se.getMessage());
+			}
+		}
+		
+		return searchResults;
+	}
+	
+	public int getOverallCount() {
 		return overallCount;
 	}
 
-	public long getSearchTime()
-	{
+	public long getSearchTime() {
 		return searchTime;
 	}
 
-	private static List<String> prepareQueryParameter(String str)
-	{
+	private static List<String> prepareQueryParameter(String str) {
 		List<String> result = new LinkedList<String>();
-		if (str != null)
-		{
+		if (str != null) {
 			str = str.replaceAll("\\*|_|-|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
 			String[] terms = str.toLowerCase().split(" ");
-			for (String term : terms)
-			{
+			for (String term : terms) {
 				term = term.trim();
-				if (term.length() >= MIN_TERM_LENGTH)
-				{
+				if (term.length() >= MIN_TERM_LENGTH) {
 					result.add(term);
 				}
 			}
@@ -130,35 +148,47 @@ public class SearchAction
 		return result;
 	}
 
-	private static List<SearchResult> prepareResults(List<Document> results)
-	{
+	private static List<ItemGroup> makeGroupsFromDocs(List<Document> docs) {
+		List<ItemGroup> groups = new LinkedList<ItemGroup>();
+		for (Document doc : docs) {
+			boolean added = false;
+			for (ItemGroup group : groups) {
+				if (group.matches(doc)) {
+					group.add(doc);
+					added = true;
+					break;
+				}
+			}
+			if (!added) {
+				groups.add(new ItemGroup(doc));
+			}
+		}
+		return groups;
+	}
+
+	private static List<SearchResult> prepareResults(List<Document> results) {
 		List<SearchResult> searchResults = new ArrayList<SearchResult>(results.size());
-		for (Document doc : results)
-		{
+		for (Document doc : results) {
 			searchResults.add(new SearchResult(doc));
 		}
 		return searchResults;
 	}
 
-	private Query makeSimpleQuery(String userQuery)
-	{
+	private Query makeSimpleQuery(String userQuery) {
 		List<String> terms = prepareQueryParameter(userQuery);
-		
-		if (terms.size() == 0)
-		{
+
+		if (terms.size() == 0) {
 			return null;
 		}
-		
+
 		BooleanQuery query = new BooleanQuery(false);
 		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
-		
-		for (String item : terms)
-		{
+
+		for (String item : terms) {
 			BooleanQuery itemQuery = new BooleanQuery();
 
 			BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-			if (item.startsWith("!"))
-			{
+			if (item.startsWith("!")) {
 				item = item.substring(1);
 				occurItem = BooleanClause.Occur.MUST_NOT;
 			}
@@ -175,25 +205,21 @@ public class SearchAction
 		return query;
 	}
 
-	private Query makeAdvancedQuery(String dir, String file, String ext)
-	{
+	private Query makeAdvancedQuery(String dir, String file, String ext) {
 		BooleanQuery query = new BooleanQuery(false);
 		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
 
-		List<String> dirTerms  = prepareQueryParameter(dir);
+		List<String> dirTerms = prepareQueryParameter(dir);
 		List<String> fileTerms = prepareQueryParameter(file);
-		List<String> extTerms  = prepareQueryParameter(ext);
+		List<String> extTerms = prepareQueryParameter(ext);
 
 		if (fileTerms.size() != 0 || extTerms.size() != 0) // search for files
 		{
-			if (fileTerms.size() != 0)
-			{
+			if (fileTerms.size() != 0) {
 				BooleanQuery fileQuery = new BooleanQuery();
-				for (String item : fileTerms)
-				{
+				for (String item : fileTerms) {
 					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-					if (item.startsWith("!"))
-					{
+					if (item.startsWith("!")) {
 						item = item.substring(1);
 						occurItem = BooleanClause.Occur.MUST_NOT;
 					}
@@ -203,32 +229,27 @@ public class SearchAction
 				query.add(fileQuery, BooleanClause.Occur.MUST);
 			}
 
-			if (extTerms.size() != 0)
-			{
+			if (extTerms.size() != 0) {
 				BooleanQuery extQuery = new BooleanQuery();
-				for (String item : extTerms)
-				{
+				for (String item : extTerms) {
 					Query termQuery = new TermQuery(new Term(IndexFields.EXTENSION, item));
 					extQuery.add(termQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(extQuery, BooleanClause.Occur.MUST);
-			}
-			else
-			{
+			} else {
 				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
 				query.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
 			}
 
-			if (dirTerms.size() != 0) // restrict files to occur in specified directories only
+			if (dirTerms.size() != 0) // restrict files to occur in specified
+			// directories only
 			{
 				BooleanQuery dirQuery = new BooleanQuery();
 				int negations = 0;
 
-				for (String item : dirTerms)
-				{
+				for (String item : dirTerms) {
 					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-					if (item.startsWith("!"))
-					{
+					if (item.startsWith("!")) {
 						item = item.substring(1);
 						occurItem = BooleanClause.Occur.MUST_NOT;
 						negations++;
@@ -237,23 +258,25 @@ public class SearchAction
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
 					dirQuery.add(pathQuery, occurItem);
 				}
-				if (dirTerms.size() == negations) // it must be at least one positive clause in query to be executed. so add one if all user clauses are nagative.
+				if (dirTerms.size() == negations) // it must be at least one
+				// positive clause in query
+				// to be executed. so add
+				// one if all user clauses
+				// are nagative.
 				{
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, "*"));
 					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(dirQuery, BooleanClause.Occur.MUST);
 			}
-		}
-		else if (dirTerms.size() != 0) // search for directories only, since file name was not specified
+		} else if (dirTerms.size() != 0) // search for directories only,
+		// since file name was not specified
 		{
-			for (String item : dirTerms)
-			{
+			for (String item : dirTerms) {
 				BooleanQuery dirQuery = new BooleanQuery();
 
 				BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-				if (item.startsWith("!"))
-				{
+				if (item.startsWith("!")) {
 					item = item.substring(1);
 					occurItem = BooleanClause.Occur.MUST_NOT;
 				}
@@ -266,16 +289,13 @@ public class SearchAction
 
 				query.add(dirQuery, occurItem);
 			}
-		}
-		else
-		{
+		} else {
 			return null;
 		}
 		return query;
 	}
 
-	private String prepareItem(String item)
-	{
+	private String prepareItem(String item) {
 		return (config.isFastSearch()) ? item + "*" : "*" + item + "*";
 	}
 
