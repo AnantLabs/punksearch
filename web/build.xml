@@ -8,7 +8,7 @@
 	<property name="buildDir" location="build" />
 	<property name="docDir" location="doc" />
 
-	<target name="war" depends="clean" description="Compiles sources and builds the WAR file.">
+	<target name="war" depends="build-core,clean" description="Compiles sources and builds the WAR file.">
 		<mkdir dir="${buildDir}/classes"/>
 		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
 			<classpath>
@@ -34,4 +34,7 @@
 		<delete dir="${buildDir}" failonerror="true" />
 	</target>
 
+	<target name="build-core">
+		<ant dir="../core" target="jar" inheritAll="false"/>
+	</target>
 </project>
