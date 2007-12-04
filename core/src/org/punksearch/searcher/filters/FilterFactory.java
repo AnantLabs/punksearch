@@ -14,7 +14,10 @@ public class FilterFactory
 			throw new IllegalArgumentException("min > max");
 		}
 		
-		NumberRangeFilter<Long> filter = new NumberRangeFilter<Long>(fieldName, min, max, false, false) {
+		boolean includeLower = (min != null);
+		boolean includeUpper = (max != null);
+		
+		NumberRangeFilter<Long> filter = new NumberRangeFilter<Long>(fieldName, min, max, includeLower, includeUpper) {
 			public Long termTextToNumber(String text) {
 				return Long.valueOf(text);
 			}
