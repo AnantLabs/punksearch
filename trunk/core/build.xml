@@ -9,7 +9,8 @@
 	<property name="buildDir" location="build" />
 	<property name="docDir" location="doc" />
 
-	<target name="jar" description="Compiles the Java sources and builds the JAR file.">
+	<target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
+		<mkdir dir="build/classes"/>
 		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
 			<classpath>
 				<pathelement location="lib/lucene-core-2.1.0.jar" />
@@ -23,6 +24,7 @@
 	</target>
 
 	<target name="clean">
+		<delete file="punksearch-core.jar"/>
 		<delete dir="${buildDir}" failonerror="true" />
 	</target>
 
