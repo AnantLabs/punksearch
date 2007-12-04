@@ -11,32 +11,30 @@ import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
-import org.punksearch.commons.SearcherException;
 
 public class Searcher
 {
 	private static final Logger		__log	= Logger.getLogger(Searcher.class.getName());
 
-	private IndexSearcher			searcher;
+	private IndexSearcher			indexSearcher;
 
 	public Searcher(String dir)
 	{
 		try
 		{
-			searcher = new IndexSearcher(FSDirectory.getDirectory(dir));
+			indexSearcher = new IndexSearcher(FSDirectory.getDirectory(dir));
 		}
 		catch (IOException e)
 		{
-			__log.severe("Problem with index directory, can't init searcher! " + e.getMessage());
+			throw new IllegalArgumentException("Index directory is invalid: " + dir);
 		}
 	}
 
-	public SearcherResult search(Query query, Integer first, Integer last, Filter filter) throws SearcherException
+	public SearcherResult search(Query query, Integer first, Integer last, Filter filter)
 	{
 		if (null != first && null != last && (first > last || first < 0 || last < 0))
 		{
-			String errorMessage = "First and last should be non-negative and first shoul be more than or equal to last.";
-			throw new IllegalArgumentException(errorMessage);
+			throw new IllegalArgumentException("First (" + first + ") and last (" + last + ") should be non-negative and first should be more than or equal to last.");
 		}
 
 		try
@@ -44,7 +42,7 @@ public class Searcher
 			//Query query = new QueryParser(SearcherConstants.NAME, new StandardAnalyzer()).parse(text);
 
 			//Sort sort = (null != sortFieldId)? new Sort(new SortField(sortFieldId + SearcherConstants.SORT_SUFFIX)) : null;
-			Hits hits = searcher.search(query, filter);
+			Hits hits = indexSearcher.search(query, filter);
 
 			if (null == first)
 			{
@@ -68,13 +66,53 @@ public class Searcher
 		}
 		catch (IOException e)
 		{
-			__log.warning(e.getMessage());
-			throw new SearcherException("Problem with Lucene index directory.", e);
+			throw new RuntimeException("IOException during search", e);
 		}
-		catch (RuntimeException e)
+	}
+	
+	public SearcherResult search(Query query, Filter filter, Integer limit, ResultFilter resultFilter)
+	{
+		
+		try
 		{
-			__log.warning(e.getMessage());
-			throw new SearcherException("Exception during search: " + e.getMessage(), e);
+			Hits hits = indexSearcher.search(query, filter);
+			
+			int myLimit = (limit == null || limit <= 0 || limit > hits.length())? hits.length() : limit;
+			
+			int count = 0;
+			List<Document> docs = new ArrayList<Document>(myLimit);
+			
+			if (resultFilter == null)
+			{
+				count = hits.length();
+				for (int i = 0; i < myLimit; i++)
+				{
+					Document doc = hits.doc(i);
+					doc.setBoost(hits.score(i));
+					docs.add(doc);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < hits.length(); i++)
+				{
+					Document doc = hits.doc(i);
+					if (resultFilter.matches(doc))
+					{
+						count++;
+						if (docs.size() < myLimit)
+						{
+							doc.setBoost(hits.score(i));
+							docs.add(doc);
+						}
+					}
+				}
+			}
+			return new SearcherResult(count, docs);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException("IOException during search", e);
 		}
 	}
 }
