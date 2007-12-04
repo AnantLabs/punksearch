@@ -8,15 +8,19 @@
 	<property name="buildDir" location="build" />
 	<property name="docDir" location="doc" />
 
-	<target name="war" description="Compiles sources and builds the WAR file.">
+	<target name="war" depends="clean" description="Compiles sources and builds the WAR file.">
+		<mkdir dir="${buildDir}/classes"/>
 		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
 			<classpath>
-				<pathelement location="lib/servlet-api-2.5-6.1.4.jar" />
+				<pathelement location="lib/servlet-api.jar" />
 				<pathelement location="../core/punksearch-core.jar" />
+				<fileset dir="../core/lib">
+					<include name="*.jar"/>
+				</fileset>
 			</classpath>
 		</javac>
 		<war destfile="punksearch.war" webxml="WebContent/WEB-INF/web.xml">
-			<classes dir="build/classes"/>
+			<classes dir="${buildDir}/classes"/>
 			<fileset dir="WebContent">
 				<exclude name="WEB-INF/web.xml"/>
 			</fileset>
@@ -26,6 +30,7 @@
 	</target>
 
 	<target name="clean">
+		<delete file="punksearch.war"/>
 		<delete dir="${buildDir}" failonerror="true" />
 	</target>
 
