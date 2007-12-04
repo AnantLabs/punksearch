@@ -30,6 +30,8 @@ public class SearchParams
 
 	public Integer				first		= 0;
 	public Integer				last		= SearchPager.PAGE_SIZE - 1;
+	
+	public Boolean				showoffline = true; 
 
 	public SearchParams(HttpServletRequest request)
 	{
@@ -41,6 +43,8 @@ public class SearchParams
 		this.first = getIntegerValue(request, "first", 0);
 		this.last  = getIntegerValue(request, "last", SearchPager.PAGE_SIZE - 1);
 
+		this.showoffline = getBooleanValue(request, "showoffline", false);
+		
 		if (type.equals("advanced"))
 		{
 			/* dir & file & ext*/
@@ -129,4 +133,14 @@ public class SearchParams
 		
 	}
 
+	public static Boolean getBooleanValue(HttpServletRequest request, String paramName, Boolean byDefault)
+	{
+		String paramValue = request.getParameter(paramName);
+		if (paramValue == null || paramValue.equals(""))
+			return byDefault;
+		
+		return paramValue.equals("true") || paramValue.equals("on");
+		
+	}
+	
 }
