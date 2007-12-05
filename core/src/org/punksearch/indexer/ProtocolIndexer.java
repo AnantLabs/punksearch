@@ -16,7 +16,7 @@ public abstract class ProtocolIndexer
 {
 	protected String[] goodExtensions =
 	{
-		"avi", "mov", "mpeg", "mpg", "vob", "wmv", "wmf", 
+		"avi", "mov", "mpeg", "mpg", "vob", "wmv", "wmf", "mkv", 
 		"flac", "mp3", "ogg", "wav", "wma",
 		"exe", 
 		"iso", "dmg", "mdf", "nrg", "img", "daa", "pqi",
