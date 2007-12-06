@@ -1,6 +1,11 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.7.0 (2007-12-06) =
+  * gui: online/offline status, ability to filter out results from (currently) offline servers
+  * gui: results grouping by size & extension
+  * core: added "mp4", "mkv" and "ape" file formats
+
 = 0.6.4 (2007-08-24) =
   * usability: IE compatibility (gif for transparency, font-sizes, markup artifacts)
 
