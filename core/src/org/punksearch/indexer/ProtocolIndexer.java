@@ -1,11 +1,5 @@
 package org.punksearch.indexer;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.commons.IndexFields;
@@ -16,8 +10,8 @@ public abstract class ProtocolIndexer
 {
 	protected String[] goodExtensions =
 	{
-		"avi", "mov", "mpeg", "mpg", "vob", "wmv", "wmf", "mkv", 
-		"flac", "mp3", "ogg", "wav", "wma",
+		"avi", "mov", "mpeg", "mpg", "vob", "wmv", "wmf", "mkv", "mp4", 
+		"flac", "mp3", "ogg", "wav", "wma", "ape",
 		"exe", 
 		"iso", "dmg", "mdf", "nrg", "img", "daa", "pqi",
 		"djvu", "doc", "htm", "html", "rtf", "odg", "odp", "ods", "odt", "pdf", "ppt", "ps", "txt", "xhtml", "xls",
@@ -58,32 +52,5 @@ public abstract class ProtocolIndexer
 		}
 		return false;
 	}
-	/*
-	protected boolean isActive(String ip)
-	{
-		return isActive(ip, getPort());
-	}
-	*/
-	protected boolean isActive(String ip, int port)
-	{
-		try
-		{
-			SocketAddress sockaddr = new InetSocketAddress(ip, port);
-			Socket s = new Socket();
-			s.connect(sockaddr, 1000);
-			s.close();
-			return true;
-		}
-		catch (SocketException e)
-		{
-			return false;
-		}
-		catch (IOException e)
-		{
-			return false;
-		}
-	}
-
-
 	
 }
