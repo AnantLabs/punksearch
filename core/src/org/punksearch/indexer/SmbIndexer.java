@@ -17,6 +17,7 @@ import jcifs.smb.SmbFile;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.commons.IndexFields;
+import org.punksearch.commons.OnlineChecker;
 import org.punksearch.commons.SearcherException;
 
 /**
@@ -28,7 +29,8 @@ public class SmbIndexer extends ProtocolIndexer
 
 	private String			ip;
 	private int				maxDeep	= 5;
-
+	private NtlmPasswordAuthentication auth = null;
+	
 	/**
 	 * Constructor
 	 * @param ip - ip for indexing (for ex., 10.20.0.155)
@@ -36,8 +38,10 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws MalformedURLException connection to smb failed
 	 * @throws SmbException 
 	 */
-	public SmbIndexer() throws IllegalArgumentException
+	public SmbIndexer(int maxDeep, NtlmPasswordAuthentication auth) throws IllegalArgumentException
 	{
+		this.maxDeep = maxDeep;
+		this.auth = auth;
 	}
 
 	/**
@@ -54,7 +58,7 @@ public class SmbIndexer extends ProtocolIndexer
 			{
 				return null;
 			}
-			String tempDirName = dir.getName().toLowerCase();
+			String tempDirName = dir.getName(); //.toLowerCase();
 			String dirName = tempDirName.substring(0, tempDirName.length() - 1);
 			String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 			String dirSizeStr = Long.toString(dirSize);
@@ -96,7 +100,7 @@ public class SmbIndexer extends ProtocolIndexer
 				return null;
 			}
 
-			String fullFileName = file.getName().toLowerCase();
+			String fullFileName = file.getName(); //.toLowerCase();
 			int dotIndex = fullFileName.lastIndexOf('.');
 
 			String fileName = (dotIndex != -1) ? fullFileName.substring(0, dotIndex) : fullFileName;
@@ -124,46 +128,55 @@ public class SmbIndexer extends ProtocolIndexer
 			return null;
 		}
 	}
-
-	private boolean isGoodDirectory(SmbFile[] items)
+	
+	private boolean isGoodDirectory(SmbFile[] items) throws SmbException
 	{
-		boolean goodFileFound = false;
 		boolean badFileFound = false;
 		for (SmbFile item : items)
 		{
-			try
+			String name = item.getName();
+			int    dot  = name.lastIndexOf(".");
+			if ( item.isFile() && (dot > 0) )
 			{
-				if (item.isFile() && !item.getName().startsWith("."))
+				if (isGoodExtension(name.substring(dot + 1)))
 				{
-					String ext = item.getName().substring(item.getName().lastIndexOf(".") + 1);
-					if (isGoodExtension(ext))
-					{
-						goodFileFound = true;
-						break;
-					}
-					else
-					{
-						badFileFound = true;
-					}
+					return true;
+				}
+				else
+				{
+					badFileFound = true;
 				}
 			}
-			catch (Exception e)
-			{
-				__log.info("Error processing resource: " + item.toString() + ". " + e.getMessage());
-			}
 		}
-
-		if (!goodFileFound && badFileFound)
+		return !badFileFound;
+	}
+	
+	private boolean shouldIndex(SmbFile file) throws SmbException {
+		if (file.getName().startsWith(".") || file.isHidden() )
 		{
 			return false;
 		}
-		else
+		if (file.isDirectory())
 		{
 			return true;
 		}
-
+		return isGoodExtension(getExtension(file)); // files without extension are bad
 	}
-
+	
+	private String getExtension(SmbFile file)
+	{
+		String name = file.getName();
+		int    dot  = name.lastIndexOf(".");
+		if (dot > 0)
+		{
+			return name.substring(dot + 1);
+		}
+		else
+		{
+			return "";
+		}
+	}
+	
 	/**
 	 * Processes a directory
 	 * @param dir instance of SmbFile for parsing
@@ -174,8 +187,13 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws NumberFormatException 
 	 * @throws IOException 
 	 */
-	private long indexDirectoryContents(SmbFile dir, int deep) throws SearcherException, SmbException
+	private long indexDirectoryContents(SmbFile dir, int deep) throws IOException
 	{
+		if (deep > maxDeep)
+		{
+			return 0L;
+		}
+		
 		SmbFile[] items = dir.listFiles();
 
 		if (!isGoodDirectory(items))
@@ -189,20 +207,12 @@ public class SmbIndexer extends ProtocolIndexer
 
 		for (SmbFile file : items)
 		{
-			//__log.debug(file.getPath());
-			Document doc = null;
-			try
+			if (!shouldIndex(file))
 			{
-				doc = processResource(file, deep);
+				continue;
 			}
-			catch (Exception e)
-			{
-				__log.info("Error processing resource: " + file.toString() + ". " + e.getMessage());
-				if (!dir.canRead())
-				{
-					break;
-				}
-			}
+			
+			Document doc = processResource(file, deep);
 
 			if (doc != null)
 			{
@@ -216,21 +226,12 @@ public class SmbIndexer extends ProtocolIndexer
 		return size;
 	}
 
-	private Document processResource(SmbFile file, int deep) throws SearcherException, SmbException
+	private Document processResource(SmbFile file, int deep) throws IOException
 	{
 		Document doc = null;
 
-		if (file.getName().startsWith("."))
-		{
-			return null;
-		}
-
 		if (file.isDirectory())
 		{
-			if (deep > maxDeep || file.getName().contains("$"))
-			{
-				return null;
-			}
 			long size = indexDirectoryContents(file, deep + 1);
 			if (size != 0L)
 			{
@@ -253,7 +254,12 @@ public class SmbIndexer extends ProtocolIndexer
 	 * @throws SmbException error processing with dir
 	 * @throws MalformedURLException 
 	 */
-	public long index(String ip, CrawlerConfig config) throws SearcherException, MalformedURLException
+	public long index(String ip)
+	{
+		return index(ip, true);
+	}
+	
+	public long index(String ip, boolean checkOnline)
 	{
 		if (ip == null)
 		{
@@ -261,34 +267,26 @@ public class SmbIndexer extends ProtocolIndexer
 		}
 
 		this.ip = ip;
-		this.maxDeep = config.getIndexDeep();
 
-		if (isActive(ip, 445) || isActive(ip, 139))
-		{
-			SmbFile smb;
-
-			if (!config.getSmbUser().equals(""))
-			{
-				NtlmPasswordAuthentication pa = new NtlmPasswordAuthentication(config.getSmbDomain(), config.getSmbUser(), config.getSmbPassword());
-				smb = new SmbFile("smb://" + ip + "/", pa);
-			}
-			else
-			{
-				smb = new SmbFile("smb://" + ip + "/");
-			}
-
-			try
-			{
-				return indexDirectoryContents(smb, 0);
-			}
-			catch (SmbException se)
-			{
-				throw new SearcherException(se);
-			}
-		}
-		else
+		if (checkOnline && !OnlineChecker.isActiveSmb(ip))
 		{
 			return 0L;
+		}
+		
+		SmbFile smb = null;
+		try
+		{
+			smb = (auth == null)? new SmbFile("smb://" + ip + "/") : new SmbFile("smb://" + ip + "/", auth);
+			return indexDirectoryContents(smb, 0);
+		}
+		catch (IOException e)
+		{
+			__log.info("Exception occured: " + e.getMessage());
+			return 0L;
+		}
+		finally
+		{
+			// TODO: disconnect?
 		}
 	}
 

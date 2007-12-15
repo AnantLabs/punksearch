@@ -6,16 +6,13 @@
 package org.punksearch.indexer;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.commons.IndexFields;
-import org.punksearch.commons.SearcherException;
+import org.punksearch.commons.OnlineChecker;
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.enterprisedt.net.ftp.FTPConnectMode;
@@ -29,56 +26,44 @@ public class FtpIndexer extends ProtocolIndexer
 {
 	private static Logger	__log	= Logger.getLogger(FtpIndexer.class.getName());
 
+	public static enum MODE {active, passive};
+	
 	private FTPClient		ftp		= new FTPClient();
-	private String			ip;
+	
 	private int				maxDeep;
+	private int				timeout;
+	private MODE			mode = MODE.passive;
+	private String			encoding;
 
 	/**
 	 * Constructor
-	 * @param ip - ip for indexing (for ex., 127.0.0.1)
-	 * @throws IllegalArgumentException IP must not be null
 	 */
-	public FtpIndexer() throws IllegalArgumentException
+	public FtpIndexer(int maxDeep, int timeout) throws IllegalArgumentException
 	{
+		this.maxDeep = maxDeep;
+		this.timeout = timeout;
 	}
-
-	/**
-	 * Indexes standalone file
-	 * @param file instance of FTPFile for indexing
-	 * @param path
-	 * @throws FTPException 
-	 * @throws IOException 
-	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
-	 */
-	/*
-	private long indexFile(FTPFile file, String path) throws IllegalArgumentException
+	
+	public void setMode(MODE mode) {
+		this.mode = mode;
+	}
+	
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+	
+	private Document makeDirDocument(FTPFile dir, long dirSize) throws IOException
 	{
-		if (! file.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
+		String fullDirName;
+		try
 		{
-			return 0L;
+			fullDirName = ftp.pwd();//.toLowerCase();
 		}
-		String fullFileName = file.getName().toLowerCase();
-		int dotIndex = fullFileName.lastIndexOf('.');
-		String fileName = (dotIndex != -1) ? fullFileName.substring(0, dotIndex) : fullFileName;
-		String fileExtension = (dotIndex != -1) ? fullFileName.substring(dotIndex + 1, fullFileName.length()) : "";
-		long fileSize = file.getSize();
-		String fileSizeStr = NumberUtils.pad(fileSize);
-
-		addDocumentToList(fileName, fileExtension, fileSizeStr, host + path);
-
-		return fileSize;
-	}
-	*/
-
-	private Document makeDirDocument(FTPFile dir, long dirSize) throws IOException, FTPException
-	{
-		/*
-		if (!dir.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
+		catch (FTPException e)
 		{
+			__log.info("FTPException in makeDirDocument " + e.getMessage());
 			return null;
 		}
-		*/
-		String fullDirName = ftp.pwd().toLowerCase();
 		//fullDirName = fullDirName.substring(0, fullDirName.length() - 1); // cut last "/"
 
 		int lastSlash = fullDirName.lastIndexOf("/");
@@ -112,25 +97,28 @@ public class FtpIndexer extends ProtocolIndexer
 	 * @throws IOException 
 	 * @throws IllegalArgumentException too big file size (see <code>NumberUtils</code> class)
 	 */
-	private Document makeFileDocument(FTPFile file) throws IOException, FTPException
+	private Document makeFileDocument(FTPFile file) throws IOException
 	{
-		/*
-		if (!file.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION))
+		String fileFolderPath;
+		try
 		{
+			fileFolderPath = ftp.pwd();
+		}
+		catch (FTPException e)
+		{
+			__log.info("FTPException in makeFileDocument " + e.getMessage());
 			return null;
 		}
-		*/
 
-		String fullFileName = file.getName().toLowerCase(); // not from root, but both file name and file extension
+		String fullFileName = file.getName(); //.toLowerCase(); // not from root, but both file name and file extension
 		int dotIndex = fullFileName.lastIndexOf('.');
 
 		String fileName = (dotIndex > 0) ? fullFileName.substring(0, dotIndex) : fullFileName;
-		String fileExt = (dotIndex > 0) ? fullFileName.substring(dotIndex + 1, fullFileName.length()) : "";
+		String fileExt = (dotIndex > 0) ? fullFileName.substring(dotIndex + 1) : "";
 		String fileSize = Long.toString(file.size());
 
 		String lastModified = Long.toString(file.lastModified().getTime());
 
-		String fileFolderPath = ftp.pwd();
 		String[] pathParts = fileFolderPath.split("/");
 		float boost = 1.0f;
 		for (int i = 0; i < pathParts.length; i++)
@@ -141,28 +129,19 @@ public class FtpIndexer extends ProtocolIndexer
 		return makeDocument(fileName, fileExt, fileSize, fileFolderPath, lastModified, boost);
 	}
 
-	private Document processResource(String root, FTPFile file, int deep) throws SearcherException, FTPException, ParseException, IOException
+	private Document processResource(String root, FTPFile file, int deep) throws IOException
 	{
 		Document doc = null;
 
-		if (file.getName().startsWith("."))
-		{
-			return null;
-		}
-
 		if (file.isDir())
 		{
-			if (deep > maxDeep || file.getName().contains("$"))
-			{
-				return null;
-			}
 			long size = indexDirectoryContents(root + "/" + file.getName(), deep + 1);
 			if (size != 0L)
 			{
 				doc = makeDirDocument(file, size);
 			}
 		}
-		else if (!file.isLink())
+		else
 		{
 			doc = makeFileDocument(file);
 		}
@@ -172,73 +151,77 @@ public class FtpIndexer extends ProtocolIndexer
 
 	private boolean isGoodDirectory(FTPFile[] items)
 	{
-		boolean goodFileFound = false;
 		boolean badFileFound = false;
 		for (FTPFile item : items)
 		{
-			try
+			String name = item.getName();
+			int    dot  = name.lastIndexOf(".");
+			if ( !item.isDir() && (dot > 0) )
 			{
-				if (!item.isDir() && !item.getName().startsWith("."))
+				if (isGoodExtension(name.substring(dot + 1)))
 				{
-					String ext = item.getName().substring(item.getName().lastIndexOf(".") + 1);
-					if (isGoodExtension(ext))
-					{
-						goodFileFound = true;
-						break;
-					}
-					else
-					{
-						badFileFound = true;
-					}
+					return true;
+				}
+				else
+				{
+					badFileFound = true;
 				}
 			}
-			catch (Exception e)
-			{
-				__log.info("Error processing resource: " + item.toString() + ". " + e.getMessage());
-			}
 		}
-
-		if (!goodFileFound && badFileFound)
+		return !badFileFound;
+	}
+	
+	private boolean shouldIndex(FTPFile file) {
+		if (file.getName().startsWith(".") || file.isLink())
 		{
 			return false;
 		}
-		else
+		if (file.isDir())
 		{
 			return true;
 		}
-
+		return isGoodExtension(getExtension(file)); // files without extension are bad
+	}
+	
+	private String getExtension(FTPFile file)
+	{
+		String name = file.getName();
+		int    dot  = name.lastIndexOf(".");
+		if (dot > 0)
+		{
+			return name.substring(dot + 1);
+		}
+		else
+		{
+			return "";
+		}
 	}
 
-	private long indexDirectoryContents(String dir, int deep) throws SearcherException, IOException, FTPException, ParseException
+	private long indexDirectoryContents(String dir, int deep) throws IOException
 	{
-		try
+		if (deep > maxDeep)
 		{
-			ftp.chdir(dir);
-		}
-		catch (Exception e)
-		{
-			__log.info("Exception (" + e.toString() + ") during changing working directory to: " + dir);
 			return 0L;
 		}
-
+		
 		FTPFile[] items = {};
 
 		try
 		{
+			ftp.chdir(dir); // required for pwd() in make* methods
 			items = ftp.dirDetails(dir);
+			if (!isGoodDirectory(items))
+			{
+				return 0L;
+			}
 		}
-		catch (SocketException e) {
+		catch (IOException e) {
 			// host communication problem occured, rethrow the exception so indexer will give up indexing this host
 			throw e;
 		}
 		catch (Exception e)
 		{
-			__log.info("Exception (" + e.toString() + ") during listing directory: " + dir);
-			return 0L;
-		}
-
-		if (!isGoodDirectory(items))
-		{
+			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + dir);
 			return 0L;
 		}
 
@@ -248,22 +231,28 @@ public class FtpIndexer extends ProtocolIndexer
 
 		for (FTPFile file : items)
 		{
-			Document doc = null;
+			if (!shouldIndex(file))
+			{
+				continue;
+			}
+			
 			try
 			{
-				doc = processResource(dir, file, deep);
-				ftp.chdir(dir);
+				Document doc = processResource(dir, file, deep);
+				if (doc != null)
+				{
+					documentList.add(doc);
+					size += Long.parseLong(doc.get(IndexFields.SIZE));
+				}
+				ftp.chdir(dir); // rollback. required for pwd() in make* methods
+			}
+			catch (IOException e) {
+				// host communication problem occured, rethrow the exception so indexer will give up indexing this host
+				throw e;
 			}
 			catch (Exception e)
 			{
-				__log.info("Error processing resource: ftp://" + ip + dir + "/" + file.getName() + ". " + e.getMessage());
-				e.printStackTrace();
-			}
-
-			if (doc != null)
-			{
-				documentList.add(doc);
-				size += Long.parseLong(doc.get(IndexFields.SIZE));
+				__log.info("Error processing resource: ftp://" + getIp() + dir + "/" + file.getName() + ". " + e.getMessage());
 			}
 		}
 
@@ -271,79 +260,68 @@ public class FtpIndexer extends ProtocolIndexer
 
 		return size;
 	}
-
-	public long index(String ip, CrawlerConfig config) throws SearcherException
+	
+	public long index(String ip)
+	{
+		return index(ip, true);
+	}
+	
+	public long index(String ip, boolean checkOnline)
 	{
 		if (ip == null)
 		{
 			throw new IllegalArgumentException("IP must not be null");
 		}
-		this.ip = ip;
-		this.maxDeep = config.getIndexDeep();
-
-		long result = 0L;
-		if (isActive(ip, 21))
+		
+		if (checkOnline && !OnlineChecker.isActiveFtp(ip))
 		{
-			try
-			{
-				setupControlEncoding(config);
-				setupConnectMode(config);
-				ftp.setRemoteHost(ip);
-				ftp.setTimeout(config.getFtpTimeout());
-				ftp.connect();
-
-				ftp.login("anonymous", "some@ema.il");
-
-				result = indexDirectoryContents("/", 0);
-			}
-			catch (Exception e)
-			{
-				__log.info("FTP: Exception (" + e.toString() + ") during indexing server: " + ip);
-			}
-			finally
-			{
-				try
-				{
-					if (ftp.connected())
-						ftp.quit();
-				}
-				catch (Exception e)
-				{
-					__log.info("Can't disconnect from ftp server: " + ip);
-				}
-			}
+			return 0L;
 		}
-		return result;
-	}
-
-	private void setupControlEncoding(CrawlerConfig config) throws FTPException
-	{
-		Map<String, String> customEncodings = config.getFtpCustomEncodings();
-		if (customEncodings.containsKey(ip))
+		
+		try
 		{
-			ftp.setControlEncoding(customEncodings.get(ip));
+			setupFtpClient(ip);
+			ftp.connect();
+			ftp.login("anonymous", "some@ema.il");
+			return indexDirectoryContents("/", 0);
 		}
-		else
+		catch (Exception e)
 		{
-			ftp.setControlEncoding(config.getFtpDefaultEncoding());
+			__log.info("FTP: Exception (" + e.getMessage() + ") during indexing server: " + ip);
+			return 0L;
+		}
+		finally
+		{
+			if (!disconnect())
+			{
+				__log.warning("Can't disconnect from ftp server: " + ip);
+			}
 		}
 	}
 
-	private void setupConnectMode(CrawlerConfig config)
+	private boolean disconnect()
 	{
-		String mode;
-
-		Map<String, String> customModes = config.getFtpCustomModes();
-		if (customModes.containsKey(ip))
+		try
 		{
-			mode = customModes.get(ip);
+			if (ftp.connected())
+			{
+				ftp.quit();
+			}
+			return true;
 		}
-		else
+		catch (Exception e)
 		{
-			mode = config.getFtpDefaultMode();
+			return false;
 		}
-
-		if (mode.equalsIgnoreCase("active"))
+	}
+	
+	private void setupFtpClient(String ip) throws FTPException, IOException {
+		if (ftp == null)
+		{
+			ftp = new FTPClient();
+		}
+		ftp.setControlEncoding(encoding);
+		if (mode == MODE.active)
 		{
 			ftp.setConnectMode(FTPConnectMode.ACTIVE);
 		}
@@ -351,12 +329,14 @@ public class FtpIndexer extends ProtocolIndexer
 		{
 			ftp.setConnectMode(FTPConnectMode.PASV);
 		}
+		ftp.setRemoteHost(ip);
+		ftp.setTimeout(timeout);
 	}
 
 	@Override
 	protected String getIp()
 	{
-		return ip;
+		return ftp.getRemoteHost();
 	}
 
 	@Override
