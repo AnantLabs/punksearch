@@ -1,4 +1,3 @@
-<!-- Ant build file for ServletViewer -->
 <project name="punksearch-core" default="jar">
 
 	<tstamp>
