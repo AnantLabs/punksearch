@@ -7,9 +7,12 @@ package org.punksearch.indexer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.punksearch.commons.SearcherException;
+import jcifs.smb.NtlmPasswordAuthentication;
+
+import org.punksearch.commons.OnlineChecker;
 
 /**
  * Class represents indexer thread
@@ -34,8 +37,8 @@ public class IndexerThread extends Thread
 	 */
 	public void run()
 	{
-		SmbIndexer smbIndexer = new SmbIndexer();
-		FtpIndexer ftpIndexer = new FtpIndexer();
+		SmbIndexer smbIndexer = new SmbIndexer(crawlerConfig.getIndexDeep(), getSmbAuth());
+		FtpIndexer ftpIndexer = new FtpIndexer(crawlerConfig.getIndexDeep(), crawlerConfig.getFtpTimeout());
 
 		while ((ip = iterator.next()) != null)
 		{
@@ -45,17 +48,25 @@ public class IndexerThread extends Thread
 
 				IndexOperator.getInstance().deleteDocuments(ip, "smb");
 				IndexOperator.getInstance().deleteDocuments(ip, "ftp");
-
-				long sizeSmb = smbIndexer.index(ip, crawlerConfig);
-				if (sizeSmb > 0)
+				
+				if (canIndexSmb(ip))
 				{
-					__log.info("SMB: " + ip + " indexed: " + sizeSmb + " bytes");
+    				long sizeSmb = smbIndexer.index(ip, false);
+    				if (sizeSmb > 0)
+    				{
+    					__log.info("SMB: " + ip + " indexed: " + sizeSmb + " bytes");
+    				}
 				}
-
-				long sizeFtp = ftpIndexer.index(ip, crawlerConfig);
-				if (sizeFtp > 0)
+				
+				if (canIndexFtp(ip))
 				{
-					__log.info("FTP: " + ip + " indexed: " + sizeFtp + " bytes");
+    				ftpIndexer.setMode(getFtpModeForIp(ip));
+    				ftpIndexer.setEncoding(getFtpEncodingForIp(ip));
+    				long sizeFtp = ftpIndexer.index(ip, false);
+    				if (sizeFtp > 0)
+    				{
+    					__log.info("FTP: " + ip + " indexed: " + sizeFtp + " bytes");
+    				}
 				}
 
 				IndexOperator.getInstance().flushIndex();
@@ -68,17 +79,48 @@ public class IndexerThread extends Thread
 			{
 				__log.warning("MUE: " + e);
 			}
-			catch (SearcherException e)
-			{
-				__log.warning("SE: " + e);
-			}
 			catch (IOException e)
 			{
-				__log.warning("Can't flush index! " + e.getMessage());
+				__log.info("IOException: " + e.getMessage() + " on ip='" + ip + "'");
 			}
 		}
 	}
 
+	private NtlmPasswordAuthentication getSmbAuth()
+	{
+		if (crawlerConfig.getSmbUser().length() > 0)
+		{
+			return new NtlmPasswordAuthentication(crawlerConfig.getSmbDomain(), crawlerConfig.getSmbUser(), crawlerConfig.getSmbPassword());
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	private String getFtpEncodingForIp(String ip)
+	{
+		Map<String, String> customEncodings = crawlerConfig.getFtpCustomEncodings();
+		return (customEncodings.containsKey(ip))? customEncodings.get(ip) : crawlerConfig.getFtpDefaultEncoding();
+	}
+
+	private FtpIndexer.MODE getFtpModeForIp(String ip)
+	{
+		Map<String, String> customModes = crawlerConfig.getFtpCustomModes();
+		String modeStr = (customModes.containsKey(ip))? customModes.get(ip) : crawlerConfig.getFtpDefaultMode();
+		return (modeStr.equals("active"))? FtpIndexer.MODE.active : FtpIndexer.MODE.passive;
+	}	
+	
+	private boolean canIndexSmb(String ip)
+	{
+		return OnlineChecker.isActiveSmb(ip);
+	}
+	
+	private boolean canIndexFtp(String ip)
+	{
+		return OnlineChecker.isActiveFtp(ip);
+	}
+	
 	public void finish()
 	{
 		iterator = null;
