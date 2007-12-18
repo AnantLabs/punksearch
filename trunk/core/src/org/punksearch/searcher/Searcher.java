@@ -2,6 +2,7 @@ package org.punksearch.searcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -94,7 +95,34 @@ public class Searcher
 			}
 			else
 			{
-				for (int i = 0; i < hits.length(); i++)
+				int chunk = 0;
+				while (chunk * myLimit < hits.length())
+				{
+					int min = chunk * myLimit;
+					int max = (chunk+1) * myLimit;
+					int trueMax = (max > hits.length())? hits.length() : max;
+					
+					List<Document> docs2 = new ArrayList<Document>();
+					for (int i = min ; i < trueMax ; i++)
+					{
+						docs2.add(hits.doc(i));
+					}
+					List<Integer> idxs = resultFilter.filter(docs2);
+					Collections.sort(idxs);
+					for (Integer idx : idxs)
+					{
+						count++;
+						if (docs.size() < myLimit)
+						{
+    						Document doc = hits.doc(idx + min);
+    						doc.setBoost(hits.score(idx + min));
+    						docs.add(doc);
+						}
+					}
+					chunk++;
+				}
+				/*
+				for (int i = 0; i < hits.length(); i = i + myLimit)
 				{
 					Document doc = hits.doc(i);
 					if (resultFilter.matches(doc))
@@ -107,6 +135,7 @@ public class Searcher
 						}
 					}
 				}
+				*/
 			}
 			return new SearcherResult(count, docs);
 		}
