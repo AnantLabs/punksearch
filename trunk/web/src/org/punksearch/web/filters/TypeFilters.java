@@ -61,19 +61,19 @@ public class TypeFilters
 		if (type.equals(Types.FILM))
 		{
 			min = 500 * MB;
-			ext = "avi vob mpg";
+			ext = "avi vob mpg mkv mpeg mov wmv wmf mp4";
 		}
 		else if (type.equals(Types.CLIP))
 		{
 			min = 3 * MB;
 			max = 100 * MB;
-			ext = "avi mpg mpeg wmv mov wmf";
+			ext = "avi mpg mpeg wmv mov wmf wmv mkv";
 		}
 		else if (type.equals(Types.MUSIC))
 		{
 			min = 1 * MB;
 			max = 100 * MB;
-			ext = "flac mp3 ogg wav wma";
+			ext = "flac mp3 ogg wav wma ape";
 		}
 		else if (type.equals(Types.ISO))
 		{
