@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 	<%@ page import="java.util.List" %>
-	<%@ page import="org.punksearch.web.online.OnlineChecker" %>
+	<%@ page import="org.punksearch.web.online.CachedOnlineChecker" %>
 	<%@ page import="org.punksearch.web.SearchParams" %>
 	<%@ page import="org.punksearch.web.SearchResult" %>
 	<%@ page import="org.punksearch.web.SearchAction" %>
@@ -172,7 +172,7 @@
 											break;
 										}
 										SearchResult file = new SearchResult(group.getItems().get(0));
-								        boolean online = (params.showoffline)? OnlineChecker.isOnline(file.host) : true;
+								        boolean online = (params.showoffline)? CachedOnlineChecker.isOnline(file.host) : true;
 										counter2++;
 				%>
 					<tr>
@@ -191,7 +191,7 @@
 							<%
 								for (int i = 1; i < group.getItems().size(); i++ ) {
 																		   SearchResult subFile = new SearchResult(group.getItems().get(i));
-																		   boolean subOnline = (params.showoffline)? OnlineChecker.isOnline(subFile.host) : true;
+																		   boolean subOnline = (params.showoffline)? CachedOnlineChecker.isOnline(subFile.host) : true;
 							%>
 								    <tr>
 								        <td>
