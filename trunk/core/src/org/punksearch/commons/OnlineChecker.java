@@ -7,6 +7,9 @@ import java.net.SocketAddress;
 
 public class OnlineChecker {
 	
+	// TODO: extract to settings
+	private static final int TIMEOUT = 500;
+	
 	public static boolean isOnline(String host)
 	{
 		if ( !(host.startsWith("smb") || host.startsWith("ftp")) )
@@ -34,7 +37,7 @@ public class OnlineChecker {
 		{
 			SocketAddress sockaddr = new InetSocketAddress(ip, port);
 			Socket s = new Socket();
-			s.connect(sockaddr, 1000);
+			s.connect(sockaddr, TIMEOUT);
 			s.close();
 			return true;
 		}
