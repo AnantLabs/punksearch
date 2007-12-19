@@ -26,19 +26,19 @@ public class OnlineResultFilter implements ResultFilter {
 		int chunkSize = size / THREAD_COUNT;
 		int lastChunk = size % THREAD_COUNT;
 
-		final List<Integer> result = Collections.synchronizedList(new ArrayList<Integer>());
+		final List<Integer> onlineHostIds = Collections.synchronizedList(new ArrayList<Integer>());
 
 		List<Thread> threadList = new ArrayList<Thread>();
 		for (int i = 0; i < THREAD_COUNT; i++) {
 			final int chunkStart = i * chunkSize;
 			final int chunkStop = chunkStart + chunkSize - 1;
-			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, chunkStart, chunkStop, hosts, result);
+			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, chunkStart, chunkStop, hosts, onlineHostIds);
 			thread.start();
 			threadList.add(thread);
 		}
 		if (lastChunk != 0) {
 			Thread thread = new OnlineCheckThread("OnlineCheckThread" + THREAD_COUNT, THREAD_COUNT * chunkSize, size,
-			        hosts, result);
+			        hosts, onlineHostIds);
 			thread.start();
 			threadList.add(thread);
 		}
@@ -51,7 +51,18 @@ public class OnlineResultFilter implements ResultFilter {
 			e.printStackTrace();
 			return new LinkedList<Integer>();
 		}
-		return result;
+		List<String> onlineHosts = new ArrayList<String>(onlineHostIds.size());
+		for (Integer id : onlineHostIds) {
+			onlineHosts.add(hosts.get(id));
+		}
+		List<Integer> docIds = new ArrayList<Integer>();
+		for (int i = 0 ; i < docs.size() ; i++) {
+			Document doc = docs.get(i);
+			if (onlineHosts.contains(doc.get(IndexFields.HOST))) {
+				docIds.add(i);
+			}
+		}
+		return docIds;
 	}
 
 	private List<String> extractDistinctHosts(List<Document> docs) {
@@ -63,7 +74,7 @@ public class OnlineResultFilter implements ResultFilter {
 		}
 		return result;
 	}
-
+	
 }
 
 class OnlineCheckThread extends Thread {
@@ -81,13 +92,14 @@ class OnlineCheckThread extends Thread {
 	}
 
 	public void run() {
-		System.out.println("> onlineCheckThread. checking " + start + ":" + stop);
+		//System.out.println("> onlineCheckThread. checking " + start + ":" + stop);
 		for (int j = start; j < stop; j++) {
-			if (CachedOnlineChecker.isOnline(hosts.get(j))) {
+			String host = hosts.get(j).replace("smb_", "smb://").replace("ftp_", "ftp://");
+			if (CachedOnlineChecker.isOnline(host)) {
 				out.add(j);
 			}
 		}
-		System.out.println("< onlineCheckThread. checking " + start + ":" + stop);
+		//System.out.println("< onlineCheckThread. checking " + start + ":" + stop);
 	}
 
 }
