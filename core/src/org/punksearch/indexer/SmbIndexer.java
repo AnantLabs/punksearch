@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -79,7 +80,7 @@ public class SmbIndexer extends ProtocolIndexer
 		}
 		catch (SmbException e)
 		{
-			__log.warning("SmbException (" + e.toString() + ") occured on resource: " + dir.toString());
+			__log.warning("SMB: SmbException (" + e.toString() + ") occured on resource: " + dir.toString());
 			return null;
 		}
 	}
@@ -124,7 +125,7 @@ public class SmbIndexer extends ProtocolIndexer
 		}
 		catch (SmbException e)
 		{
-			__log.warning("SmbException (" + e.toString() + ") occured on resource: " + file.toString());
+			__log.warning("SMB: SmbException (" + e.toString() + ") occured on resource: " + file.toString());
 			return null;
 		}
 	}
@@ -194,7 +195,16 @@ public class SmbIndexer extends ProtocolIndexer
 			return 0L;
 		}
 		
-		SmbFile[] items = dir.listFiles();
+		SmbFile[] items = null;
+		try {
+			items = dir.listFiles();
+		} catch (SmbAuthException e) {
+			__log.info("SMB: restricted directory: " + dir.getPath());
+			return 0L;
+		} catch (SmbException e) {
+			__log.info("SMB: exception (" + e.getMessage() + ") occured while indexing directory: " + dir.getPath());
+			return 0L;
+		}
 
 		if (!isGoodDirectory(items))
 		{
@@ -207,6 +217,7 @@ public class SmbIndexer extends ProtocolIndexer
 
 		for (SmbFile file : items)
 		{
+			//__log.info("SMB: " + file.getCanonicalPath());
 			if (!shouldIndex(file))
 			{
 				continue;
@@ -281,7 +292,8 @@ public class SmbIndexer extends ProtocolIndexer
 		}
 		catch (IOException e)
 		{
-			__log.info("Exception occured: " + e.getMessage());
+			__log.info("SMB: Exception occured: " + e.getMessage() + " during indexing host " + ip);
+			e.printStackTrace();
 			return 0L;
 		}
 		finally
