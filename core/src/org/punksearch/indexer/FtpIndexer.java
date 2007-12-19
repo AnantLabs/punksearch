@@ -61,7 +61,7 @@ public class FtpIndexer extends ProtocolIndexer
 		}
 		catch (FTPException e)
 		{
-			__log.info("FTPException in makeDirDocument " + e.getMessage());
+			__log.info("FTP: FTPException in makeDirDocument " + e.getMessage());
 			return null;
 		}
 		//fullDirName = fullDirName.substring(0, fullDirName.length() - 1); // cut last "/"
@@ -204,6 +204,7 @@ public class FtpIndexer extends ProtocolIndexer
 			return 0L;
 		}
 		
+		
 		FTPFile[] items = {};
 
 		try
@@ -221,7 +222,7 @@ public class FtpIndexer extends ProtocolIndexer
 		}
 		catch (Exception e)
 		{
-			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + dir);
+			__log.info("FTP: Exception (" + e.getMessage() + ") during changing or listing directory: " + dir);
 			return 0L;
 		}
 
@@ -238,6 +239,7 @@ public class FtpIndexer extends ProtocolIndexer
 			
 			try
 			{
+				ftp.keepAlive();
 				Document doc = processResource(dir, file, deep);
 				if (doc != null)
 				{
@@ -252,7 +254,7 @@ public class FtpIndexer extends ProtocolIndexer
 			}
 			catch (Exception e)
 			{
-				__log.info("Error processing resource: ftp://" + getIp() + dir + "/" + file.getName() + ". " + e.getMessage());
+				__log.info("FTP: Error processing resource: ftp://" + getIp() + dir + "/" + file.getName() + ". " + e.getMessage());
 			}
 		}
 
@@ -283,6 +285,7 @@ public class FtpIndexer extends ProtocolIndexer
 			setupFtpClient(ip);
 			ftp.connect();
 			ftp.login("anonymous", "some@ema.il");
+			ftp.keepAlive();
 			return indexDirectoryContents("/", 0);
 		}
 		catch (Exception e)
@@ -294,7 +297,7 @@ public class FtpIndexer extends ProtocolIndexer
 		{
 			if (!disconnect())
 			{
-				__log.warning("Can't disconnect from ftp server: " + ip);
+				__log.warning("FTP: Can't disconnect from ftp server: " + ip);
 			}
 		}
 	}
