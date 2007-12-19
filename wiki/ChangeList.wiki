@@ -1,6 +1,9 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.7.2 (2007-12-19) =
+  * gui: about.jsp added with info about current version and some other stuff
+
 = 0.7.1 (2007-12-19) =
   * bugfix: many small fixes and some refactoring
   * core: online status check speedup (threaded)
