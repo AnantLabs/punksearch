@@ -1,6 +1,10 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.7.1 (2007-12-19) =
+  * bugfix: many small fixes and some refactoring
+  * core: online status check speedup (threaded)
+
 = 0.7.0 (2007-12-06) =
   * gui: online/offline status, ability to filter out results from (currently) offline servers
   * gui: results grouping by size & extension
