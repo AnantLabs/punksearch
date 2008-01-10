@@ -132,8 +132,6 @@
 								%>
 			<input id="query" type="text" name="query" value="<%=params.query%>" style="width:480px;" />
 			<input type="submit" value="search"/>
-			<br/>
-			<span style="padding-right: 480px; text-align: left; font-size: 10pt;"><input type="checkbox" name="showoffline" <%= (params.showoffline)? "checked=\"checked\"" : "" %>/> show offline</span>				
 		<%
 							}
 						%>
@@ -153,7 +151,13 @@
 				<table id="pager" cellspacing="0" cellpadding="0" align="center">
 					<tr>
 						<td style="font-size: 12px; text-align: left; padding-left: 2px;">
-							<span style="font-size: 18px;"><%=searchAction.getOverallCount()%></span> items (<%=SearchPager.getPageCount(searchAction.getOverallCount())%> pages) in <%=searchAction.getSearchTime()/1000.0%> secs
+						<%
+						  int items = searchAction.getOverallCount();
+						  int pages = SearchPager.getPageCount(searchAction.getOverallCount());
+						  double searchTime = searchAction.getSearchTime()/1000.0;
+						  double presentationTime = searchAction.getPresentationTime()/1000.0;
+						%>
+							<span style="font-size: 18px;"><%=items%></span> items (<%=pages%> pages) in <span title="<%=searchTime + " search + " + presentationTime + " presentation"%>"><%=searchTime + presentationTime%></span> secs
 						</td>
 						<td style="text-align: right; vertical-align: bottom;"><%=SearchPager.makePagesRow(request, searchAction.getOverallCount())%></td>
 					</tr>
@@ -172,7 +176,7 @@
 											break;
 										}
 										SearchResult file = new SearchResult(group.getItems().get(0));
-								        boolean online = (params.showoffline)? CachedOnlineChecker.isOnline(file.host) : true;
+								        boolean online = CachedOnlineChecker.isOnline(file.host);
 										counter2++;
 				%>
 					<tr>
@@ -191,7 +195,7 @@
 							<%
 								for (int i = 1; i < group.getItems().size(); i++ ) {
 																		   SearchResult subFile = new SearchResult(group.getItems().get(i));
-																		   boolean subOnline = (params.showoffline)? CachedOnlineChecker.isOnline(subFile.host) : true;
+																		   boolean subOnline = CachedOnlineChecker.isOnline(subFile.host);
 							%>
 								    <tr>
 								        <td>
