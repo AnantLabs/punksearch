@@ -2,7 +2,6 @@ package org.punksearch.searcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -71,7 +70,7 @@ public class Searcher
 		}
 	}
 	
-	public SearcherResult search(Query query, Filter filter, Integer limit, ResultFilter resultFilter)
+	public SearcherResult search(Query query, Filter filter, Integer limit)
 	{
 		
 		try
@@ -80,64 +79,14 @@ public class Searcher
 			
 			int myLimit = (limit == null || limit <= 0 || limit > hits.length())? hits.length() : limit;
 			
-			int count = 0;
 			List<Document> docs = new ArrayList<Document>(myLimit);
-			
-			if (resultFilter == null)
+			for (int i = 0; i < myLimit; i++)
 			{
-				count = hits.length();
-				for (int i = 0; i < myLimit; i++)
-				{
-					Document doc = hits.doc(i);
-					doc.setBoost(hits.score(i));
-					docs.add(doc);
-				}
+				Document doc = hits.doc(i);
+				doc.setBoost(hits.score(i));
+				docs.add(doc);
 			}
-			else
-			{
-				int chunk = 0;
-				while (chunk * myLimit < hits.length())
-				{
-					int min = chunk * myLimit;
-					int max = (chunk+1) * myLimit;
-					int trueMax = (max > hits.length())? hits.length() : max;
-					
-					List<Document> docs2 = new ArrayList<Document>();
-					for (int i = min ; i < trueMax ; i++)
-					{
-						docs2.add(hits.doc(i));
-					}
-					List<Integer> idxs = resultFilter.filter(docs2);
-					Collections.sort(idxs);
-					for (Integer idx : idxs)
-					{
-						count++;
-						if (docs.size() < myLimit)
-						{
-    						Document doc = hits.doc(idx + min);
-    						doc.setBoost(hits.score(idx + min));
-    						docs.add(doc);
-						}
-					}
-					chunk++;
-				}
-				/*
-				for (int i = 0; i < hits.length(); i = i + myLimit)
-				{
-					Document doc = hits.doc(i);
-					if (resultFilter.matches(doc))
-					{
-						count++;
-						if (docs.size() < myLimit)
-						{
-							doc.setBoost(hits.score(i));
-							docs.add(doc);
-						}
-					}
-				}
-				*/
-			}
-			return new SearcherResult(count, docs);
+			return new SearcherResult(hits.length(), docs);
 		}
 		catch (IOException e)
 		{
