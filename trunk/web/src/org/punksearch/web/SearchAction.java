@@ -1,6 +1,17 @@
+/***************************************************************************
+ *                                                                         *
+ *   PunkSearch - Searching over LAN                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 package org.punksearch.web;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,23 +27,30 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.SearcherException;
+import org.punksearch.searcher.ResultFilter;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 import org.punksearch.web.filters.TypeFilters;
+import org.punksearch.web.online.OnlineResultFilter;
 
+/**
+ * @author Yury Soldak (ysoldak@gmail.com)
+ */
 public class SearchAction {
 
-	private static final int MIN_TERM_LENGTH = 3;
+	// TODO: extract SearchAction.MIN_TERM_LENGTH to settings
+	private static final int MIN_TERM_LENGTH  = 3;
 
-	private static Logger    __log           = Logger.getLogger(SearchParams.class.getName());
+	private static Logger    __log            = Logger.getLogger(SearchParams.class.getName());
 
 	private SearchParams     params;
-	private SearcherConfig   config          = SearcherConfig.getInstance();
+	private SearcherConfig   config           = SearcherConfig.getInstance();
 
-	private long             searchTime      = 0;
-	private int              overallCount    = 0;
+	private long             searchTime       = 0;
+	private long             presentationTime = 0;
+	private int              overallCount     = 0;
 
 	public SearchAction(SearchParams params) {
 		this.params = params;
@@ -74,6 +92,7 @@ public class SearchAction {
 		}
 	}
 
+	@Deprecated
 	public List<SearchResult> doSearch() {
 		Query query = makeQuery();
 		Filter filter = makeFilter();
@@ -100,37 +119,60 @@ public class SearchAction {
 	public List<ItemGroup> doSearchGroupped() {
 		Query query = makeQuery();
 		Filter filter = makeFilter();
-		
+
 		List<ItemGroup> searchResults = new ArrayList<ItemGroup>();
-		
+
 		if (query != null) {
 			__log.info("query constructed: " + query.toString());
 			try {
-				
+
 				Date startDate = new Date();
-				SearcherResult result = SearcherWrapper.search(query, filter, 1000, params.showoffline);
+				SearcherResult result = SearcherWrapper.search(query, filter, 1000);
 				Date stopDate = new Date();
-				
+
 				searchTime = stopDate.getTime() - startDate.getTime();
-				
-				searchResults = makeGroupsFromDocs(result.getChunk());
-				
+
+				List<Document> docs = result.getChunk();
+
+				ResultFilter resultFilter = new OnlineResultFilter();
+				List<Integer> idxs = resultFilter.filter(docs);
+				Collections.sort(idxs);
+				int count = 0;
+				for (Integer idx : idxs) {
+					// following should be effective while list is linked and
+					// not array-based
+					// profile this anyway, since removal still can be expensive
+					// (must traverse list until index met)
+					Document onlineDoc = docs.get(idx);
+					docs.remove(idx.intValue());
+					docs.add(count, onlineDoc);
+					count++;
+				}
+
+				searchResults = makeGroupsFromDocs(docs);
+
+				presentationTime = new Date().getTime() - stopDate.getTime();
+
 				overallCount = searchResults.size();
-				
+
 			} catch (SearcherException se) {
 				__log.warning(se.getMessage());
 			}
 		}
-		
+
 		return searchResults;
 	}
-	
+
 	public int getOverallCount() {
 		return overallCount;
 	}
 
 	public long getSearchTime() {
 		return searchTime;
+	}
+
+	public long getPresentationTime() {
+		return presentationTime;
 	}
 
 	private static List<String> prepareQueryParameter(String str) {
@@ -241,9 +283,8 @@ public class SearchAction {
 				query.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
 			}
 
-			if (dirTerms.size() != 0) // restrict files to occur in specified
-			// directories only
-			{
+			// restrict files to occur in specified directories only
+			if (dirTerms.size() != 0) {
 				BooleanQuery dirQuery = new BooleanQuery();
 				int negations = 0;
 
@@ -258,20 +299,15 @@ public class SearchAction {
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
 					dirQuery.add(pathQuery, occurItem);
 				}
-				if (dirTerms.size() == negations) // it must be at least one
-				// positive clause in query
-				// to be executed. so add
-				// one if all user clauses
-				// are nagative.
-				{
+				// it must be at least one positive clause in query to be executed.
+				// so add one if all user clauses are nagative.
+				if (dirTerms.size() == negations) {
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, "*"));
 					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(dirQuery, BooleanClause.Occur.MUST);
 			}
-		} else if (dirTerms.size() != 0) // search for directories only,
-		// since file name was not specified
-		{
+		} else if (dirTerms.size() != 0) { // search for directories only, since file name was not specified
 			for (String item : dirTerms) {
 				BooleanQuery dirQuery = new BooleanQuery();
 
