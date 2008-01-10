@@ -12,7 +12,7 @@
         <%@ include file="header.jsp"%>
         <br/><br/>
         <table align="center" style="text-align: left;">
-	        <tr><th>Version</th><td>0.7.2</td></tr>
+	        <tr><th>Version</th><td>0.7.3</td></tr>
 	        <tr><th>Java</th><td><%= System.getProperty("java.version") %> by <%= System.getProperty("java.vendor") %></td></tr>
 	        <tr><th>OS</th><td><%= System.getProperty("os.name") %> <%= System.getProperty("os.version") %></td></tr>
 	        <tr><th>Architecture</th><td><%= System.getProperty("os.arch") %></td></tr>
