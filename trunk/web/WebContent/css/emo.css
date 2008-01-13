@@ -1,0 +1,93 @@
+/* GLOBALS */
+BODY {
+	background-color: #000000;
+}
+
+INPUT {
+	border: 1px solid black;
+}
+
+A {
+	color: white;
+}
+
+.errorMessage {
+	background-color: red;
+	color: white;
+}
+
+.infoMessage {
+	background-color: #CCCCCC;
+	color: black;
+}
+
+#hint {
+	color: #DDDDDD;
+}
+
+/* TOP */
+#topline {
+	background-color: #000000;
+}
+
+#logo {
+	background-color: #000000;
+}
+
+#quickLinks A {
+	color: #FF7B00;
+}
+
+/* QUERY */
+#searchTabs TD.tab {
+	color: white;
+}
+
+#searchTabs TD.selected {
+	color: #FFFFFF;
+	background-color: #FF007B;
+	border-bottom: 1px solid #FF007B;
+}
+
+#searchTabs TD a:hover {
+	color: #FF007B;
+}
+
+#searchForm {
+	background-color: #FF007B;
+}
+
+/* RESULTS */
+TABLE#results {
+	border-top: 5px solid #FF007B;
+}
+
+TABLE#results TD {
+	background-color: #FFE6F6;
+	border-bottom: 1px solid #000000;
+}
+
+TABLE#pager {
+	color: #FFFFFF;
+}
+
+TABLE#pager A {
+	color: #000000;
+}
+
+TABLE#pager A.pageNumStyle {
+	background-color: #FFF2E6;
+}
+
+TABLE#pager A.pageCurrNumStyle {
+	background-color: #FF007B;
+	border-top: 2px solid #FF007B;
+}
+
+SPAN.path {
+	color: #AD0070;
+}
+
+SPAN.more A {
+	color: #FF007B;
+}
