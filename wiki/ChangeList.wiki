@@ -4,6 +4,7 @@
 = 0.7.3 (2008-01-13) =
   * gui: multi-theme feature (application supports color themes)
   * usability: removed "show offline" checkbox (online resources simply displayed on top)
+  * search: "+" introduced to mark search terms as "must", "!" changed to "-"
   * bugfix: several small fixes to gui
   * egg: hover secs spend for search and see detailed stats
 
