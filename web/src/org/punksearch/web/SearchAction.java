@@ -178,7 +178,7 @@ public class SearchAction {
 	private static List<String> prepareQueryParameter(String str) {
 		List<String> result = new LinkedList<String>();
 		if (str != null) {
-			str = str.replaceAll("\\*|_|-|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
+			str = str.replaceAll("\\*|_|!|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
 			String[] terms = str.toLowerCase().split(" ");
 			for (String term : terms) {
 				term = term.trim();
@@ -229,11 +229,7 @@ public class SearchAction {
 		for (String item : terms) {
 			BooleanQuery itemQuery = new BooleanQuery();
 
-			BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-			if (item.startsWith("!")) {
-				item = item.substring(1);
-				occurItem = BooleanClause.Occur.MUST_NOT;
-			}
+			BooleanClause.Occur occurItem = occurItem(item);
 
 			Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 			itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
@@ -260,11 +256,7 @@ public class SearchAction {
 			if (fileTerms.size() != 0) {
 				BooleanQuery fileQuery = new BooleanQuery();
 				for (String item : fileTerms) {
-					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-					if (item.startsWith("!")) {
-						item = item.substring(1);
-						occurItem = BooleanClause.Occur.MUST_NOT;
-					}
+					BooleanClause.Occur occurItem = occurItem(item);
 					Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 					fileQuery.add(nameQuery, occurItem);
 				}
@@ -289,13 +281,10 @@ public class SearchAction {
 				int negations = 0;
 
 				for (String item : dirTerms) {
-					BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-					if (item.startsWith("!")) {
-						item = item.substring(1);
-						occurItem = BooleanClause.Occur.MUST_NOT;
+					BooleanClause.Occur occurItem = occurItem(item);
+					if (occurItem == BooleanClause.Occur.MUST_NOT) {
 						negations++;
 					}
-
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
 					dirQuery.add(pathQuery, occurItem);
 				}
@@ -311,11 +300,7 @@ public class SearchAction {
 			for (String item : dirTerms) {
 				BooleanQuery dirQuery = new BooleanQuery();
 
-				BooleanClause.Occur occurItem = BooleanClause.Occur.SHOULD;
-				if (item.startsWith("!")) {
-					item = item.substring(1);
-					occurItem = BooleanClause.Occur.MUST_NOT;
-				}
+				BooleanClause.Occur occurItem = occurItem(item);
 
 				Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 				dirQuery.add(nameQuery, BooleanClause.Occur.MUST);
@@ -332,7 +317,19 @@ public class SearchAction {
 	}
 
 	private String prepareItem(String item) {
+		if (item.startsWith("+") || item.startsWith("-")) {
+			item = item.substring(1);
+		}
 		return (config.isFastSearch()) ? item + "*" : "*" + item + "*";
 	}
 
+	private BooleanClause.Occur occurItem(String item) {
+		BooleanClause.Occur result = BooleanClause.Occur.SHOULD;
+		if (item.startsWith("+")) {
+			result = BooleanClause.Occur.MUST;
+		} else if (item.startsWith("-")) {
+			result = BooleanClause.Occur.MUST_NOT;
+		}
+		return result;
+	}
 }
