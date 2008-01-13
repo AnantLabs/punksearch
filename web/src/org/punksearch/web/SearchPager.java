@@ -27,7 +27,7 @@ public class SearchPager {
     		String key = (String) o_key;
     		if (!key.equals("first") && !key.equals("last"))
     		{
-    				urlPrefix += key + "=" + SearchParams.getStringValue(request, key) + "&";
+    				urlPrefix += key + "=" + SearchParams.getStringValue(request, key).replace("+", "%2B") + "&";
     		}
     	}
     	
