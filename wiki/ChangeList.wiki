@@ -1,6 +1,12 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.7.3 (2008-01-13) =
+  * gui: multi-theme feature (application supports color themes)
+  * usability: removed "show offline" checkbox (online resources simply displayed on top)
+  * bugfix: several small fixes to gui
+  * egg: hover secs spend for search and see detailed stats
+
 = 0.7.2 (2007-12-19) =
   * gui: about.jsp added with info about current version and some other stuff
 
