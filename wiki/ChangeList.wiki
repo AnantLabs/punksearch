@@ -52,4 +52,4 @@
   * some small fixes
 
 = 0.5 (2007-06-21) =
-_first publicly available release_
+  * first publicly available release
