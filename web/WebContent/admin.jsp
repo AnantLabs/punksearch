@@ -1,4 +1,3 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ page import="org.punksearch.commons.*" %>
 <%@ page import="org.punksearch.indexer.*" %>
@@ -9,11 +8,7 @@
 <%@page import="org.punksearch.web.filters.TypeFilters"%>
 <%@page import="org.punksearch.web.SearcherWrapper"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />	
-		<title>Admin - PUNKSearch</title>
-		<link href="css/style.css" type=text/css rel=stylesheet />		
-	</head>
+    <%@include file="head.jsp" %>
 <body>
 	<%@include file="header.jsp" %>
 
