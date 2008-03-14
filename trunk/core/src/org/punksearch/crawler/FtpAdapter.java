@@ -49,8 +49,6 @@ public class FtpAdapter implements ProtocolAdapter {
 		} catch (Exception e) {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during connecting the server: " + ip);
 			return false;
-		} finally {
-			disconnect();
 		}
 	}
 
@@ -87,8 +85,9 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public String getPath(Object item) {
-		String path = ((FTPFile) item).getPath();
-		return path.substring(rootPath.length()) + "/";
+		String path = ((FTPFile) item).getPath().replaceAll("^/+", "/");
+		String suffix = (path.length() == 1)? "" : "/";
+		return path.substring(rootPath.length() - 1) + suffix;
 	}
 
 	public String getProtocol() {
@@ -100,8 +99,9 @@ public class FtpAdapter implements ProtocolAdapter {
 			throw new IllegalStateException("can't get root dir since not connected to any ftp host");
 		}
 		try {
-			return ftp.fileDetails(rootPath);
+			return rootPath;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException();
 		}
 	}
@@ -127,18 +127,25 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public Object[] listFiles(Object dir) {
-		FTPFile res = (FTPFile) dir;
+		if (dir instanceof String) {
+			return list((String)dir);
+		} else {
+    		return list(getFullPath(dir));
+		}
+	}
+	
+	private Object[] list(String path) {
 		FTPFile[] items = {};
 		try {
-			items = ftp.dirDetails(res.getPath());
+			items = ftp.dirDetails(path);
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
 			throw new RuntimeException(e);
 		} catch (Exception e) {
-			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + dir);
+			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
 		}
 		return items;
-	}
+    }
 
 	public Map<String, String> parseCustomEncodings(String encString) {
 		Map<String, String> result = new HashMap<String, String>();
