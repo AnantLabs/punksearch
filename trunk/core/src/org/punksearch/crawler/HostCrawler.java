@@ -22,7 +22,7 @@ import org.punksearch.commons.FileTypes;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.PunksearchProperties;
 import org.punksearch.indexer.IndexOperator;
-import org.punksearch.ip.IpIteratorWrapper;
+import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -36,9 +36,9 @@ public class HostCrawler extends Thread {
 	private ProtocolAdapter   adapter;
 	private FileTypes         knownFileTypes;
 
-	private IpIteratorWrapper iterator;
+	private SynchronizedIpIterator iterator;
 
-	public HostCrawler(String name, IpIteratorWrapper iter, FileTypes fileTypes) {
+	public HostCrawler(String name, SynchronizedIpIterator iter, FileTypes fileTypes) {
 		super(name);
 		iterator = iter;
 		knownFileTypes = fileTypes;

@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import org.punksearch.commons.FileTypes;
 import org.punksearch.commons.PunksearchProperties;
 import org.punksearch.indexer.IndexOperator;
-import org.punksearch.ip.IpIteratorWrapper;
+import org.punksearch.ip.SynchronizedIpIterator;
 import org.punksearch.ip.IpRange;
 
 /**
@@ -44,7 +44,7 @@ public class NetworkCrawler implements Runnable {
 		String range = PunksearchProperties.getProperty("org.punksearch.crawler.range");
 		int threadCount = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.threads"));
 
-		IpIteratorWrapper iter = new IpIteratorWrapper(parseRanges(range));
+		SynchronizedIpIterator iter = new SynchronizedIpIterator(parseRanges(range));
 
 		threadList.clear();
 
