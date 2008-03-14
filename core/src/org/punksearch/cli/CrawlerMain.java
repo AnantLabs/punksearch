@@ -10,7 +10,7 @@
  ***************************************************************************/
 package org.punksearch.cli;
 
-import org.punksearch.commons.PunksearchProperties;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.crawler.NetworkCrawler;
 
 /**
