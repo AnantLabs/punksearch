@@ -21,8 +21,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexModifier;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.punksearch.commons.IndexFields;
-import org.punksearch.commons.SearcherException;
+import org.punksearch.common.IndexFields;
+import org.punksearch.common.SearcherException;
 
 // TODO: think about this wrapper class. it seems it can be full static or entirely refactored
 public class IndexOperator
@@ -62,7 +62,7 @@ public class IndexOperator
 	/**
 	 * Adds documents in index
 	 * @param documentList List of Document
-	 * @throws org.punksearch.commons.SearcherException Failed adding documents in index
+	 * @throws org.punksearch.common.SearcherException Failed adding documents in index
 	 */
 	public boolean addDocuments(List<Document> documentList)
 	{

@@ -1,4 +1,4 @@
-package org.punksearch.commons;
+package org.punksearch.common;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

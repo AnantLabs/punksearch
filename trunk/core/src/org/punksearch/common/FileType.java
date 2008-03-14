@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.commons;
+package org.punksearch.common;
 
 import java.util.HashSet;
 import java.util.Set;

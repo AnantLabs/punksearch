@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.punksearch.commons.FileTypes;
-import org.punksearch.commons.IndexFields;
-import org.punksearch.commons.PunksearchProperties;
+import org.punksearch.common.FileTypes;
+import org.punksearch.common.IndexFields;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
