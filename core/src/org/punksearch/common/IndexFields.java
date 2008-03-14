@@ -1,4 +1,4 @@
-package org.punksearch.commons;
+package org.punksearch.common;
 
 public class IndexFields
 {

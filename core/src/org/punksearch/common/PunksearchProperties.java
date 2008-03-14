@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.commons;
+package org.punksearch.common;
 
 import java.io.IOException;
 import java.io.InputStream;

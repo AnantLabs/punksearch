@@ -18,8 +18,8 @@ import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
-import org.punksearch.commons.OnlineChecker;
-import org.punksearch.commons.PunksearchProperties;
+import org.punksearch.common.OnlineChecker;
+import org.punksearch.common.PunksearchProperties;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)

@@ -16,8 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.punksearch.commons.FileTypes;
-import org.punksearch.commons.PunksearchProperties;
+import org.punksearch.common.FileTypes;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.SynchronizedIpIterator;
 import org.punksearch.ip.IpRange;
 

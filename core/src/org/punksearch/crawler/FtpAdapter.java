@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.punksearch.commons.OnlineChecker;
-import org.punksearch.commons.PunksearchProperties;
+import org.punksearch.common.OnlineChecker;
+import org.punksearch.common.PunksearchProperties;
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.enterprisedt.net.ftp.FTPConnectMode;
