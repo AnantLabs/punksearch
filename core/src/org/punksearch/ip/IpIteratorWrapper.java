@@ -1,10 +1,8 @@
-package org.punksearch.indexer;
+package org.punksearch.ip;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.punksearch.ip.IpIterator;
-import org.punksearch.ip.IpRange;
 
 public class IpIteratorWrapper implements Iterator<String>
 {

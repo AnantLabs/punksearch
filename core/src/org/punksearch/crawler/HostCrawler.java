@@ -22,7 +22,7 @@ import org.punksearch.commons.FileTypes;
 import org.punksearch.commons.IndexFields;
 import org.punksearch.commons.PunksearchProperties;
 import org.punksearch.indexer.IndexOperator;
-import org.punksearch.indexer.IpIteratorWrapper;
+import org.punksearch.ip.IpIteratorWrapper;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
