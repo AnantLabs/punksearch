@@ -44,7 +44,7 @@ public class SmbAdapter implements ProtocolAdapter {
 	 * @see org.punksearch.crawler.ProtocolAdapter#getFullPath(java.lang.Object)
 	 */
 	public String getFullPath(Object item) {
-		return getPath(item) + "/" + getName(item);
+		return getPath(item) + getName(item);
 	}
 
 	/* (non-Javadoc)
@@ -74,8 +74,10 @@ public class SmbAdapter implements ProtocolAdapter {
 	 * @see org.punksearch.crawler.ProtocolAdapter#getPath(java.lang.Object)
 	 */
 	public String getPath(Object item) {
-		String path = ((SmbFile) item).getPath();
-		return path.substring(rootPath.length());
+		String fullPath = ((SmbFile) item).getPath();
+		int nameLength =  getName(item).length();
+		int endPos = (isDirectory(item))? fullPath.length() - 1 - nameLength : fullPath.length() - nameLength;
+		return fullPath.substring(rootPath.length(), endPos);
 	}
 
 	/* (non-Javadoc)

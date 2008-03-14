@@ -43,8 +43,12 @@ public class SmbAdapterTest extends TestCase {
 	 */
 	public void testGetFullPath() {
 		SmbFile file = getSomeFile();
-		String expected = file.getPath().substring(root.getPath().length()-1) + "/" + file.getName();
+		String expected = file.getPath().substring(root.getPath().length() - 1);
 		assertEquals(expected, adapter.getFullPath(file));
+		
+		SmbFile dir = getSomeDir();
+		String expected2 = dir.getPath().substring(root.getPath().length() - 1, dir.getPath().length() - 1);
+		assertEquals(expected2, adapter.getFullPath(dir));
 	}
 
 	/**
@@ -82,8 +86,19 @@ public class SmbAdapterTest extends TestCase {
 		SmbFile file = getSomeFile();
 		String path = adapter.getPath(file);
 		assertTrue(path.startsWith("/"));
-		assertFalse(path.endsWith("/"));
-		assertEquals(file.getPath().substring(root.getPath().length() - 1), path);
+		assertTrue(path.endsWith("/"));
+		String expectedPath = file.getPath().substring(root.getPath().length() - 1);
+		expectedPath = expectedPath.substring(0, expectedPath.length() - adapter.getName(file).length());
+		assertEquals(expectedPath, path);
+		
+		SmbFile dir = getSomeDir();
+		String path2 = adapter.getPath(dir);
+		assertTrue(path2.startsWith("/"));
+		assertTrue(path2.endsWith("/"));
+		assertFalse(path2.endsWith(adapter.getName(dir) + "/"));
+		String expectedPath2 = dir.getPath().substring(root.getPath().length() - 1);
+		expectedPath2 = expectedPath2.substring(0, expectedPath2.length() - 1 - adapter.getName(dir).length());
+		assertEquals(expectedPath2, path2);
 	}
 
 	/**

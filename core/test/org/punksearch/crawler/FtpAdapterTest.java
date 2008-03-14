@@ -90,8 +90,16 @@ public class FtpAdapterTest extends TestCase {
 		FTPFile file = getSomeFile();
 		String path = adapter.getPath(file);
 		assertTrue(path.startsWith("/"));
-		assertFalse(path.endsWith("/"));
-		assertEquals(file.getPath().substring(rootPath.length()), path);
+		assertTrue(path.endsWith("/"));
+		assertFalse(path.endsWith(adapter.getName(file) + "/"));
+		assertEquals(file.getPath().substring(rootPath.length()) + "/", path);
+		
+		FTPFile dir = getSomeDir();
+		String path2 = adapter.getPath(dir);
+		assertTrue(path2.startsWith("/"));
+		assertTrue(path2.endsWith("/"));
+		assertFalse(path2.endsWith(adapter.getName(dir) + "/"));
+		assertEquals(dir.getPath().substring(rootPath.length()) + "/", path2);
 	}
 
 	/**
@@ -99,8 +107,16 @@ public class FtpAdapterTest extends TestCase {
 	 */
 	public void testGetFullPath() {
 		FTPFile file = getSomeFile();
-		String expected = file.getPath().substring(rootPath.length()) + "/" + file.getName();
+		assertTrue(adapter.getFullPath(file).startsWith("/"));
+		assertFalse(adapter.getFullPath(file).endsWith("/"));
+		String expected = file.getPath().substring(rootPath.length()) + "/" + adapter.getName(file);
 		assertEquals(expected, adapter.getFullPath(file));
+		
+		FTPFile dir = getSomeDir();
+		assertTrue(adapter.getFullPath(dir).startsWith("/"));
+		assertFalse(adapter.getFullPath(dir).endsWith("/"));
+		String expected2 = dir.getPath().substring(rootPath.length()) + "/" + adapter.getName(dir);
+		assertEquals(expected2, adapter.getFullPath(dir));
 	}
 
 	/**

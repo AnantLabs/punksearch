@@ -75,7 +75,7 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 	
 	public String getFullPath(Object item) {
-		return getPath(item) + "/" + getName(item);
+		return getPath(item) + getName(item);
 	}
 
 	public long getModificationTime(Object item) {
@@ -88,7 +88,7 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	public String getPath(Object item) {
 		String path = ((FTPFile) item).getPath();
-		return path.substring(rootPath.length());
+		return path.substring(rootPath.length()) + "/";
 	}
 
 	public String getProtocol() {
