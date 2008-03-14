@@ -37,6 +37,7 @@
 
     <target name="crawl">
         <java fork="true" failonerror="true" classname="org.punksearch.cli.CrawlerMain" classpathref="run.classpath">
+            <jvmarg line="-Xmx1024m"/>
         </java>
     </target>
 
