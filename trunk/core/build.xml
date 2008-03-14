@@ -8,7 +8,6 @@
     <property name="buildDir" location="build" />
     <property name="docDir" location="doc" />
 
-    <property name="crawlIp" value="127.0.0.1" />
     <path id="run.classpath">
         <fileset dir="lib">
             <include name="*.jar" />
@@ -38,7 +37,6 @@
 
     <target name="crawl">
         <java fork="true" failonerror="true" classname="org.punksearch.cli.CrawlerMain" classpathref="run.classpath">
-            <arg line="${crawlIp}" />
         </java>
     </target>
 
