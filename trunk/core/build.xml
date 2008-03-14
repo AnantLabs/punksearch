@@ -1,30 +1,45 @@
 <project name="punksearch-core" default="jar">
 
-	<tstamp>
-		<format property="dateIso" pattern="yyyy-MM-dd" />
-	</tstamp>
-	
-	<property name="srcDir" location="src" />
-	<property name="buildDir" location="build" />
-	<property name="docDir" location="doc" />
+    <tstamp>
+        <format property="dateIso" pattern="yyyy-MM-dd" />
+    </tstamp>
 
-	<target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
-		<mkdir dir="build/classes"/>
-		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
-			<classpath>
-				<pathelement location="lib/lucene-core-2.1.0.jar" />
-				<pathelement location="lib/jcifs-1.2.14.jar" />
-				<pathelement location="lib/edtftpj.jar" />
-			</classpath>
-		</javac>
-		<jar destfile="punksearch-core.jar">
-			<fileset dir="${buildDir}/classes" />
-		</jar>
-	</target>
+    <property name="srcDir" location="src" />
+    <property name="buildDir" location="build" />
+    <property name="docDir" location="doc" />
 
-	<target name="clean">
-		<delete file="punksearch-core.jar"/>
-		<delete dir="${buildDir}" failonerror="true" />
-	</target>
+    <property name="crawlIp" value="127.0.0.1" />
+    <path id="run.classpath">
+        <fileset dir="lib">
+            <include name="*.jar" />
+        </fileset>
+        <pathelement path="build/classes" />
+        <pathelement path="etc" />
+    </path>
+
+    <target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
+        <mkdir dir="build/classes" />
+        <javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+        </javac>
+        <jar destfile="punksearch-core.jar">
+            <fileset dir="${buildDir}/classes" />
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete file="punksearch-core.jar" />
+        <delete dir="${buildDir}" failonerror="true" />
+    </target>
+
+    <target name="crawl">
+        <java fork="true" failonerror="true" classname="org.punksearch.cli.CrawlerMain" classpathref="run.classpath">
+            <arg line="${crawlIp}" />
+        </java>
+    </target>
 
 </project>
