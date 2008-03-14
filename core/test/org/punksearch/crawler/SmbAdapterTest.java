@@ -20,7 +20,7 @@ import junit.framework.TestCase;
  */
 public class SmbAdapterTest extends TestCase {
 
-	private static String ip = "10.20.111.107"; // "127.0.0.1";
+	private static String ip = "127.0.0.1";
 
 	private SmbFile       root;
 
