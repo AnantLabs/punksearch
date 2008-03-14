@@ -28,7 +28,7 @@ public class SynchronizedIpIterator implements Iterator<String> {
 	}
 
 	public synchronized String next() {
-		if (iterator == null && !iterator.hasNext()) {
+		if (iterator == null || !iterator.hasNext()) {
 			return null;
 		}
 		return iterator.next().toString();
