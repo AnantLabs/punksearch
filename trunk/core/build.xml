@@ -8,6 +8,8 @@
     <property name="buildDir" location="build" />
     <property name="docDir" location="doc" />
 
+    <property name="debug" value="on" />
+
     <path id="run.classpath">
         <fileset dir="lib">
             <include name="*.jar" />
@@ -18,7 +20,7 @@
 
     <target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
         <mkdir dir="build/classes" />
-        <javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+        <javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" debug="${debug}" includeAntRuntime="no" destdir="${buildDir}/classes">
             <classpath>
                 <fileset dir="lib">
                     <include name="*.jar" />
@@ -37,7 +39,7 @@
 
     <target name="crawl">
         <java fork="true" failonerror="true" classname="org.punksearch.cli.CrawlerMain" classpathref="run.classpath">
-            <jvmarg line="-Xmx1024m"/>
+            <jvmarg line="-Xmx1024m" />
         </java>
     </target>
 
