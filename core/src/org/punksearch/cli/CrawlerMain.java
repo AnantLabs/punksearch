@@ -23,7 +23,9 @@ public class CrawlerMain {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PunksearchProperties.setProperty("org.punksearch.crawler.range", args[0]);
+		if (args.length > 0) {
+			PunksearchProperties.setProperty("org.punksearch.crawler.range", args[0]);
+		}
 		NetworkCrawler crawler = new NetworkCrawler(PunksearchProperties.getProperty("org.punksearch.index.dir"));
 		crawler.run();
 	}

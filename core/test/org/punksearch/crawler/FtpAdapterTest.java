@@ -99,7 +99,7 @@ public class FtpAdapterTest extends TestCase {
 		assertTrue(path2.startsWith("/"));
 		assertTrue(path2.endsWith("/"));
 		assertFalse(path2.endsWith(adapter.getName(dir) + "/"));
-		assertEquals(dir.getPath().substring(rootPath.length()) + "/", path2);
+		assertEquals((dir.getPath().substring(rootPath.length()) + "/").replaceAll("^/+", "/"), path2);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class FtpAdapterTest extends TestCase {
 		assertTrue(adapter.getFullPath(dir).startsWith("/"));
 		assertFalse(adapter.getFullPath(dir).endsWith("/"));
 		String expected2 = dir.getPath().substring(rootPath.length()) + "/" + adapter.getName(dir);
-		assertEquals(expected2, adapter.getFullPath(dir));
+		assertEquals(expected2.replaceAll("^/+", "/"), adapter.getFullPath(dir));
 	}
 
 	/**
