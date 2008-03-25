@@ -18,6 +18,8 @@ public class IndexFields {
 	public static final String PATH                = "Path";         // /video/best/ghost/
 	public static final String SIZE                = "Size";         // 000705560576
 	public static final String DATE                = "Date";
+	
+	public static final String INDEXED             = "Indexed";
 
 	public static final String DIRECTORY_EXTENSION = "";
 	public static final String SORT_SUFFIX         = "_Sort";        // 000705560576
