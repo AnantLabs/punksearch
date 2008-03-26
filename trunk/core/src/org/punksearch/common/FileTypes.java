@@ -12,9 +12,9 @@ package org.punksearch.common;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
@@ -23,7 +23,7 @@ import org.apache.commons.io.FileUtils;
  */
 public class FileTypes {
 
-	private Set<FileType> types = new HashSet<FileType>();
+	private Map<String, FileType> types = new HashMap<String, FileType>();
 
 	public void readFromFile(File file) {
 		try {
@@ -39,19 +39,20 @@ public class FileTypes {
 					continue;
 				}
 				System.out.println(line);
-				types.add(makeItemType(chunks));
+				FileType type = makeItemType(chunks);
+				types.put(type.getTitle(), type);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public Set<FileType> getTypes() {
-		return types;
+	public FileType get(String title) {
+		return types.get(title);
 	}
-	
+
 	public boolean isExtension(String ext) {
-		for (FileType type : types) {
+		for (FileType type : types.values()) {
 			if (type.getExtensions().contains(ext.toLowerCase())) {
 				return true;
 			}
@@ -73,7 +74,7 @@ public class FileTypes {
 		}
 		return type;
 	}
-	
+
 	private int parseSize(String size) {
 		if (size.length() == 0) {
 			size = "0";

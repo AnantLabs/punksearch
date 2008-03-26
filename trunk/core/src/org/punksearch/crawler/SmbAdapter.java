@@ -32,6 +32,10 @@ public class SmbAdapter implements ProtocolAdapter {
 
 	private String        rootPath;
 
+	static {
+		System.setProperty("jcifs.smb.client.soTimeout", PunksearchProperties.getProperty("org.punksearch.crawler.smb.timeout"));
+	}
+	
 	/**
 	 * test-friendly method
 	 * @param path
@@ -64,6 +68,9 @@ public class SmbAdapter implements ProtocolAdapter {
 	public String getName(Object item) {
 		SmbFile res = (SmbFile) item;
 		try {
+			if (res.getName().startsWith(res.getServer())) {
+				return "";
+			}
 			return (res.isFile()) ? res.getName() : res.getName().substring(0, res.getName().length() - 1);
 		} catch (SmbException e) {
 			throw new RuntimeException(e);
@@ -77,7 +84,7 @@ public class SmbAdapter implements ProtocolAdapter {
 		String fullPath = ((SmbFile) item).getPath();
 		int nameLength =  getName(item).length();
 		int endPos = (isDirectory(item))? fullPath.length() - 1 - nameLength : fullPath.length() - nameLength;
-		return fullPath.substring(rootPath.length(), endPos);
+		return (endPos > rootPath.length())? fullPath.substring(rootPath.length(), endPos) : "/";
 	}
 
 	/* (non-Javadoc)

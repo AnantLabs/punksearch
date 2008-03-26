@@ -16,10 +16,16 @@ import java.util.List;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
+import org.punksearch.common.FileType;
+import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
+import org.punksearch.searcher.filters.FilterFactory;
+import org.punksearch.searcher.filters.NumberRangeFilter;
+
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -30,6 +36,11 @@ public class EasyQueryParser {
 	private static final boolean FAST_SEARCH     = true;
 
 	private int                  maxClauseCount  = 1000;
+	private FileTypes            types           = new FileTypes();
+
+	public EasyQueryParser(FileTypes types) {
+		this.types = types;
+	}
 
 	public EasyQueryParser(int maxClauseCount) {
 		this.maxClauseCount = maxClauseCount;
@@ -166,7 +177,14 @@ public class EasyQueryParser {
 		}
 		return result;
 	}
-	
+
+	public Filter makeSizeFilter(String typeName) {
+		FileType type = types.get(typeName);
+		long min = (type.getMinBytes() > 0)? type.getMinBytes() : null;
+		long max = (type.getMaxBytes() > 0)? type.getMaxBytes() : null;
+		NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
+		return sizeFilter;
+	}
 	/*
 	private Filter makeFilter() {
 		if (params.type.equals("advanced")) {
@@ -196,6 +214,5 @@ public class EasyQueryParser {
 		}
 	}
 	*/
-
 
 }

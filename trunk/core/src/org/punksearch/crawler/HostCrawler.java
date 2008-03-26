@@ -10,10 +10,10 @@
  ***************************************************************************/
 package org.punksearch.crawler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
@@ -27,68 +27,75 @@ import org.punksearch.ip.SynchronizedIpIterator;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
-	private static Logger     __log   = Logger.getLogger(HostCrawler.class.getName());
+	private static Logger          __log        = Logger.getLogger(HostCrawler.class.getName());
 
-	private String            ip;
-	private int               maxDeep = 5;
+	private String                 ip;
+	private int                    maxDeep      = 5;
 
-	private ProtocolAdapter   adapter;
-	private FileTypes         knownFileTypes;
+	private ProtocolAdapter        adapter;
+	private FileTypes              knownFileTypes;
 
 	private SynchronizedIpIterator iterator;
 
-	public HostCrawler(String name, SynchronizedIpIterator iter, FileTypes fileTypes) {
+	private IndexOperator          indexOperator;
+
+	private Set<String>            crawledHosts = new HashSet<String>();
+	private Set<String>            skippedHosts = new HashSet<String>();
+	private String                 timestamp;
+
+	public HostCrawler(String name, SynchronizedIpIterator iter, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
+
 		iterator = iter;
 		knownFileTypes = fileTypes;
+
 		maxDeep = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.deep"));
+
+		indexOperator = new IndexOperator(indexDirectoryPath);
 	}
 
 	public void run() {
-		// int deep = Integer.parseInt(System.getProperty("org.punksearch.crawler.deep"));
-		// setMaxDeep(deep);
 
 		SmbAdapter smbAdapter = new SmbAdapter();
 		FtpAdapter ftpAdapter = new FtpAdapter();
 
 		while ((ip = iterator.next()) != null) {
-			try {
-				__log.info(ip + " start indexing");
+			
+			__log.fine(getName() + ": trying " + ip);
+			
+			crawlWithAdapter(smbAdapter);
+			crawlWithAdapter(ftpAdapter);
 
-				IndexOperator.getInstance().deleteDocuments(ip, "smb");
-				IndexOperator.getInstance().deleteDocuments(ip, "ftp");
+		}
+		indexOperator.close();
+	}
 
-				if (smbAdapter.connect(ip)) {
-					setAdapter(smbAdapter);
-					long sizeSmb = crawl();
-					if (sizeSmb > 0) {
-						__log.info("smb: " + ip + " indexed: " + sizeSmb + " bytes");
-					}
+	private void crawlWithAdapter(ProtocolAdapter ad) {
+		
+		timestamp = Long.toString(System.currentTimeMillis());
+		String protocol = ad.getProtocol();
+		
+		try {
+			if (ad.connect(ip)) {
+				__log.info(getName() + ": start crawling " + ip);
+				setAdapter(ad);
+				long size = crawlDirectory(adapter.getRootDir(), 0);
+				if (size > 0) {
+					__log.info(getName() + ": " + protocol + ": " + ip + " crawled: " + size + " bytes");
+					crawledHosts.add("smb_" + ip);
+				} else {
+					skippedHosts.add("smb_" + ip);
 				}
-
-				if (ftpAdapter.connect(ip)) {
-					setAdapter(ftpAdapter);
-					long sizeFtp = crawl();
-					if (sizeFtp > 0) {
-						__log.info("ftp: " + ip + " indexed: " + sizeFtp + " bytes");
-					}
-				}
-
-				IndexOperator.getInstance().flushIndex();
-			} catch (IllegalArgumentException e) {
-				__log.warning("IAE: " + e);
-			} catch (MalformedURLException e) {
-				__log.warning("MUE: " + e);
-			} catch (IOException e) {
-				__log.info("IOException: " + e.getMessage() + " on ip='" + ip + "'");
+				ad.disconnect();
 			}
+		} catch (IllegalArgumentException e) {
+			__log.warning("IAE: " + e);
+		} catch (RuntimeException e) {
+			__log.warning(getName() + ": Runtime exception occured");
+			e.printStackTrace();
 		}
 	}
-
-	public long crawl() {
-		return crawlDirectory(adapter.getRootDir(), 0);
-	}
-
+	
 	public String getIp() {
 		return ip;
 	}
@@ -117,6 +124,7 @@ public class HostCrawler extends Thread {
 		document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.setBoost(boost);
 		return document;
 	}
@@ -161,6 +169,9 @@ public class HostCrawler extends Thread {
 			return 0L;
 		}
 
+		// __log.finest(getName() + ": crawling: " + adapter.getProtocol() + "://" + getIp() +
+		// adapter.getFullPath(dir));
+
 		Object[] items = adapter.listFiles(dir);
 
 		// start actual crawling
@@ -177,7 +188,7 @@ public class HostCrawler extends Thread {
 			}
 		}
 
-		IndexOperator.getInstance().addDocuments(documentList);
+		indexOperator.addDocuments(documentList);
 
 		return size;
 	}
@@ -228,7 +239,7 @@ public class HostCrawler extends Thread {
 			// return isGoodDirectory(adapter.listFiles(item));
 			return true;
 		} else {
-			//System.out.println(getExtension(adapter.getName(item)));
+			// System.out.println(getExtension(adapter.getName(item)));
 			return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
 		}
 	}
@@ -240,6 +251,14 @@ public class HostCrawler extends Thread {
 		} else {
 			return "";
 		}
+	}
+
+	public Set<String> getCrawledHosts() {
+		return crawledHosts;
+	}
+
+	public Set<String> getSkippedHosts() {
+		return skippedHosts;
 	}
 
 }
