@@ -13,13 +13,16 @@ package org.punksearch.crawler;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.PunksearchProperties;
-import org.punksearch.ip.SynchronizedIpIterator;
 import org.punksearch.ip.IpRange;
+import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -48,32 +51,59 @@ public class NetworkCrawler implements Runnable {
 		threadList.clear();
 
 		try {
-			IndexOperator.init(indexDirectory);
-
 			long startTime = new Date().getTime();
-			__log.info("Indexing process started");
+			__log.info("Crawl process started");
 
 			for (int i = 0; i < threadCount; i++) {
-				HostCrawler indexerThread = new HostCrawler("IndexerThread" + i, iter, fileTypes);
+				// FileUtils.deleteDirectory(new File(indexDirectory + "_IndexerThread" + i));
+				HostCrawler indexerThread = new HostCrawler("HostCrawler" + i, iter, fileTypes, indexDirectory + "_crawler" + i);
 				// indexerThread.setDaemon(true);
 				indexerThread.start();
 				threadList.add(indexerThread);
 			}
-			for (Thread indexerThread : threadList) {
-				indexerThread.join();
+			Set<String> crawledHosts = new HashSet<String>();
+			for (HostCrawler crawlerThread : threadList) {
+				crawlerThread.join();
+				crawledHosts.addAll(crawlerThread.getCrawledHosts());
 			}
 
-			IndexOperator.getInstance().optimizeIndex();
-			IndexOperator.getInstance().flushIndex();
+			cleanup(indexDirectory, crawledHosts);
+			
+			merge(indexDirectory, threadCount);
+
+			for (int i = 0; i < threadCount; i++) {
+				FileUtils.deleteDirectory(new File(indexDirectory + "_crawler" + i));
+			}
+			
+			// IndexOperator.getInstance().optimizeIndex();
+			// IndexOperator.getInstance().flushIndex();
 
 			long finishTime = new Date().getTime();
-			__log.info("Index process is finished in " + ((finishTime - startTime) / 1000) + " sec");
+			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
 		} catch (Exception e) {
-			__log.warning("Indexer.run(): exception occured. " + e.getMessage());
+			__log.warning("NetworkCrawler.run(): exception occured. " + e.getMessage());
 			e.printStackTrace();
-		} finally {
-			IndexOperator.close();
 		}
+	}
+	
+	private void cleanup(String indexDirectory, Set<String> crawled) {
+		if (Boolean.parseBoolean(PunksearchProperties.getProperty("org.punksearch.crawler.fromscratch"))) {
+			IndexOperator.deleteAll(indexDirectory);
+		} else {
+			for (String host : crawled) {
+				IndexOperator.deleteByHost(indexDirectory, host);
+			}
+			int daysToKeep = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.keepdays"));
+			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
+		}
+	}
+
+	private void merge(String indexDir, int count) {
+		Set<String> dirs = new HashSet<String>();
+		for (int i = 0; i < count; i++) {
+			dirs.add(indexDir + "_crawler" + i);
+		}
+		IndexOperator.merge(indexDir, dirs);
 	}
 
 	public void stop() {

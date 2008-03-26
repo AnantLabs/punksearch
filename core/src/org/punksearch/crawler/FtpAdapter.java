@@ -53,14 +53,10 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public void disconnect() {
-		String ip = "unknown-ip";
 		try {
-			if (ftp.connected()) {
-				ip = ftp.getRemoteHost();
-				ftp.quit();
-			}
+			ftp.quit();
 		} catch (Exception e) {
-			__log.info("ftp: exception during disconnect from " + ip + ": " + e.getMessage());
+			__log.info("ftp: exception during disconnect " + e.getMessage());
 		}
 	}
 
