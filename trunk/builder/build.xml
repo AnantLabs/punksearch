@@ -1,0 +1,46 @@
+<project name="punksearch-builder" default="dist">
+
+	<target name="build-core">
+		<ant dir="../core" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="build-web">
+		<ant dir="../web" target="war" inheritAll="false" />
+	</target>
+
+	<target name="build-server">
+		<ant dir="../server" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="dist" depends="build-core,build-web,build-server">
+		<delete dir="dist" />
+		<mkdir dir="dist" />
+		
+		<copydir dest="dist" src="skel" />
+		
+		<exec executable="chmod" dir="dist/bin">
+			<arg line="a+x start.sh"/>
+		</exec>
+		<exec executable="chmod" dir="dist/bin">
+			<arg line="a+x crawler.sh"/>
+		</exec>
+		
+		<copy todir="dist/lib">
+            <fileset dir="../server/lib">
+                <include name="*.jar" />
+            </fileset>
+			<fileset dir="../server">
+				<include name="punksearch-server.jar"/>
+			</fileset>
+		</copy>
+		
+		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war"/>
+		
+		<zip destfile="punksearch.zip">
+			<fileset dir="dist">
+				<include name="**/*"/>
+			</fileset>
+		</zip>
+	</target>
+	
+</project>
