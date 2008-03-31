@@ -15,15 +15,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.punksearch.crawler.NetworkCrawler;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class FileTypes {
 
-	private Map<String, FileType> types = new HashMap<String, FileType>();
+	private static final String   DEFAULT_CONFIG_FILE = "file.types";
+
+	private Map<String, FileType> types               = new HashMap<String, FileType>();
+
+	public void readFromDefaultFile() {
+		String file = NetworkCrawler.class.getClassLoader().getResource(DEFAULT_CONFIG_FILE).getFile();
+		File standardTypes = new File(file);
+		readFromFile(standardTypes);
+	}
 
 	public void readFromFile(File file) {
 		try {
@@ -51,6 +61,10 @@ public class FileTypes {
 		return types.get(title);
 	}
 
+	public Set<String> list() {
+		return types.keySet();
+	}
+
 	public boolean isExtension(String ext) {
 		for (FileType type : types.values()) {
 			if (type.getExtensions().contains(ext.toLowerCase())) {
@@ -70,12 +84,12 @@ public class FileTypes {
 		}
 		int max = parseSize(chunks[2].trim());
 		if (max > 0) {
-			type.setMinBytes(max);
+			type.setMaxBytes(max);
 		}
 		return type;
 	}
 
-	private int parseSize(String size) {
+	protected static int parseSize(String size) {
 		if (size.length() == 0) {
 			size = "0";
 		}

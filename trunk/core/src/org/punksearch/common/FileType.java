@@ -20,8 +20,8 @@ public class FileType {
 
 	private String      title      = "undefined";
 	private Set<String> extensions = new HashSet<String>();
-	private int         minBytes   = 0;
-	private int         maxBytes   = Integer.MAX_VALUE;
+	private long         minBytes   = 0;
+	private long         maxBytes   = Long.MAX_VALUE;
 
 	public void addExtensions(String... exts) {
 		for (String ext : exts) {
@@ -50,7 +50,7 @@ public class FileType {
 		this.addExtensions(extensions);
 	}
 
-	public int getMinBytes() {
+	public long getMinBytes() {
 		return minBytes;
 	}
 
@@ -58,7 +58,7 @@ public class FileType {
 		this.minBytes = minBytes;
 	}
 
-	public int getMaxBytes() {
+	public long getMaxBytes() {
 		return maxBytes;
 	}
 
