@@ -20,7 +20,7 @@ import org.punksearch.searcher.SearcherResult;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
- *
+ * 
  */
 public class SearcherMain {
 
@@ -32,21 +32,18 @@ public class SearcherMain {
 			printUsage();
 			System.exit(1);
 		}
-		
-		if (args[0].equals("-t")) {
-			//TODO
-		} else {
-			EasyQueryParser parser = new EasyQueryParser(10000);
-			Query query = parser.makeSimpleQuery(args[0]);
-			Searcher searcher = new Searcher(PunksearchProperties.getProperty("org.punksearch.index.dir"));
-			SearcherResult result = searcher.search(query, null, 30);
-			System.out.println("Found items: " + result.getHitCount());
-			for (Document doc : result.getChunk()) {
-				System.out.println(makeResultRow(doc));
-			}
+
+		EasyQueryParser parser = new EasyQueryParser();
+		Query query = parser.makeSimpleQuery(args[0]);
+
+		Searcher searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
+		SearcherResult result = searcher.search(query, null, 30);
+		System.out.println("Found items: " + result.count());
+		for (Document doc : result.items()) {
+			System.out.println(makeResultRow(doc));
 		}
 	}
-	
+
 	private static void printUsage() {
 		System.out.println("Usage: java -jar <jarfile> [-t <type>] <query>");
 		System.out.println("Query is rather Lucene query like: \"Path:distr* +Extension:iso\" or simple human-oriented query like \"distr iso\"");
@@ -57,6 +54,5 @@ public class SearcherMain {
 		String row = doc.get(IndexFields.HOST).replace("_", "://") + doc.get(IndexFields.PATH) + doc.get(IndexFields.NAME);
 		return row;
 	}
-	
 
 }
