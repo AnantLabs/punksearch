@@ -36,9 +36,7 @@ public class NetworkCrawler implements Runnable {
 	private List<HostCrawler> threadList = new ArrayList<HostCrawler>();
 
 	public NetworkCrawler(String indexDir) {
-		String file = NetworkCrawler.class.getClassLoader().getResource("standard.types").getFile();
-		File standardTypes = new File(file);
-		fileTypes.readFromFile(standardTypes);
+		fileTypes.readFromDefaultFile();
 		this.indexDirectory = indexDir;
 	}
 
