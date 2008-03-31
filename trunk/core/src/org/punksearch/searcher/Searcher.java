@@ -30,11 +30,11 @@ public class Searcher
 		}
 	}
 
-	public SearcherResult search(Query query, Integer first, Integer last, Filter filter)
+	public SearcherResult search(Query query, Integer start, Integer stop, Filter filter)
 	{
-		if (null != first && null != last && (first > last || first < 0 || last < 0))
+		if (null != start && null != stop && (start > stop || start < 0 || stop < 0))
 		{
-			throw new IllegalArgumentException("First (" + first + ") and last (" + last + ") should be non-negative and first should be more than or equal to last.");
+			throw new IllegalArgumentException("First (" + start + ") and last (" + stop + ") should be non-negative and first should be more than or equal to last.");
 		}
 
 		try
@@ -44,6 +44,8 @@ public class Searcher
 			//Sort sort = (null != sortFieldId)? new Sort(new SortField(sortFieldId + SearcherConstants.SORT_SUFFIX)) : null;
 			Hits hits = indexSearcher.search(query, filter);
 
+			Integer first = start;
+			Integer last = stop;
 			if (null == first)
 			{
 				first = 0;
