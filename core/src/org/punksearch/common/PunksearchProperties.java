@@ -41,5 +41,17 @@ public class PunksearchProperties {
 	public static void setProperty(String key, String value) {
 		props.setProperty(key, value);
 	}
+	
+	public static String resolveIndexDirectory() {
+		String indexDir = getProperty("org.punksearch.index.dir");
+		if (!indexDir.startsWith("/")) {
+			String home = System.getenv("PUNKSEARCH_HOME");
+			if (home == null) {
+				home = System.getenv("PWD");
+			}
+			indexDir = home + "/" + indexDir;
+		}
+		return indexDir;
+	}
 
 }
