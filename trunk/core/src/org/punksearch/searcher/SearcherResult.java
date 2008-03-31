@@ -6,27 +6,23 @@ import org.apache.lucene.document.Document;
 
 /**
  * Date: 17.06.2006
- *
+ * 
  * @author arPm
  */
-public class SearcherResult
-{
-	private int				hits;
-	private List<Document>	chunk;
+public class SearcherResult {
+	private int            hits;
+	private List<Document> items;
 
-	public SearcherResult(int allHits, List<Document> thisChunk)
-	{
+	public SearcherResult(int allHits, List<Document> items) {
 		this.hits = allHits;
-		this.chunk = thisChunk;
+		this.items = items;
 	}
 
-	public int getHitCount()
-	{
+	public int count() {
 		return hits;
 	}
 
-	public List<Document> getChunk()
-	{
-		return chunk;
+	public List<Document> items() {
+		return items;
 	}
 }
