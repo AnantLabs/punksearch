@@ -15,7 +15,6 @@ import org.punksearch.crawler.NetworkCrawler;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
- *
  */
 public class CrawlerMain {
 
@@ -26,7 +25,7 @@ public class CrawlerMain {
 		if (args.length > 0) {
 			PunksearchProperties.setProperty("org.punksearch.crawler.range", args[0]);
 		}
-		NetworkCrawler crawler = new NetworkCrawler(PunksearchProperties.getProperty("org.punksearch.index.dir"));
+		NetworkCrawler crawler = new NetworkCrawler(PunksearchProperties.resolveIndexDirectory());
 		crawler.run();
 	}
 
