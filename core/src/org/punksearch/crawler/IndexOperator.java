@@ -44,10 +44,10 @@ public class IndexOperator {
 
 	public IndexOperator(String indexDirectory) {
 		try {
-	        this.indexWriter = createIndexWriter(indexDirectory);
-        } catch (IOException e) {
-        	throw new IllegalArgumentException(e);
-        }
+			this.indexWriter = createIndexWriter(indexDirectory);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class IndexOperator {
 		if (documentList == null || documentList.size() == 0) {
 			return true;
 		}
-		
+
 		try {
 			for (Document document : documentList) {
 				indexWriter.addDocument(document);
@@ -114,11 +114,11 @@ public class IndexOperator {
 				IndexWriter iw = createIndexWriter(dir);
 				iw.close();
 			}
-        } catch (IOException e) {
-        	throw new RuntimeException(e);
-        }
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	
+
 	public static void deleteByAge(String dir, int age) {
 		try {
 			IndexSearcher is = new IndexSearcher(FSDirectory.getDirectory(dir));
@@ -137,7 +137,7 @@ public class IndexOperator {
 			throw new RuntimeException(ex);
 		}
 	}
-	
+
 	public static void merge(String targetDir, Set<String> sourceDirs) {
 		try {
 			IndexWriter iw = createIndexWriter(targetDir);
@@ -174,53 +174,34 @@ public class IndexOperator {
 		return paw;
 	}
 
-	public void close() {
+	public void optimize() {
 		try {
-	        indexWriter.close();
-        } catch (CorruptIndexException e) {
-        	throw new RuntimeException(e);
-        } catch (IOException e) {
-        	throw new RuntimeException(e);
-        }
-	}
-	
-	public void flush() {
-		try {
-	        indexWriter.flush();
-        } catch (CorruptIndexException e) {
-        	throw new RuntimeException(e);
-        } catch (IOException e) {
-        	throw new RuntimeException(e);
-        }
-	}
-	
-	/*
-	public static IndexOperator getInstance()
-	{
-		if (singleton == null)
-		{
-			throw new IllegalStateException("Not initialized");
+			indexWriter.optimize();
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		return singleton;
 	}
 
-	public void optimizeIndex() throws IOException
-	{
-		indexModifier.optimize();
-		//indexModifier.flush();
-		//indexModifier.close();
-		//for (IndexModifier im : map.values()) {
-		//	im.optimize();
-		//}
+	public void flush() {
+		try {
+			indexWriter.flush();
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	
-	public void flushIndex() throws IOException
-	{
-		indexModifier.flush();
-		//for (IndexModifier im : map.values()) {
-		//	im.flush();
-		//}
+
+	public void close() {
+		try {
+			indexWriter.close();
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	*/
 
 }
