@@ -1,4 +1,4 @@
-<project name="embeded" default="jar">
+<project name="punksearch-server" default="jar">
 
 	<tstamp>
 		<format property="dateIso" pattern="yyyy-MM-dd" />
@@ -6,17 +6,8 @@
 
 	<property name="srcDir" location="src" />
 	<property name="buildDir" location="build" />
-	<property name="docDir" location="doc" />
 
-	<target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
-		<mkdir dir="${buildDir}/classes"/>
-		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
-			<classpath>
-				<fileset dir="lib">
-					<include name="*.jar" />
-				</fileset>
-			</classpath>
-		</javac>
+	<target name="jar" depends="compile" description="Builds the JAR file.">
 		<jar destfile="punksearch-server.jar">
 			<fileset dir="${buildDir}/classes" />
 			<fileset dir="${srcDir}" includes="ServletViewer*.properties" />
@@ -24,6 +15,17 @@
 				<attribute name="Main-Class" value="org.punksearch.server.Main" />
 			</manifest>
 		</jar>
+	</target>
+
+	<target name="compile" depends="clean" description="Compiles the Java sources">
+		<mkdir dir="${buildDir}/classes" />
+		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+			<classpath>
+				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
 	</target>
 
 	<target name="clean">
