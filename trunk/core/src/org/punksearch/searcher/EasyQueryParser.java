@@ -23,27 +23,30 @@ import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.common.FileType;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
-
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class EasyQueryParser {
 
-	private static final int     MIN_TERM_LENGTH = 3;
-	private static final boolean FAST_SEARCH     = true;
+	private static final int     MIN_TERM_LENGTH = Integer.valueOf(PunksearchProperties
+	                                                     .getProperty("org.punksearch.search.termlength"));
+	private static final boolean FAST_SEARCH     = Boolean.valueOf(PunksearchProperties
+	                                                     .getProperty("org.punksearch.search.fast"));
 
-	private int                  maxClauseCount  = 1000;
+	private int                  maxClauseCount;
 	private FileTypes            types           = new FileTypes();
+
+	public EasyQueryParser() {
+		this(null);
+	}
 
 	public EasyQueryParser(FileTypes types) {
 		this.types = types;
-	}
-
-	public EasyQueryParser(int maxClauseCount) {
-		this.maxClauseCount = maxClauseCount;
+		this.maxClauseCount = Integer.valueOf(PunksearchProperties.getProperty("org.punksearch.search.clauses"));
 	}
 
 	public Query makeSimpleQuery(String userQuery) {
@@ -81,8 +84,7 @@ public class EasyQueryParser {
 		List<String> fileTerms = prepareQueryParameter(file);
 		List<String> extTerms = prepareQueryParameter(ext);
 
-		if (fileTerms.size() != 0 || extTerms.size() != 0) // search for files
-		{
+		if (fileTerms.size() != 0 || extTerms.size() != 0) { // search for files
 			if (fileTerms.size() != 0) {
 				BooleanQuery fileQuery = new BooleanQuery();
 				for (String item : fileTerms) {
@@ -180,39 +182,10 @@ public class EasyQueryParser {
 
 	public Filter makeSizeFilter(String typeName) {
 		FileType type = types.get(typeName);
-		long min = (type.getMinBytes() > 0)? type.getMinBytes() : null;
-		long max = (type.getMaxBytes() > 0)? type.getMaxBytes() : null;
+		long min = (type.getMinBytes() > 0) ? type.getMinBytes() : null;
+		long max = (type.getMaxBytes() > 0) ? type.getMaxBytes() : null;
 		NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
 		return sizeFilter;
 	}
-	/*
-	private Filter makeFilter() {
-		if (params.type.equals("advanced")) {
-
-			NumberRangeFilter<Long> sizeFilter = null;
-			if (params.minSize != null || params.maxSize != null) {
-				sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, params.minSize, params.maxSize);
-			}
-
-			NumberRangeFilter<Long> dateFilter = null;
-			if (params.fromDate != null || params.toDate != null) {
-				dateFilter = FilterFactory.createNumberFilter(IndexFields.DATE, params.fromDate, params.toDate);
-			}
-
-			if (sizeFilter != null || dateFilter != null) {
-				CompositeFilter resultFilter = new CompositeFilter();
-				if (sizeFilter != null)
-					resultFilter.add(sizeFilter);
-				if (dateFilter != null)
-					resultFilter.add(dateFilter);
-				return resultFilter;
-			} else {
-				return null;
-			}
-		} else {
-			return TypeFilters.get(params.type);
-		}
-	}
-	*/
 
 }
