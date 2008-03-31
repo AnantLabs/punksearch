@@ -75,8 +75,10 @@ public class HostCrawler extends Thread {
 		timestamp = Long.toString(System.currentTimeMillis());
 		String protocol = ad.getProtocol();
 		
+		boolean connected = false;
 		try {
-			if (ad.connect(ip)) {
+			connected = ad.connect(ip);
+			if (connected) {
 				__log.info(getName() + ": start crawling " + ip);
 				setAdapter(ad);
 				long size = crawlDirectory(adapter.getRootDir(), 0);
@@ -86,13 +88,16 @@ public class HostCrawler extends Thread {
 				} else {
 					skippedHosts.add("smb_" + ip);
 				}
-				ad.disconnect();
 			}
 		} catch (IllegalArgumentException e) {
 			__log.warning("IAE: " + e);
 		} catch (RuntimeException e) {
 			__log.warning(getName() + ": Runtime exception occured");
 			e.printStackTrace();
+		} finally {
+			if (connected) {
+				ad.disconnect();
+			}
 		}
 	}
 	
