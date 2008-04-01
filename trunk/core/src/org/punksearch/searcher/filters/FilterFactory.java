@@ -1,5 +1,10 @@
 package org.punksearch.searcher.filters;
 
+import org.apache.lucene.search.Filter;
+import org.punksearch.common.FileType;
+import org.punksearch.common.FileTypes;
+import org.punksearch.common.IndexFields;
+
 public class FilterFactory
 {
 
@@ -23,6 +28,14 @@ public class FilterFactory
 			}
 		};
 		return filter;
+	}
+	
+	public Filter makeSizeFilter(FileTypes types, String typeName) {
+		FileType type = types.get(typeName);
+		long min = (type.getMinBytes() > 0) ? type.getMinBytes() : null;
+		long max = (type.getMaxBytes() > 0) ? type.getMaxBytes() : null;
+		NumberRangeFilter<Long> sizeFilter = createNumberFilter(IndexFields.SIZE, min, max);
+		return sizeFilter;
 	}
 	
 }
