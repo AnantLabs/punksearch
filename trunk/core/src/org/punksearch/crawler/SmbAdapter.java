@@ -33,7 +33,7 @@ public class SmbAdapter implements ProtocolAdapter {
 	private String        rootPath;
 
 	static {
-		System.setProperty("jcifs.smb.client.soTimeout", PunksearchProperties.getProperty("org.punksearch.crawler.smb.timeout"));
+		System.setProperty("jcifs.smb.client.soTimeout", System.getProperty("org.punksearch.crawler.smb.timeout"));
 	}
 	
 	/**
@@ -194,9 +194,9 @@ public class SmbAdapter implements ProtocolAdapter {
 	
 	private NtlmPasswordAuthentication getSmbAuth()
 	{
-		String domain = PunksearchProperties.getProperty("org.punksearch.crawler.smb.domain");
-		String user = PunksearchProperties.getProperty("org.punksearch.crawler.smb.user");
-		String password = PunksearchProperties.getProperty("org.punksearch.crawler.smb.password");
+		String domain = System.getProperty("org.punksearch.crawler.smb.domain");
+		String user = System.getProperty("org.punksearch.crawler.smb.user");
+		String password = System.getProperty("org.punksearch.crawler.smb.password");
 
 		if (user.length() > 0)
 		{

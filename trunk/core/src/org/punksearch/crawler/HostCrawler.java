@@ -20,7 +20,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
@@ -49,7 +48,7 @@ public class HostCrawler extends Thread {
 		iterator = iter;
 		knownFileTypes = fileTypes;
 
-		maxDeep = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.deep"));
+		maxDeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.deep"));
 
 		indexOperator = new IndexOperator(indexDirectoryPath);
 	}
