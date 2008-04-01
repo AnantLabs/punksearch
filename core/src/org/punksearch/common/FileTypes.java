@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.punksearch.crawler.NetworkCrawler;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -30,9 +29,11 @@ public class FileTypes {
 	private Map<String, FileType> types               = new HashMap<String, FileType>();
 
 	public void readFromDefaultFile() {
-		String file = NetworkCrawler.class.getClassLoader().getResource(DEFAULT_CONFIG_FILE).getFile();
-		File standardTypes = new File(file);
-		readFromFile(standardTypes);
+		String home = System.getenv("PUNKSEARCH_HOME");
+		if (home == null) {
+			home = System.getProperty("user.dir");
+		}
+		readFromFile(new File(home + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE));
 	}
 
 	public void readFromFile(File file) {
