@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.punksearch.common.OnlineChecker;
-import org.punksearch.common.PunksearchProperties;
 
 import com.enterprisedt.net.ftp.FTPClient;
 import com.enterprisedt.net.ftp.FTPConnectMode;
@@ -172,15 +171,15 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	private String getFtpEncodingForIp(String ip) {
-		String defaultEnc = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.encoding.default");
-		String customEnc = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.encoding.custom");
+		String defaultEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.default");
+		String customEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.custom");
 		Map<String, String> encMap = parseCustomEncodings(customEnc);
 		return (encMap.containsKey(ip)) ? encMap.get(ip) : defaultEnc;
 	}
 
 	private boolean isActiveModeForIp(String ip) {
-		String defaultMode = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.mode.default");
-		String customMode = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.mode.custom");
+		String defaultMode = System.getProperty("org.punksearch.crawler.ftp.mode.default");
+		String customMode = System.getProperty("org.punksearch.crawler.ftp.mode.custom");
 		Map<String, String> customModes = parseCustomModes(customMode);
 		String modeStr = (customModes.containsKey(ip)) ? customModes.get(ip) : defaultMode;
 		return (modeStr.equals("active"));
@@ -197,16 +196,16 @@ public class FtpAdapter implements ProtocolAdapter {
 			ftp.setConnectMode(FTPConnectMode.PASV);
 		}
 		ftp.setRemoteHost(ip);
-		ftp.setTimeout(Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.ftp.timeout")));
+		ftp.setTimeout(Integer.parseInt(System.getProperty("org.punksearch.crawler.ftp.timeout")));
 	}
 	
 	private String getUser() {
-		String user = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.user");
+		String user = System.getProperty("org.punksearch.crawler.ftp.user");
 		return (user.length() == 0)? "anonymous" : user;
 	}
 	
 	private String getPassword() {
-		String passwd = PunksearchProperties.getProperty("org.punksearch.crawler.ftp.password");
+		String passwd = System.getProperty("org.punksearch.crawler.ftp.password");
 		return (passwd.length() == 0)? "some@email.com" : passwd;
 	}
 

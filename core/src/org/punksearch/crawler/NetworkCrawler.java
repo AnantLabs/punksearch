@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
-import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
 
@@ -41,8 +40,8 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	public void run() {
-		String range = PunksearchProperties.getProperty("org.punksearch.crawler.range");
-		int threadCount = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.threads"));
+		String range = System.getProperty("org.punksearch.crawler.range");
+		int threadCount = Integer.parseInt(System.getProperty("org.punksearch.crawler.threads"));
 
 		SynchronizedIpIterator iter = new SynchronizedIpIterator(parseRanges(range));
 
@@ -85,13 +84,13 @@ public class NetworkCrawler implements Runnable {
 	}
 	
 	private void cleanup(String indexDirectory, Set<String> crawled) {
-		if (Boolean.parseBoolean(PunksearchProperties.getProperty("org.punksearch.crawler.fromscratch"))) {
+		if (Boolean.parseBoolean(System.getProperty("org.punksearch.crawler.fromscratch"))) {
 			IndexOperator.deleteAll(indexDirectory);
 		} else {
 			for (String host : crawled) {
 				IndexOperator.deleteByHost(indexDirectory, host);
 			}
-			int daysToKeep = Integer.parseInt(PunksearchProperties.getProperty("org.punksearch.crawler.keepdays"));
+			int daysToKeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.keepdays"));
 			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
 		}
 	}
