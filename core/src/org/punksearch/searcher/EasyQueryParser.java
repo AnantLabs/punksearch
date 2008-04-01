@@ -23,7 +23,6 @@ import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.common.FileType;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.PunksearchProperties;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 
@@ -32,21 +31,14 @@ import org.punksearch.searcher.filters.NumberRangeFilter;
  */
 public class EasyQueryParser {
 
-	private static final int     MIN_TERM_LENGTH = Integer.valueOf(PunksearchProperties
-	                                                     .getProperty("org.punksearch.search.termlength"));
-	private static final boolean FAST_SEARCH     = Boolean.valueOf(PunksearchProperties
-	                                                     .getProperty("org.punksearch.search.fast"));
-
-	private int                  maxClauseCount;
-	private FileTypes            types           = new FileTypes();
+	private int       maxClauseCount;
+	private int       minTermLength;
+	private boolean   isFastSearch;
 
 	public EasyQueryParser() {
-		this(null);
-	}
-
-	public EasyQueryParser(FileTypes types) {
-		this.types = types;
-		this.maxClauseCount = Integer.valueOf(PunksearchProperties.getProperty("org.punksearch.search.clauses"));
+		this.maxClauseCount = Integer.valueOf(System.getProperty("org.punksearch.search.clauses"));
+		this.minTermLength = Integer.valueOf(System.getProperty("org.punksearch.search.termlength"));
+		this.isFastSearch = Boolean.valueOf(System.getProperty("org.punksearch.search.fast"));
 	}
 
 	public Query makeSimpleQuery(String userQuery) {
@@ -148,14 +140,14 @@ public class EasyQueryParser {
 		return query;
 	}
 
-	private static List<String> prepareQueryParameter(String str) {
+	private List<String> prepareQueryParameter(String str) {
 		List<String> result = new LinkedList<String>();
 		if (str != null) {
 			str = str.replaceAll("\\*|_|!|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
 			String[] terms = str.toLowerCase().split(" ");
 			for (String term : terms) {
 				term = term.trim();
-				if (term.length() >= MIN_TERM_LENGTH) {
+				if (term.length() >= minTermLength) {
 					result.add(term);
 				}
 			}
@@ -167,7 +159,7 @@ public class EasyQueryParser {
 		if (item.startsWith("+") || item.startsWith("-")) {
 			item = item.substring(1);
 		}
-		return (FAST_SEARCH) ? item + "*" : "*" + item + "*";
+		return (isFastSearch) ? item + "*" : "*" + item + "*";
 	}
 
 	private BooleanClause.Occur occurItem(String item) {
@@ -178,14 +170,6 @@ public class EasyQueryParser {
 			result = BooleanClause.Occur.MUST_NOT;
 		}
 		return result;
-	}
-
-	public Filter makeSizeFilter(String typeName) {
-		FileType type = types.get(typeName);
-		long min = (type.getMinBytes() > 0) ? type.getMinBytes() : null;
-		long max = (type.getMaxBytes() > 0) ? type.getMaxBytes() : null;
-		NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
-		return sizeFilter;
 	}
 
 }

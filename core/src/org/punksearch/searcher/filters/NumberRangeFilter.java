@@ -60,8 +60,10 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 					Term term = enumerator.term();
 					if (term != null && term.field().equals(fieldName)) {
 						N termValue = termTextToNumber(term.text());
-						if (lowerTerm == null || lowerTerm.compareTo(termValue) < 0 || (includeLower && lowerTerm.compareTo(termValue) == 0)) {
-							if (upperTerm == null || upperTerm.compareTo(termValue) > 0 || (includeUpper && upperTerm.compareTo(termValue) == 0)) {
+						if (lowerTerm == null || lowerTerm.compareTo(termValue) < 0
+						        || (includeLower && lowerTerm.compareTo(termValue) == 0)) {
+							if (upperTerm == null || upperTerm.compareTo(termValue) > 0
+							        || (includeUpper && upperTerm.compareTo(termValue) == 0)) {
 								// we have a good term, find the docs
 								termDocs.seek(enumerator.term());
 								while (termDocs.next()) {
@@ -104,17 +106,20 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 
 	/** Returns true if <code>o</code> is equal to this. */
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof NumberRangeFilter)) return false;
+		if (this == o)
+			return true;
+		if (!(o instanceof NumberRangeFilter))
+			return false;
 		NumberRangeFilter other = (NumberRangeFilter) o;
 
-		if (!this.fieldName.equals(other.fieldName) || this.includeLower != other.includeLower || this.includeUpper != other.includeUpper) {
+		if (!this.fieldName.equals(other.fieldName) || this.includeLower != other.includeLower
+		        || this.includeUpper != other.includeUpper) {
 			return false;
 		}
 		if (this.lowerTerm != null ? !this.lowerTerm.equals(other.lowerTerm) : other.lowerTerm != null)
-		    return false;
+			return false;
 		if (this.upperTerm != null ? !this.upperTerm.equals(other.upperTerm) : other.upperTerm != null)
-		    return false;
+			return false;
 		return true;
 	}
 
