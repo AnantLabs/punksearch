@@ -10,48 +10,51 @@
  ***************************************************************************/
 package org.punksearch.common;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class PunksearchProperties {
 
-	private static String     PROPERTIES_FILENAME = "punksearch.properties";
-	private static Properties props;
+	private static String PROPERTIES_FILENAME = "punksearch.properties";
 
-	static {
-		props = new Properties();
-		InputStream inputStream = PunksearchProperties.class.getClassLoader().getResourceAsStream(PROPERTIES_FILENAME);
-
-		if (inputStream == null) {
-			throw new RuntimeException("property file '" + PROPERTIES_FILENAME + "' not found in the classpath");
+	public static void loadDefault() throws FileNotFoundException {
+		String home = System.getenv("PUNKSEARCH_HOME");
+		if (home == null) {
+			home = System.getProperty("user.dir");
 		}
+		loadFromFile(home + System.getProperty("file.separator") + PROPERTIES_FILENAME);
+	}
 
+	public static void loadFromFile(String path) throws FileNotFoundException {
+		Properties props = new Properties();
+		InputStream inputStream = new FileInputStream(path);
 		try {
 			props.load(inputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		for (Object key : props.keySet()) {
+			System.setProperty((String) key, (String) props.get(key));
+		}
 	}
 
-	public static String getProperty(String key) {
-		return props.getProperty(key);
-	}
-	
-	public static void setProperty(String key, String value) {
-		props.setProperty(key, value);
-	}
-	
 	public static String resolveIndexDirectory() {
-		String indexDir = getProperty("org.punksearch.index.dir");
-		if (!indexDir.startsWith("/")) {
+		String indexDir = System.getProperty("org.punksearch.index.dir");
+		if (!isAbsolutePath(indexDir)) {
 			String home = System.getenv("PUNKSEARCH_HOME");
 			if (home == null) {
-				home = System.getenv("PWD");
+				home = System.getProperty("user.dir");
 			}
-			indexDir = home + "/" + indexDir;
+			indexDir = home + System.getProperty("file.separator") + indexDir;
 		}
 		return indexDir;
+	}
+
+	private static boolean isAbsolutePath(String path) {
+		return path.startsWith("/");
 	}
 
 }
