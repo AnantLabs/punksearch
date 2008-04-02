@@ -16,15 +16,10 @@ import java.util.List;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
-import org.punksearch.common.FileType;
-import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.searcher.filters.FilterFactory;
-import org.punksearch.searcher.filters.NumberRangeFilter;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
