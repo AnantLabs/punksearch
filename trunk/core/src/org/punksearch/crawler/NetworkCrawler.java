@@ -90,12 +90,18 @@ public class NetworkCrawler implements Runnable {
 	private void cleanup(String indexDirectory, Set<String> crawled) {
 		if (Boolean.parseBoolean(System.getProperty("org.punksearch.crawler.fromscratch"))) {
 			IndexOperator.deleteAll(indexDirectory);
+			__log.info("Target index directory wiped out");
 		} else {
+			__log.info("Start cleaning target index directory from indexed hosts");
 			for (String host : crawled) {
+				__log.info("Cleaning target index directory from indexed host: " + host);
 				IndexOperator.deleteByHost(indexDirectory, host);
 			}
+			__log.info("Finished cleaning target index directory from indexed hosts");
+			__log.info("Start cleaning target index directory from old items");
 			int daysToKeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.keepdays"));
 			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
+			__log.info("Finished cleaning target index directory from old items");
 		}
 	}
 
