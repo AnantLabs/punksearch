@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
-import org.punksearch.commons.IndexFields;
+import org.punksearch.common.IndexFields;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -41,7 +41,7 @@ public class ItemGroup {
 	public boolean matches(Document item) {
 		long itemSize = Long.valueOf(item.get(IndexFields.SIZE));
 		String itemExt = item.get(IndexFields.EXTENSION);
-		return (itemSize == size && itemExt.equals(ext));
+		return (itemSize == size && itemExt.equalsIgnoreCase(ext));
 	}
 
 	public List<Document> getItems() {
