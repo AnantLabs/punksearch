@@ -27,13 +27,15 @@ import com.enterprisedt.net.ftp.FTPFile;
  */
 public class FtpAdapter implements ProtocolAdapter {
 
-	private static Logger __log   = Logger.getLogger(FtpAdapter.class.getName());
-	
-	private FTPClient     ftp     = new FTPClient();
+	private static Logger __log     = Logger.getLogger(FtpAdapter.class.getName());
+
+	private FTPClient     ftp       = new FTPClient();
 
 	private String        rootPath;
 
 	public boolean connect(String ip) {
+		disconnect();
+		
 		if (!OnlineChecker.isActiveFtp(ip)) {
 			return false;
 		}
@@ -47,26 +49,31 @@ public class FtpAdapter implements ProtocolAdapter {
 			return true;
 		} catch (Exception e) {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during connecting the server: " + ip);
+			disconnect();
 			return false;
 		}
 	}
 
 	public void disconnect() {
 		try {
-			ftp.quit();
+			if (ftp.connected()) {
+				ftp.quit();
+			}
 		} catch (Exception e) {
 			__log.info("ftp: exception during disconnect " + e.getMessage());
+			ftp = new FTPClient();
 		}
 	}
 
 	/**
 	 * test-friendly method
+	 * 
 	 * @param path
 	 */
 	protected void setRootPath(String path) {
 		rootPath = path;
 	}
-	
+
 	public String getFullPath(Object item) {
 		return getPath(item) + getName(item);
 	}
@@ -81,7 +88,7 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	public String getPath(Object item) {
 		String path = ((FTPFile) item).getPath().replaceAll("^/+", "/");
-		String suffix = (path.length() == 1)? "" : "/";
+		String suffix = (path.length() == 1) ? "" : "/";
 		return path.substring(rootPath.length() - 1) + suffix;
 	}
 
@@ -123,12 +130,12 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	public Object[] listFiles(Object dir) {
 		if (dir instanceof String) {
-			return list((String)dir);
+			return list((String) dir);
 		} else {
-    		return list(getFullPath(dir));
+			return list(getFullPath(dir));
 		}
 	}
-	
+
 	private Object[] list(String path) {
 		FTPFile[] items = {};
 		try {
@@ -140,7 +147,7 @@ public class FtpAdapter implements ProtocolAdapter {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
 		}
 		return items;
-    }
+	}
 
 	public Map<String, String> parseCustomEncodings(String encString) {
 		Map<String, String> result = new HashMap<String, String>();
@@ -198,15 +205,15 @@ public class FtpAdapter implements ProtocolAdapter {
 		ftp.setRemoteHost(ip);
 		ftp.setTimeout(Integer.parseInt(System.getProperty("org.punksearch.crawler.ftp.timeout")));
 	}
-	
+
 	private String getUser() {
 		String user = System.getProperty("org.punksearch.crawler.ftp.user");
-		return (user.length() == 0)? "anonymous" : user;
+		return (user.length() == 0) ? "anonymous" : user;
 	}
-	
+
 	private String getPassword() {
 		String passwd = System.getProperty("org.punksearch.crawler.ftp.password");
-		return (passwd.length() == 0)? "some@email.com" : passwd;
+		return (passwd.length() == 0) ? "some@email.com" : passwd;
 	}
 
 }
