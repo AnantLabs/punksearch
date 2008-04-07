@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.punksearch.indexer.Indexer;
-
 public class AuthFilter implements Filter
 {
 	private static Logger	__log			= Logger.getLogger(AuthFilter.class.getName());
