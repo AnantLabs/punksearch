@@ -97,8 +97,6 @@ public class IndexOperator {
 		try {
 			IndexWriter iw = createIndexWriter(dir);
 			iw.deleteDocuments(new Term(IndexFields.HOST, host));
-			iw.optimize();
-			iw.flush();
 			iw.close();
 		} catch (IOException ex) {
 			__log.log(Level.SEVERE, "Exception during merging index directories", ex);
@@ -130,7 +128,6 @@ public class IndexOperator {
 			for (int i = 0; i < hits.length(); i++) {
 				ir.deleteDocument(hits.id(i));
 			}
-			ir.flush();
 			ir.close();
 		} catch (IOException ex) {
 			__log.log(Level.SEVERE, "Exception during merging index directories", ex);
