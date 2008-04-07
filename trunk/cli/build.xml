@@ -16,13 +16,20 @@
 		</fileset>
 	</path>
 
+	<target name="clean">
+		<delete dir="${distDir}" />
+		<delete>
+			<fileset dir="." includes="*.zip" />
+			<fileset dir="." includes="*.jar" />
+		</delete>
+	</target>
+	
 	<target name="build-core">
 		<ant dir="../core" target="jar" inheritAll="false" />
 	</target>
 
-	<target name="dist" depends="build-core,jar" description="Builds the ZIP file.">
+	<target name="dist" depends="clean,build-core,jar" description="Builds the ZIP file.">
 
-		<delete dir="${distDir}" failonerror="true" />
 		<mkdir dir="dist" />
 
 		<copydir src="bin" dest="dist/bin" />
@@ -47,13 +54,13 @@
 
 	</target>
 
-	<target name="jar" depends="compile" >
-        <jar destfile="punksearch-cli.jar">
-            <fileset dir="${buildDir}/classes" />
-        </jar>
-    </target>
+	<target name="jar" depends="compile">
+		<jar destfile="punksearch-cli.jar">
+			<fileset dir="${buildDir}/classes" />
+		</jar>
+	</target>
 
-	<target name="compile" description="Compiles the JAVA sources" >
+	<target name="compile" description="Compiles the JAVA sources">
 		<delete dir="${buildDir}" failonerror="true" />
 		<mkdir dir="${buildDir}/classes" />
 		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
