@@ -129,4 +129,12 @@ public class SearchParams {
 
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public String getQuery() {
+		return query;
+	}
+
 }
