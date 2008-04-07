@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils;
  */
 public class FileTypes {
 
-	private static final String   DEFAULT_CONFIG_FILE = "file.types";
+	private static final String   DEFAULT_CONFIG_FILE = "filetypes.conf";
 
 	private Map<String, FileType> types               = new HashMap<String, FileType>();
 
