@@ -24,14 +24,17 @@ import org.apache.commons.io.FileUtils;
  */
 public class FileTypes {
 
-	private static final String   DEFAULT_CONFIG_FILE = "filetypes.conf";
+	public static final String   DEFAULT_CONFIG_FILE = "filetypes.conf";
 
 	private Map<String, FileType> types               = new HashMap<String, FileType>();
 
 	public void readFromDefaultFile() {
-		String home = System.getenv("PUNKSEARCH_HOME");
+		String home = System.getProperty("org.punksearch.home");
 		if (home == null) {
-			home = System.getProperty("user.dir");
+    		home = System.getenv("PUNKSEARCH_HOME");
+    		if (home == null) {
+    			home = System.getProperty("user.dir");
+    		}
 		}
 		readFromFile(new File(home + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE));
 	}
