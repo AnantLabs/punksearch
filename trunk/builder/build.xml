@@ -1,7 +1,20 @@
 <project name="punksearch-builder" default="dist">
 
+	<target name="clean">
+		<delete dir="dist" />
+		<delete dir=".">
+			<fileset>
+				<include name="*.zip" />
+			</fileset>
+		</delete>
+	</target>
+	
 	<target name="build-core">
 		<ant dir="../core" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="build-cli">
+		<ant dir="../cli" target="jar" inheritAll="false" />
 	</target>
 
 	<target name="build-web">
@@ -12,18 +25,8 @@
 		<ant dir="../server" target="jar" inheritAll="false" />
 	</target>
 
-	<target name="dist" depends="build-core,build-web,build-server">
-		<delete dir="dist" />
+	<target name="dist" depends="clean,build-core,build-cli,build-web,build-server">
 		<mkdir dir="dist" />
-
-		<copydir dest="dist" src="skel" />
-
-		<exec executable="chmod" dir="dist">
-			<arg line="a+x start.sh" />
-		</exec>
-		<exec executable="chmod" dir="dist">
-			<arg line="a+x crawler.sh" />
-		</exec>
 
 		<copy todir="dist/lib">
 			<fileset dir="../server/lib">
@@ -43,7 +46,27 @@
 			</fileset>
 		</copy>
 
+		<copy todir="dist/lib">
+			<fileset dir="../cli">
+				<include name="punksearch-cli.jar" />
+			</fileset>
+		</copy>
+
 		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war" />
+
+		<zip destfile="punksearch-noconf.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+
+		<copydir dest="dist" src="skel" />
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x start.sh" />
+		</exec>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x crawler.sh" />
+		</exec>
 
 		<zip destfile="punksearch.zip">
 			<fileset dir="dist">
