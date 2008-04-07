@@ -21,9 +21,12 @@ public class PunksearchProperties {
 	public static String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
-		String home = System.getenv("PUNKSEARCH_HOME");
+		String home = System.getProperty("org.punksearch.home");
 		if (home == null) {
-			home = System.getProperty("user.dir");
+			home = System.getenv("PUNKSEARCH_HOME");
+			if (home == null) {
+				home = System.getProperty("user.dir");
+			}
 		}
 		loadFromFile(home + System.getProperty("file.separator") + PROPERTIES_FILENAME);
 	}
