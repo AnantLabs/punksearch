@@ -1,3 +1,13 @@
+/***************************************************************************
+ *                                                                         *
+ *   PunkSearch - Searching over LAN                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 package org.punksearch.web.filters;
 
 import java.util.HashMap;
@@ -11,133 +21,78 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.QueryFilter;
 import org.apache.lucene.search.TermQuery;
-import org.punksearch.commons.IndexFields;
+import org.punksearch.common.FileTypes;
+import org.punksearch.common.IndexFields;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
-import org.punksearch.web.Types;
 
-public class TypeFilters
-{
+public class TypeFilters {
 
-	private static Long					MB		= 1024L * 1024L;
+	private static Long                MB      = 1024L * 1024L;
 
-	private static Map<String, Filter>	filters	= new HashMap<String, Filter>();
+	private static Map<String, Filter> filters = new HashMap<String, Filter>();
 
-	static
-	{
+	private static FileTypes           types   = new FileTypes();
+
+	static {
 		init();
 	}
 
-	public static void reset()
-	{
+	public static void reset() {
 		filters.clear();
 		init();
 	}
 
-	public static Filter get(String type)
-	{
+	public static Filter get(String type) {
 		return filters.get(type);
 	}
 
-	private static void init()
-	{
-		filters.put(Types.FILM,    new CachedFilter(createFilter(Types.FILM)));
-		filters.put(Types.CLIP,    new CachedFilter(createFilter(Types.CLIP)));
-		filters.put(Types.MUSIC,   new CachedFilter(createFilter(Types.MUSIC)));
-		filters.put(Types.ISO,     new CachedFilter(createFilter(Types.ISO)));
-		filters.put(Types.PICTURE, new CachedFilter(createFilter(Types.PICTURE)));
-		filters.put(Types.ARCHIVE, new CachedFilter(createFilter(Types.ARCHIVE)));
-		filters.put(Types.EXE,     new CachedFilter(createFilter(Types.EXE)));
-		filters.put(Types.DOC,     new CachedFilter(createFilter(Types.DOC)));
-		filters.put(Types.DIR,     new CachedFilter(createFilter(Types.DIR)));
+	private static void init() {
+		types.readFromDefaultFile();
+
+		for (String key : types.list()) {
+			filters.put(key, new CachedFilter(createFilter(key)));
+		}
 	}
 
-	private static Filter createFilter(String type)
-	{
-		Long min = null;
-		Long max = null;
-		String ext = null;
-		if (type.equals(Types.FILM))
-		{
-			min = 500 * MB;
-			ext = "avi vob mpg mkv mpeg mov wmv wmf mp4";
+	private static Filter createFilter(String type) {
+		Long min = types.get(type).getMinBytes();
+		Long max = types.get(type).getMaxBytes();
+		String ext = "";
+		for (String tmp : types.get(type).getExtensions()) {
+			ext += " " + tmp;
 		}
-		else if (type.equals(Types.CLIP))
-		{
-			min = 3 * MB;
-			max = 100 * MB;
-			ext = "avi mpg mpeg wmv mov wmf wmv mkv";
-		}
-		else if (type.equals(Types.MUSIC))
-		{
-			min = 1 * MB;
-			max = 100 * MB;
-			ext = "flac mp3 ogg wav wma ape";
-		}
-		else if (type.equals(Types.ISO))
-		{
-			min = 10 * MB;
-			ext = "iso mdf nrg dmg img daa pqi";
-		}
-		else if (type.equals(Types.PICTURE))
-		{
-			ext = "bmp gif jpeg jpg png tif tiff";
-		}
-		else if (type.equals(Types.ARCHIVE))
-		{
-			ext = "7z, arj bz2 gz rar tar tgz zip";
-		}
-		else if (type.equals(Types.EXE))
-		{
-			ext = "exe";
-		}
-		else if (type.equals(Types.DOC))
-		{
-			ext = "djvu doc htm html rtf odg odp ods odt pdf ppt ps txt xhtml xls";
-		}
-		else if (type.equals(Types.DIR))
-		{
-			ext = "";
-		}
-		else
-		{
-			throw new IllegalArgumentException("unknown type");
-		}
-
+		System.out.println("Type: " + type + " = " + min + ":" + max + " -> " + ext);
 		CompositeFilter filter = new CompositeFilter();
 
-		if (min != null || max != null)
-		{
+		if (min != null || max != null) {
 			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
 			filter.add(sizeFilter);
 		}
 
-		if (ext != null)
-		{
-			try
-			{
+		if (ext != null) {
+			try {
 				Query extQuery;
-				if (ext.length() != 0)
-				{
+				if (ext.length() != 0) {
 					extQuery = new QueryParser(IndexFields.EXTENSION, new StandardAnalyzer()).parse(ext);
-				}
-				else
-				{
+				} else {
 					extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
 				}
 				System.out.println(extQuery);
 				QueryFilter extFilter = new QueryFilter(extQuery);
 				filter.add(extFilter);
-			}
-			catch (ParseException pe)
-			{
+			} catch (ParseException pe) {
 				// dummy
 			}
 		}
 
 		return filter;
 
+	}
+
+	public static FileTypes getTypes() {
+		return types;
 	}
 
 }
