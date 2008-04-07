@@ -1,75 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-<web-app version="2.4"
-         xmlns="http://java.sun.com/xml/ns/j2ee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
-
-	<context-param>
-		<param-name>indexDirectory</param-name>
-		<param-value>/Users/sky/tmp/LanSearcherIndex</param-value>
-	</context-param>
-	<context-param>
-		<param-name>indexThreads</param-name>
-		<param-value>10</param-value>
-	</context-param>
-	<context-param>
-		<param-name>indexDeep</param-name>
-		<param-value>5</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ipRange</param-name>
-		<param-value>10.0.0.1-10.0.0.255</param-value>
-	</context-param>
-	<context-param>
-		<param-name>smbLogin</param-name>
-		<param-value></param-value><!-- DOMAIN\user:password -->
-	</context-param>
-	<context-param>
-		<param-name>searchMaxClauseCount</param-name>
-		<param-value>1000000</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ftpDefaultEncoding</param-name>
-		<param-value>UTF-8</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ftpCustomEncodings</param-name>
-		<param-value>195.19.254.80:KOI8-R,195.19.252.54:CP1251,195.19.255.204:KOI8-R,195.19.253.66:CP1251</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ftpDefaultMode</param-name>
-		<param-value>Passive</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ftpCustomModes</param-name>
-		<param-value>10.0.0.1:Active</param-value>
-	</context-param>
-	<context-param>
-		<param-name>ftpTimeout</param-name>
-		<param-value>2000</param-value>
-	</context-param>
+	<!--context-param>
+		<param-name>punksearch_home</param-name>
+		<param-value>/opt/punksearch</param-value>
+	</context-param-->
 	<context-param>
 		<param-name>adminPassword</param-name>
 		<param-value>123_456</param-value>
 	</context-param>
-	<context-param>
-		<param-name>googleAnalyticsId</param-name>
-		<param-value></param-value>
-	</context-param>
-	<context-param>
-		<param-name>fastSearch</param-name>
-		<param-value>true</param-value>
-	</context-param>
+
+	<jsp-config>
+		<taglib>
+			<taglib-uri>http://java.sun.com/jstl/core</taglib-uri>
+			<taglib-location>/WEB-INF/c.tld</taglib-location>
+		</taglib>
+	</jsp-config>
 
 	<welcome-file-list>
 		<welcome-file>search.jsp</welcome-file>
 	</welcome-file-list>
-		
+
 	<filter>
 		<filter-name>AuthFilter</filter-name>
 		<filter-class>org.punksearch.web.AuthFilter</filter-class>
-	</filter>	
+	</filter>
+
 	<filter-mapping>
 		<filter-name>AuthFilter</filter-name>
 		<url-pattern>/admin.jsp</url-pattern>
@@ -77,12 +34,22 @@
 	<error-page>
 		<error-code>401</error-code>
 		<location>/login.jsp</location>
-	</error-page>		
-	
+	</error-page>
+
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>
 		<servlet-class>org.punksearch.web.InitServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+
+	<servlet>
+		<servlet-name>ChartViewerServlet</servlet-name>
+		<servlet-class>org.punksearch.web.chart.ChartViewer</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ChartViewerServlet</servlet-name>
+		<url-pattern>/chart/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>
