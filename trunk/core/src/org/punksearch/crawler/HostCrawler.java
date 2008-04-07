@@ -83,9 +83,9 @@ public class HostCrawler extends Thread {
 				long size = crawlDirectory(adapter.getRootDir(), 0);
 				if (size > 0) {
 					__log.info(getName() + ": " + protocol + ": " + ip + " crawled: " + size + " bytes");
-					crawledHosts.add("smb_" + ip);
+					crawledHosts.add(protocol + "_" + ip);
 				} else {
-					skippedHosts.add("smb_" + ip);
+					skippedHosts.add(protocol + "_" + ip);
 				}
 			}
 		} catch (IllegalArgumentException e) {
