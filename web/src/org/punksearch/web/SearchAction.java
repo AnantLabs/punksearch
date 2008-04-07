@@ -18,16 +18,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.WildcardQuery;
-import org.punksearch.commons.IndexFields;
-import org.punksearch.commons.SearcherException;
-import org.punksearch.searcher.ResultFilter;
+import org.punksearch.common.IndexFields;
+import org.punksearch.common.SearcherException;
+import org.punksearch.searcher.EasyQueryParser;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
@@ -42,11 +37,12 @@ public class SearchAction {
 
 	// TODO: extract SearchAction.MIN_TERM_LENGTH to settings
 	private static final int MIN_TERM_LENGTH  = 3;
+	private static final int MAX_DOCS         = 10000;
 
 	private static Logger    __log            = Logger.getLogger(SearchParams.class.getName());
 
 	private SearchParams     params;
-	private SearcherConfig   config           = SearcherConfig.getInstance();
+	// private SearcherConfig config = SearcherConfig.getInstance();
 
 	private long             searchTime       = 0;
 	private long             presentationTime = 0;
@@ -85,10 +81,11 @@ public class SearchAction {
 	}
 
 	private Query makeQuery() {
+		EasyQueryParser parser = new EasyQueryParser();
 		if (params.type.equals("advanced")) {
-			return makeAdvancedQuery(params.dir, params.file, params.ext);
+			return parser.makeAdvancedQuery(params.dir, params.file, params.ext);
 		} else {
-			return makeSimpleQuery(params.query);
+			return parser.makeSimpleQuery(params.query);
 		}
 	}
 
@@ -106,8 +103,8 @@ public class SearchAction {
 				SearcherResult result = SearcherWrapper.search(query, params.first, params.last, filter);
 				Date stopDate = new Date();
 				searchTime = stopDate.getTime() - startDate.getTime();
-				overallCount = result.getHitCount();
-				searchResults = prepareResults(result.getChunk());
+				overallCount = result.count();
+				searchResults = prepareResults(result.items());
 			} catch (SearcherException se) {
 				__log.warning(se.getMessage());
 			}
@@ -117,50 +114,67 @@ public class SearchAction {
 	}
 
 	public List<ItemGroup> doSearchGroupped() {
+		return doSearchGroupped(0, MAX_DOCS);
+	}
+
+	public List<ItemGroup> doSearchGroupped(int start, int stop) {
 		Query query = makeQuery();
+		if (query == null) {
+			return new ArrayList<ItemGroup>(0);
+		}
+		__log.info("query constructed: " + query.toString());
+
 		Filter filter = makeFilter();
 
 		List<ItemGroup> searchResults = new ArrayList<ItemGroup>();
 
-		if (query != null) {
-			__log.info("query constructed: " + query.toString());
-			try {
+		try {
+			Date startDate = new Date();
+			SearcherResult result = SearcherWrapper.search(query, filter, MAX_DOCS);
+			Date stopDate = new Date();
 
-				Date startDate = new Date();
-				SearcherResult result = SearcherWrapper.search(query, filter, 1000);
-				Date stopDate = new Date();
+			List<Document> docs = sortDocsOnlineFirst(result.items());
+			searchResults = makeGroupsFromDocs(docs);
 
-				searchTime = stopDate.getTime() - startDate.getTime();
-
-				List<Document> docs = result.getChunk();
-
-				ResultFilter resultFilter = new OnlineResultFilter();
-				List<Integer> idxs = resultFilter.filter(docs);
-				Collections.sort(idxs);
-				int count = 0;
-				for (Integer idx : idxs) {
-					// following should be effective while list is linked and
-					// not array-based
-					// profile this anyway, since removal still can be expensive
-					// (must traverse list until index met)
-					Document onlineDoc = docs.get(idx);
-					docs.remove(idx.intValue());
-					docs.add(count, onlineDoc);
-					count++;
-				}
-
-				searchResults = makeGroupsFromDocs(docs);
-
-				presentationTime = new Date().getTime() - stopDate.getTime();
-
-				overallCount = searchResults.size();
-
-			} catch (SearcherException se) {
-				__log.warning(se.getMessage());
-			}
+			searchTime = stopDate.getTime() - startDate.getTime();
+			presentationTime = new Date().getTime() - stopDate.getTime();
+			overallCount = searchResults.size();
+		} catch (SearcherException se) {
+			__log.warning(se.getMessage());
 		}
 
-		return searchResults;
+		int min = (start > 0) ? Math.max(0, start) : 0;
+		int max = (stop > 0) ? Math.min(overallCount, stop) : 0;
+		if (min > max || min > overallCount) {
+			min = 0;
+			max = 0;
+		}
+		return searchResults.subList(min, max);
+	}
+
+	// following should be effective while list is linked and not array-based
+	// profile this anyway, since removal still can be expensive (must traverse list until index met)
+	private static List<Document> sortDocsOnlineFirst(List<Document> docs) {
+		List<Document> result = new ArrayList<Document>(docs.size());
+
+		ResultFilter resultFilter = new OnlineResultFilter();
+		List<Integer> idxs = resultFilter.filter(docs);
+		// __log.info("Online docs: " + idxs.size());
+		Collections.sort(idxs);
+
+		int count = 0;
+		for (Integer idx : idxs) {
+			Document onlineDoc = docs.get(idx);
+			// docs.remove(idx.intValue());
+			result.add(onlineDoc);
+			count++;
+		}
+		for (int i = 0; i < docs.size(); i++) {
+			if (!idxs.contains(i)) {
+				result.add(docs.get(i));
+			}
+		}
+		return result;
 	}
 
 	public int getOverallCount() {
@@ -173,21 +187,6 @@ public class SearchAction {
 
 	public long getPresentationTime() {
 		return presentationTime;
-	}
-
-	private static List<String> prepareQueryParameter(String str) {
-		List<String> result = new LinkedList<String>();
-		if (str != null) {
-			str = str.replaceAll("\\*|_|!|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
-			String[] terms = str.toLowerCase().split(" ");
-			for (String term : terms) {
-				term = term.trim();
-				if (term.length() >= MIN_TERM_LENGTH) {
-					result.add(term);
-				}
-			}
-		}
-		return result;
 	}
 
 	private static List<ItemGroup> makeGroupsFromDocs(List<Document> docs) {
@@ -214,122 +213,5 @@ public class SearchAction {
 			searchResults.add(new SearchResult(doc));
 		}
 		return searchResults;
-	}
-
-	private Query makeSimpleQuery(String userQuery) {
-		List<String> terms = prepareQueryParameter(userQuery);
-
-		if (terms.size() == 0) {
-			return null;
-		}
-
-		BooleanQuery query = new BooleanQuery(false);
-		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
-
-		for (String item : terms) {
-			BooleanQuery itemQuery = new BooleanQuery();
-
-			BooleanClause.Occur occurItem = occurItem(item);
-
-			Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
-			itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
-
-			Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
-			itemQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
-
-			query.add(itemQuery, occurItem);
-		}
-
-		return query;
-	}
-
-	private Query makeAdvancedQuery(String dir, String file, String ext) {
-		BooleanQuery query = new BooleanQuery(false);
-		BooleanQuery.setMaxClauseCount(config.getMaxClauseCount());
-
-		List<String> dirTerms = prepareQueryParameter(dir);
-		List<String> fileTerms = prepareQueryParameter(file);
-		List<String> extTerms = prepareQueryParameter(ext);
-
-		if (fileTerms.size() != 0 || extTerms.size() != 0) // search for files
-		{
-			if (fileTerms.size() != 0) {
-				BooleanQuery fileQuery = new BooleanQuery();
-				for (String item : fileTerms) {
-					BooleanClause.Occur occurItem = occurItem(item);
-					Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
-					fileQuery.add(nameQuery, occurItem);
-				}
-				query.add(fileQuery, BooleanClause.Occur.MUST);
-			}
-
-			if (extTerms.size() != 0) {
-				BooleanQuery extQuery = new BooleanQuery();
-				for (String item : extTerms) {
-					Query termQuery = new TermQuery(new Term(IndexFields.EXTENSION, item));
-					extQuery.add(termQuery, BooleanClause.Occur.SHOULD);
-				}
-				query.add(extQuery, BooleanClause.Occur.MUST);
-			} else {
-				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
-				query.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
-			}
-
-			// restrict files to occur in specified directories only
-			if (dirTerms.size() != 0) {
-				BooleanQuery dirQuery = new BooleanQuery();
-				int negations = 0;
-
-				for (String item : dirTerms) {
-					BooleanClause.Occur occurItem = occurItem(item);
-					if (occurItem == BooleanClause.Occur.MUST_NOT) {
-						negations++;
-					}
-					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
-					dirQuery.add(pathQuery, occurItem);
-				}
-				// it must be at least one positive clause in query to be executed.
-				// so add one if all user clauses are nagative.
-				if (dirTerms.size() == negations) {
-					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, "*"));
-					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
-				}
-				query.add(dirQuery, BooleanClause.Occur.MUST);
-			}
-		} else if (dirTerms.size() != 0) { // search for directories only, since file name was not specified
-			for (String item : dirTerms) {
-				BooleanQuery dirQuery = new BooleanQuery();
-
-				BooleanClause.Occur occurItem = occurItem(item);
-
-				Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
-				dirQuery.add(nameQuery, BooleanClause.Occur.MUST);
-
-				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
-				dirQuery.add(extensionQuery, BooleanClause.Occur.MUST);
-
-				query.add(dirQuery, occurItem);
-			}
-		} else {
-			return null;
-		}
-		return query;
-	}
-
-	private String prepareItem(String item) {
-		if (item.startsWith("+") || item.startsWith("-")) {
-			item = item.substring(1);
-		}
-		return (config.isFastSearch()) ? item + "*" : "*" + item + "*";
-	}
-
-	private BooleanClause.Occur occurItem(String item) {
-		BooleanClause.Occur result = BooleanClause.Occur.SHOULD;
-		if (item.startsWith("+")) {
-			result = BooleanClause.Occur.MUST;
-		} else if (item.startsWith("-")) {
-			result = BooleanClause.Occur.MUST_NOT;
-		}
-		return result;
 	}
 }
