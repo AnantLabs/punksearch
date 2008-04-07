@@ -8,8 +8,8 @@ import java.net.SocketAddress;
 public class OnlineChecker {
 
 	// TODO: extract to settings
-	private static final int     TIMEOUT          = 1000;
-	private static final boolean USE_OLD_SMB_PORT = false;
+	private static final int     TIMEOUT          = 2000;
+	private static final boolean USE_OLD_SMB_PORT = true;
 
 	private static final int     SMB_PORT         = 445;
 	private static final int     SMB_OLD_PORT     = 139;
