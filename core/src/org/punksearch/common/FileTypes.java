@@ -29,14 +29,8 @@ public class FileTypes {
 	private Map<String, FileType> types               = new HashMap<String, FileType>();
 
 	public void readFromDefaultFile() {
-		String home = System.getProperty("org.punksearch.home");
-		if (home == null) {
-    		home = System.getenv("PUNKSEARCH_HOME");
-    		if (home == null) {
-    			home = System.getProperty("user.dir");
-    		}
-		}
-		readFromFile(new File(home + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE));
+		String path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE;
+		readFromFile(new File(path));
 	}
 
 	public void readFromFile(File file) {
