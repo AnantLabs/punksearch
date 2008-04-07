@@ -2,13 +2,11 @@
 
 	<target name="clean">
 		<delete dir="dist" />
-		<delete dir=".">
-			<fileset>
-				<include name="*.zip" />
-			</fileset>
+		<delete>
+			<fileset dir="." includes="*.zip" />
 		</delete>
 	</target>
-	
+
 	<target name="build-core">
 		<ant dir="../core" target="jar" inheritAll="false" />
 	</target>
@@ -29,15 +27,6 @@
 		<mkdir dir="dist" />
 
 		<copy todir="dist/lib">
-			<fileset dir="../server/lib">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="../server">
-				<include name="punksearch-server.jar" />
-			</fileset>
-		</copy>
-
-		<copy todir="dist/lib">
 			<fileset dir="../core/lib">
 				<include name="*.jar" />
 			</fileset>
@@ -54,7 +43,22 @@
 
 		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war" />
 
-		<zip destfile="punksearch-noconf.zip">
+		<zip destfile="punksearch-noserver-noconf.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+
+		<copy todir="dist/lib">
+			<fileset dir="../server/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../server">
+				<include name="punksearch-server.jar" />
+			</fileset>
+		</copy>
+
+		<zip destfile="punksearch-withserver-noconf.zip">
 			<fileset dir="dist">
 				<include name="**/*" />
 			</fileset>
