@@ -14,7 +14,6 @@
 				<exclude name="WEB-INF/web.xml" />
 			</fileset>
 			<lib dir="../core/lib" />
-			<lib dir="lib" />
 			<lib file="../core/punksearch-core.jar" />
 		</war>
 	</target>
@@ -33,6 +32,9 @@
 		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
 			<classpath>
 				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="WebContent/WEB-INF/lib">
 					<include name="*.jar" />
 				</fileset>
 				<pathelement location="../core/punksearch-core.jar" />
