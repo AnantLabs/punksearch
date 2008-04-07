@@ -15,41 +15,41 @@
 	<target name="dist" depends="build-core,build-web,build-server">
 		<delete dir="dist" />
 		<mkdir dir="dist" />
-		
+
 		<copydir dest="dist" src="skel" />
-		
-		<exec executable="chmod" dir="dist/bin">
-			<arg line="a+x start.sh"/>
+
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x start.sh" />
 		</exec>
-		<exec executable="chmod" dir="dist/bin">
-			<arg line="a+x crawler.sh"/>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x crawler.sh" />
 		</exec>
-		
+
 		<copy todir="dist/lib">
-            <fileset dir="../server/lib">
-                <include name="*.jar" />
-            </fileset>
+			<fileset dir="../server/lib">
+				<include name="*.jar" />
+			</fileset>
 			<fileset dir="../server">
-				<include name="punksearch-server.jar"/>
+				<include name="punksearch-server.jar" />
 			</fileset>
 		</copy>
 
 		<copy todir="dist/lib">
-            <fileset dir="../core/lib">
-                <include name="*.jar" />
-            </fileset>
+			<fileset dir="../core/lib">
+				<include name="*.jar" />
+			</fileset>
 			<fileset dir="../core">
-				<include name="punksearch-core.jar"/>
+				<include name="punksearch-core.jar" />
 			</fileset>
 		</copy>
-		
-		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war"/>
-		
+
+		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war" />
+
 		<zip destfile="punksearch.zip">
 			<fileset dir="dist">
-				<include name="**/*"/>
+				<include name="**/*" />
 			</fileset>
 		</zip>
 	</target>
-	
+
 </project>
