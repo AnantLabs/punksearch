@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
-import org.punksearch.commons.IndexFields;
-import org.punksearch.searcher.ResultFilter;
+import org.punksearch.common.IndexFields;
+import org.punksearch.web.ResultFilter;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -38,24 +38,26 @@ public class OnlineResultFilter implements ResultFilter {
 		List<String> hosts = extractDistinctHosts(docs);
 
 		int size = hosts.size();
+		//System.out.println("Size: " + size);
 		int chunkSize = size / THREAD_COUNT;
 		int lastChunk = size % THREAD_COUNT;
 
-		final List<Integer> onlineHostIds = Collections.synchronizedList(new LinkedList<Integer>());
+		List<Integer> onlineIndexes = Collections.synchronizedList(new ArrayList<Integer>());
 
 		List<Thread> threadList = new ArrayList<Thread>();
 		for (int i = 0; i < THREAD_COUNT; i++) {
 			final int chunkStart = i * chunkSize;
 			final int chunkStop = chunkStart + chunkSize - 1;
-			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, chunkStart, chunkStop, hosts, onlineHostIds);
+			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, chunkStart, chunkStop, hosts, onlineIndexes);
 			thread.start();
 			threadList.add(thread);
+			//System.out.println(chunkStart + ":" + chunkStop);
 		}
 		if (lastChunk != 0) {
-			Thread thread = new OnlineCheckThread("OnlineCheckThread" + THREAD_COUNT, THREAD_COUNT * chunkSize, size,
-			        hosts, onlineHostIds);
+			Thread thread = new OnlineCheckThread("OnlineCheckThread" + THREAD_COUNT, THREAD_COUNT * chunkSize, size - 1, hosts, onlineIndexes);
 			thread.start();
 			threadList.add(thread);
+			//System.out.println((THREAD_COUNT * chunkSize) + ":" + (size - 1));
 		}
 
 		try {
@@ -66,9 +68,10 @@ public class OnlineResultFilter implements ResultFilter {
 			e.printStackTrace();
 			return new LinkedList<Integer>();
 		}
-		Set<String> onlineHosts = new HashSet<String>(onlineHostIds.size());
-		for (Integer id : onlineHostIds) {
-			onlineHosts.add(hosts.get(id));
+		Set<String> onlineHosts = new HashSet<String>(onlineIndexes.size());
+		for (Integer idx : onlineIndexes) {
+			onlineHosts.add(hosts.get(idx));
+			//System.out.println("Online host: " + hosts.get(idx));
 		}
 		List<Integer> docIds = new LinkedList<Integer>();
 		for (int i = 0 ; i < docs.size() ; i++) {
@@ -108,10 +111,11 @@ class OnlineCheckThread extends Thread {
 
 	public void run() {
 		//System.out.println("> onlineCheckThread. checking " + start + ":" + stop);
-		for (int j = start; j < stop; j++) {
+		for (int j = start; j <= stop; j++) {
 			String host = hosts.get(j).replace("smb_", "smb://").replace("ftp_", "ftp://");
 			if (CachedOnlineChecker.isOnline(host)) {
 				out.add(j);
+				//System.out.println(getName() + " Online in thread: " + host);
 			}
 		}
 		//System.out.println("< onlineCheckThread. checking " + start + ":" + stop);
