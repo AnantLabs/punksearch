@@ -12,7 +12,8 @@ package org.punksearch.web;
 
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
-import org.punksearch.commons.SearcherException;
+import org.punksearch.common.PunksearchProperties;
+import org.punksearch.common.SearcherException;
 import org.punksearch.searcher.Searcher;
 import org.punksearch.searcher.SearcherResult;
 
@@ -22,8 +23,9 @@ import org.punksearch.searcher.SearcherResult;
 public class SearcherWrapper {
 	private static Searcher searcher;
 
-	public static void init(String dir) {
-		searcher = new Searcher(dir);
+	public static void init() {
+		System.out.println("Using index directory: " + PunksearchProperties.resolveIndexDirectory());
+		searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
 	}
 
 	public static SearcherResult search(Query query, Integer first, Integer last, Filter filter)
