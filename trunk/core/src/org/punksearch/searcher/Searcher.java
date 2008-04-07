@@ -34,7 +34,6 @@ public class Searcher {
 
 	public Searcher(String dir) {
 		this.indexDir = dir;
-		this.indexSearcherCreated = System.currentTimeMillis();
 		initIndexSearcher(dir);
 	}
 
@@ -44,6 +43,7 @@ public class Searcher {
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Index directory is invalid: " + dir);
 		}
+		this.indexSearcherCreated = System.currentTimeMillis();
 	}
 
 	public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
