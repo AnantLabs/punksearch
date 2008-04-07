@@ -21,14 +21,7 @@ public class PunksearchProperties {
 	public static String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
-		String home = System.getProperty("org.punksearch.home");
-		if (home == null) {
-			home = System.getenv("PUNKSEARCH_HOME");
-			if (home == null) {
-				home = System.getProperty("user.dir");
-			}
-		}
-		loadFromFile(home + System.getProperty("file.separator") + PROPERTIES_FILENAME);
+		loadFromFile(resolveHome() + System.getProperty("file.separator") + PROPERTIES_FILENAME);
 	}
 
 	public static void loadFromFile(String path) throws FileNotFoundException {
@@ -47,17 +40,24 @@ public class PunksearchProperties {
 	public static String resolveIndexDirectory() {
 		String indexDir = System.getProperty("org.punksearch.index.dir");
 		if (!isAbsolutePath(indexDir)) {
-			String home = System.getenv("PUNKSEARCH_HOME");
-			if (home == null) {
-				home = System.getProperty("user.dir");
-			}
-			indexDir = home + System.getProperty("file.separator") + indexDir;
+			indexDir = resolveHome() + System.getProperty("file.separator") + indexDir;
 		}
 		return indexDir;
 	}
 
 	private static boolean isAbsolutePath(String path) {
 		return path.startsWith("/");
+	}
+	
+	public static String resolveHome() {
+		String home = System.getProperty("org.punksearch.home");
+		if (home == null) {
+			home = System.getenv("PUNKSEARCH_HOME");
+			if (home == null) {
+				home = System.getProperty("user.dir");
+			}
+		}
+		return home;
 	}
 
 }
