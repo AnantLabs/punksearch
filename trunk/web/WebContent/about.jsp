@@ -1,6 +1,4 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<%@page import="org.punksearch.web.Types"%>
-<%@page import="org.punksearch.commons.IndexFields"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
     <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
     <head>
@@ -9,7 +7,7 @@
         <link href="css/style.css" type="text/css" rel="stylesheet" />
     </head>
     <body>
-        <%@ include file="header.jsp"%>
+        <%@ include file="inc/header.jsp"%>
         <br/><br/>
         <table align="center" style="text-align: left;">
 	        <tr><th>Version</th><td>0.7.3</td></tr>
