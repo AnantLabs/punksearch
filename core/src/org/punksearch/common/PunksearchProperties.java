@@ -18,7 +18,7 @@ import java.util.Properties;
 
 public class PunksearchProperties {
 
-	private static String PROPERTIES_FILENAME = "punksearch.properties";
+	public static String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
 		String home = System.getenv("PUNKSEARCH_HOME");
