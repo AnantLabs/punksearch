@@ -12,6 +12,7 @@ package org.punksearch.crawler;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
 
@@ -64,6 +66,8 @@ public class NetworkCrawler implements Runnable {
 				__log.info("Crawl thread joined: " + crawlerThread.getName());
 				crawledHosts.addAll(crawlerThread.getCrawledHosts());
 			}
+			
+			FileUtils.writeLines(new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list"), crawledHosts);
 
 			cleanup(indexDirectory, crawledHosts);
 			__log.info("Target index directory cleaned up: " + indexDirectory);
