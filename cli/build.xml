@@ -20,7 +20,7 @@
 		<ant dir="../core" target="jar" inheritAll="false" />
 	</target>
 
-	<target name="dist" depends="build-core,compile" description="Builds the ZIP file.">
+	<target name="dist" depends="build-core,jar" description="Builds the ZIP file.">
 
 		<delete dir="${distDir}" failonerror="true" />
 		<mkdir dir="dist" />
@@ -34,6 +34,9 @@
 			<fileset dir="../core">
 				<include name="punksearch-core.jar" />
 			</fileset>
+			<fileset dir=".">
+				<include name="punksearch-cli.jar" />
+			</fileset>
 		</copy>
 
 		<zip destfile="punksearch-cli.zip">
@@ -43,6 +46,12 @@
 		</zip>
 
 	</target>
+
+	<target name="jar" depends="compile" >
+        <jar destfile="punksearch-cli.jar">
+            <fileset dir="${buildDir}/classes" />
+        </jar>
+    </target>
 
 	<target name="compile" description="Compiles the JAVA sources" >
 		<delete dir="${buildDir}" failonerror="true" />
