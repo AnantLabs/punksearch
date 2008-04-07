@@ -61,16 +61,20 @@ public class NetworkCrawler implements Runnable {
 			Set<String> crawledHosts = new HashSet<String>();
 			for (HostCrawler crawlerThread : threadList) {
 				crawlerThread.join();
+				__log.info("Crawl thread joined: " + crawlerThread.getName());
 				crawledHosts.addAll(crawlerThread.getCrawledHosts());
 			}
 
 			cleanup(indexDirectory, crawledHosts);
+			__log.info("Target index directory cleaned up: " + indexDirectory);
 			
 			merge(indexDirectory, threadCount);
+			__log.info("Temp index directories merged into target index directory");
 
 			for (int i = 0; i < threadCount; i++) {
 				FileUtils.deleteDirectory(new File(indexDirectory + "_crawler" + i));
 			}
+			__log.info("Temp index directories cleaned up");
 			
 			// IndexOperator.getInstance().optimizeIndex();
 			// IndexOperator.getInstance().flushIndex();
