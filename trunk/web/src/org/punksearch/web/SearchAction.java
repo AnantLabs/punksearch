@@ -35,8 +35,6 @@ import org.punksearch.web.online.OnlineResultFilter;
  */
 public class SearchAction {
 
-	// TODO: extract SearchAction.MIN_TERM_LENGTH to settings
-	private static final int MIN_TERM_LENGTH  = 3;
 	private static final int MAX_DOCS         = 10000;
 
 	private static Logger    __log            = Logger.getLogger(SearchParams.class.getName());
