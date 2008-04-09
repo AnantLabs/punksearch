@@ -5,10 +5,10 @@
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <c:set var="currentTab" value="<%=params.type%>" />
 
-<div id="searchTabsContainer">
-<table cellspacing=0 id="searchTabs">
+<div id="tabsContainer">
+<table cellspacing="0" id="tabs">
 	<tr>
-		<td style="width: 50%">&#160;</td>
+		<td style="width: 200px;">&#160;</td>
 		<c:forEach items="${'everything,movie,serial,music,clip,picture,advanced'}" var="tab">
 			<c:choose>
 				<c:when test="${tab == 'advanced'}" >
@@ -27,7 +27,7 @@
 				</c:otherwise>
 			</c:choose>
 		</c:forEach>
-		<td style="width: 50%">&#160;</td>
+		<td>&#160;</td>
 	</tr>
 </table>
 </div>
