@@ -179,3 +179,11 @@ DIV.othersInGroup SPAN.name {
 DIV.othersInGroup SPAN.path {
 	font-size: 8pt;
 }
+
+#statistics TABLE {
+	text-align: left;
+}
+
+#statistics TABLE TD, #statistics TABLE TH {
+	background-color: white;
+}
