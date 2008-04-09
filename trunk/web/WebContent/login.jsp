@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<%@ include file="head.jsp" %>	
+	<%@ include file="/WEB-INF/inc/head.jsp" %>	
 	<body>
-		<%@ include file="header.jsp" %>	
+		<%@ include file="/WEB-INF/inc/header.jsp" %>	
 		<div id="searchFormContainer" style="height:50px">
 			<form id="searchForm" action="login.jsp" method="post">
 				Password: <input type="password" name="password" />&#160;<input type="submit" value="Login" />
@@ -21,7 +21,7 @@
 				String password = request.getParameter("password");
 				if (password != null)				
 				{
-					String adminPassword = getServletContext().getInitParameter("adminPassword");
+					String adminPassword = getServletContext().getInitParameter("admin_password");
 					if (password.equals(adminPassword))
 					{
 						session.setAttribute("logged", true);
