@@ -9,7 +9,7 @@
 <table cellspacing="0" id="tabs">
 	<tr>
 		<td style="width: 200px;">&#160;</td>
-		<c:forEach items="${'everything,movie,serial,music,clip,picture,advanced'}" var="tab">
+		<c:forEach items="${'everything,films,serials,music,clips,pictures,advanced'}" var="tab">
 			<c:choose>
 				<c:when test="${tab == 'advanced'}" >
 					<td class="spacer" style="padding-left: 50px;">&#160;</td>
