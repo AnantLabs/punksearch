@@ -36,7 +36,7 @@ public class AuthFilter implements Filter
 			{
 				// first check if it is request with correct password specified (this can be request from cron)
 				String specifiedPass = request.getParameter("password");
-				String correctPass   = filterConfig.getServletContext().getInitParameter("adminPassword");
+				String correctPass   = filterConfig.getServletContext().getInitParameter("admin_password");
 				if (specifiedPass != null && specifiedPass.equals(correctPass))
 				{
 					filterChain.doFilter(request, response);
