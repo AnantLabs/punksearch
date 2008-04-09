@@ -65,6 +65,9 @@ public class HostCrawler extends Thread {
 			crawlWithAdapter(smbAdapter);
 			crawlWithAdapter(ftpAdapter);
 
+			if (isInterrupted()) {
+				break;
+			}
 		}
 		indexOperator.close();
 	}
