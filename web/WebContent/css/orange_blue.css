@@ -7,8 +7,21 @@ INPUT {
 	border: 1px solid black;
 }
 
+H1, H2, H3 {
+	color: white;
+}
+
+TABLE.data TD, TABLE.data TH {
+	background-color: white;
+}
+
+
 A {
 	color: white;
+	text-decoration: none;
+}
+A:hover {
+	color: #FF7B00;
 }
 
 .errorMessage {
@@ -44,17 +57,17 @@ A {
 	color: #FFFFFF;
 }
 
-#searchTabs TD.tab {
+#tabs TD.tab {
 	color: white;
 }
 
-#searchTabs TD.selected {
+#tabs TD.selected {
 	color: #FFFFFF;
 	background-color: #FF7B00;
 	border-bottom: 1px solid #FF7B00;
 }
 
-#searchTabs TD a:hover {
+#tabs TD a:hover {
 	color: #FF7B00;
 }
 
