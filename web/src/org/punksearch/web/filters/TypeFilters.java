@@ -93,7 +93,6 @@ public class TypeFilters {
 			Long min = type.getMinBytes();
 			Long max = type.getMaxBytes();
 			Set<String> ext = type.getExtensions();
-			//System.out.println("Type: " + typeName + " = " + min + ":" + max + " -> " + ext);
 			return create(min, max, ext);
 		} else {
 			throw new IllegalArgumentException("File type not found: " + typeName);
