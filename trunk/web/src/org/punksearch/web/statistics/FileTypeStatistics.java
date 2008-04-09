@@ -14,22 +14,35 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
+import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.searcher.SearcherResult;
-import org.punksearch.web.SearcherWrapper;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.web.filters.TypeFilters;
 
 public class FileTypeStatistics {
+
+	private static Map<String, Long> countCache              = null;
+	private static Map<String, Long> sizeCache               = null;
+	private static Long              totalSizeCache          = null;
+	private static long              countCacheTimestamp     = 0;
+	private static long              sizeCacheTimestamp      = 0;
+	private static long              totalSizeCacheTimestamp = 0;
 
 	private static Query makeQuery() {
 		BooleanQuery query = new BooleanQuery();
@@ -40,60 +53,129 @@ public class FileTypeStatistics {
 		return query;
 	}
 
-	public static int count(String type) {
+	private static Hits extractDocsForType(String type) {
 		Filter filter = TypeFilters.get(type);
 		try {
-			SearcherResult result = SearcherWrapper.search(makeQuery(), 0, 1, filter);
-			return result.count();
+			IndexSearcher indexSearcher = new IndexSearcher(PunksearchProperties.resolveIndexDirectory());
+			Hits hits = indexSearcher.search(makeQuery(), filter);
+			return hits;
 		} catch (Exception e) {
-			return 0;
+			return null;
 		}
 	}
 
-	public static int size(String type) {
-		System.out.println("Statistics.size start for " + type);
-		Filter filter = TypeFilters.get(type);
-		try {
-			SearcherResult result = SearcherWrapper.search(makeQuery(), filter, Integer.MAX_VALUE);
-			int size = 0;
-			for (Document doc : result.items()) {
-				size += Integer.parseInt(doc.get(IndexFields.SIZE));
+	public static long count(String type) {
+		return extractDocsForType(type).length();
+	}
+
+	public static Map<String, Long> count() {
+		if (countCache == null || indexChangedAfter(countCacheTimestamp)) {
+			countCache = new HashMap<String, Long>();
+
+			FileTypes types = TypeFilters.getTypes();
+			for (String key : types.list()) {
+				countCache.put(key, count(key));
 			}
-			return size / 1024;
+			countCache.put("directory", count(TypeFilters.DIRECTORY_KEY));
+			countCacheTimestamp = System.currentTimeMillis();
+		}
+		return countCache;
+	}
+
+	public static long size(String type) {
+		System.out.println("Started FileTypeStatistics.size() for " + type);
+		Hits hits = extractDocsForType(type);
+		long size = 0;
+		try {
+			for (int i = 0; i < hits.length(); i++) {
+				Document doc = hits.doc(i);
+				size += Long.parseLong(doc.get(IndexFields.SIZE));
+			}
 		} catch (Exception e) {
-			return 0;
+			e.printStackTrace();
 		}
+		System.out.println("Finished FileTypeStatistics.size() for " + type + "=" + (size / (1024D * 1024)) + "MB");
+		return size;
 	}
 
-	public static Map<String, Integer> count() {
-		Map<String, Integer> countMap = new HashMap<String, Integer>();
-
-		FileTypes types = TypeFilters.getTypes();
-		for (String key : types.list()) {
-			countMap.put(key, count(key));
+	public static Map<String, Long> size() {
+		if (sizeCache == null || indexChangedAfter(sizeCacheTimestamp)) {
+			sizeCache = new HashMap<String, Long>();
+			FileTypes types = TypeFilters.getTypes();
+			for (String key : types.list()) {
+				sizeCache.put(key, size(key));
+			}
+			sizeCacheTimestamp = System.currentTimeMillis();
 		}
-
-		return countMap;
+		return sizeCache;
 	}
 
-	public static PieDataset makePieDataset(Map<String, Integer> values, int total) {
-		int sum = 0;
+	public static Long totalSize() {
+		if (totalSizeCache == null || indexChangedAfter(totalSizeCacheTimestamp)) {
+			long size = 0;
+			try {
+				// Rough approximation to the root directories.
+				// Obviously, non-latin1 directory names slip through the filter, we'll catch them later
+				// Maybe we should use some ranges with UTF8-16 characters... TODO
+				String approxQuery = "Host:ftp_* Host:smb_* -Path:{a TO Z*} -Path:{0 TO 9*}";
+				QueryParser parser = new QueryParser("Host", new SimpleAnalyzer());
+				Query query = parser.parse(approxQuery);
+				IndexSearcher indexSearcher = new IndexSearcher(PunksearchProperties.resolveIndexDirectory());
+				Hits hits = indexSearcher.search(query);
+				for (int i = 0; i < hits.length(); i++) {
+					Document doc = hits.doc(i);
+					String path = doc.get(IndexFields.PATH);
+					if (!path.equals("/")) {
+						continue;
+					}
+					size += Long.parseLong(doc.get(IndexFields.SIZE));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			totalSizeCache = size;
+			totalSizeCacheTimestamp = System.currentTimeMillis();
+		}
+		return totalSizeCache;
+	}
+
+	public static PieDataset makePieDataset(Map<String, Long> values) {
+		long total = 0;
+		for (String key : values.keySet()) {
+			total += values.get(key);
+		}
+		return makePieDataset(values, total);
+	}
+
+	public static PieDataset makePieDataset(Map<String, Long> values, long total) {
+		long sum = 0;
 		for (String key : values.keySet()) {
 			sum += values.get(key);
 		}
-		int other = total - sum;
+		long other = total - sum;
 
-		NumberFormat nf = NumberFormat.getPercentInstance();
-		nf.setMaximumFractionDigits(2);
+		NumberFormat nfPercent = NumberFormat.getPercentInstance();
+		NumberFormat nfNumber = NumberFormat.getNumberInstance();
+		nfPercent.setMaximumFractionDigits(2);
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 		for (String key : values.keySet()) {
-			int value = values.get(key);
-			dataset.setValue(key + " (" + nf.format(value / (total + 0.0)) + ", " + value + ")", value);
+			long value = values.get(key);
+			dataset.setValue(key + " " + nfPercent.format(value / (total + 0.0)) + " (" + nfNumber.format(value) + ")", value);
 		}
-		dataset.setValue("other (" + nf.format(other / (total + 0.0)) + ", " + other + ")", other);
+		if (other > 0) {
+			dataset.setValue("other " + nfPercent.format(other / (total + 0.0)) + " (" + nfNumber.format(other) + ")", other);
+		}
 
 		return dataset;
+	}
+
+	private static boolean indexChangedAfter(long timestamp) {
+		try {
+			return (IndexReader.lastModified(PunksearchProperties.resolveIndexDirectory()) > timestamp);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

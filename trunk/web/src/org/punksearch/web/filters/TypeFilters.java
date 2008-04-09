@@ -11,16 +11,20 @@
 package org.punksearch.web.filters;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.CachingWrapperFilter;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.QueryFilter;
+import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.TermQuery;
+import org.punksearch.common.FileType;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 import org.punksearch.searcher.filters.CompositeFilter;
@@ -29,18 +33,12 @@ import org.punksearch.searcher.filters.NumberRangeFilter;
 
 public class TypeFilters {
 
-	private static Long                MB      = 1024L * 1024L;
+	public static final String         DIRECTORY_KEY = "directory";
 
-	private static Map<String, Filter> filters = new HashMap<String, Filter>();
-
-	private static FileTypes           types   = new FileTypes();
+	private static Map<String, Filter> filters       = new HashMap<String, Filter>();
+	private static FileTypes           types         = new FileTypes();
 
 	static {
-		init();
-	}
-
-	public static void reset() {
-		filters.clear();
 		init();
 	}
 
@@ -52,18 +50,14 @@ public class TypeFilters {
 		types.readFromDefaultFile();
 
 		for (String key : types.list()) {
-			filters.put(key, new CachedFilter(createFilter(key)));
+			filters.put(key, create(key));
 		}
+		Set<String> dirExts = new HashSet<String>(1);
+		dirExts.add(IndexFields.DIRECTORY_EXTENSION);
+		filters.put(DIRECTORY_KEY, create(null, null, dirExts));
 	}
 
-	private static Filter createFilter(String type) {
-		Long min = types.get(type).getMinBytes();
-		Long max = types.get(type).getMaxBytes();
-		String ext = "";
-		for (String tmp : types.get(type).getExtensions()) {
-			ext += " " + tmp;
-		}
-		System.out.println("Type: " + type + " = " + min + ":" + max + " -> " + ext);
+	private static Filter create(Long min, Long max, Set<String> extensions) {
 		CompositeFilter filter = new CompositeFilter();
 
 		if (min != null || max != null) {
@@ -71,24 +65,39 @@ public class TypeFilters {
 			filter.add(sizeFilter);
 		}
 
-		if (ext != null) {
-			try {
-				Query extQuery;
-				if (ext.length() != 0) {
-					extQuery = new QueryParser(IndexFields.EXTENSION, new StandardAnalyzer()).parse(ext);
-				} else {
-					extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
-				}
-				System.out.println(extQuery);
-				QueryFilter extFilter = new QueryFilter(extQuery);
-				filter.add(extFilter);
-			} catch (ParseException pe) {
-				// dummy
+		String extStr = "";
+		for (String tmp : extensions) {
+			extStr += " " + tmp;
+		}
+		extStr = extStr.trim();
+
+		try {
+			Query extQuery;
+			if (extStr.length() != 0) {
+				extQuery = new QueryParser(IndexFields.EXTENSION, new StandardAnalyzer()).parse(extStr);
+			} else {
+				extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
 			}
+			QueryWrapperFilter extFilter = new QueryWrapperFilter(extQuery);
+			filter.add(extFilter);
+		} catch (ParseException pe) {
+			// dummy
 		}
 
-		return filter;
+		return new CachingWrapperFilter(filter);
+	}
 
+	private static Filter create(String typeName) {
+		FileType type = types.get(typeName);
+		if (type != null) {
+			Long min = type.getMinBytes();
+			Long max = type.getMaxBytes();
+			Set<String> ext = type.getExtensions();
+			//System.out.println("Type: " + typeName + " = " + min + ":" + max + " -> " + ext);
+			return create(min, max, ext);
+		} else {
+			throw new IllegalArgumentException("File type not found: " + typeName);
+		}
 	}
 
 	public static FileTypes getTypes() {
