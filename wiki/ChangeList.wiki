@@ -6,9 +6,9 @@
   * core: settings extracted to punksearch.properties and filetypes.conf files
   * usability: possibility to start crawling from command-line (bash script)
   * usability: quickstart bundle with jetty, example index directory and settings prepared
-  * gui: fixed bug of presentation of tabs in firefox3
   * gui: admin interface reworked
   * statistics: statistics greatly improved  (pie charts, etc)
+  * bugfix: fixed bug of presentation of tabs in firefox3
 
 = 0.7.3 (2008-01-13) =
   * gui: multi-theme feature (application supports color themes)
