@@ -1,7 +1,7 @@
 #summary heavy load simulation.
 #labels Featured
 
-*The results are outdated. The test was conducted on some old version of the application. We are going to repeat the test with using new version soon. Stay tuned.*
+*The results are outdated. The test was conducted on some old version of the application. We are going to repeat the test using new version soon. Stay tuned.*
 
 = Introduction =
 It was interesting to check the application throughput on heavy load setting.
