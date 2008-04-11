@@ -15,6 +15,7 @@ The bundle includes:
 Setup:
   * Download the bundle (punksearch-<version>-quickstart.zip)
   * Extract it into some directory (for example: /opt/punksearch)
+  * Run start.sh (or start.bat)
   * Open http://localhost:8180/punksearch/search.jsp and try find something (the example index contains free linux-related stuff, so search "linux" or "ubuntu" or "debian", etc)
   * Open http://localhost:8180/punksearch/admin.jsp and login (password: "123_456" by default)
   * Check settings at "config" tab, modify punksearch.properties if needed (restart the server if you did)
