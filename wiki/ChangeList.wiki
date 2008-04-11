@@ -5,6 +5,7 @@
   * *NB!: index directories created with 0.7.3 are incompatible with this version. Please reindex the network.*
   * core: crawler engine was refactored to improve design and scalability
   * core: settings extracted to punksearch.properties and filetypes.conf files
+  * core: hosts offline (not accessible) during current crawling, but crawled before are not removed from the index for some time (configurable with 24h granularity, default to 7 days). This was done to prevent good hosts to be removed from the index in case they are just offline during current crawling.
   * usability: possibility to start crawling from command-line (bash script)
   * usability: quickstart bundle with jetty, example index directory and settings prepared
   * gui: admin interface reworked
