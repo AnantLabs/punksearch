@@ -35,7 +35,7 @@ Setup:
     * Tomcat first way: put WAR into webapps directory, setup PUNKSEARCH_HOME environment variable
     * Tomcat second way: put punksearch.xml file into CATALINA_HOME/conf/Catalina/localhost and modify it to meet your needs (set punksearch_home and admin_password, location of war file)
   * Open http://localhost:<servlet container port>/punksearch/admin.jsp and login (password: "123_456" by default)
-  * Check settings at "config" tab, modify punksearch.properties if needed
+  * Check settings at "config" tab, modify punksearch.properties if needed (redeploy web app if you did)
   * Crawl your LAN ("status" tab or using bash script)
   * Open http://localhost:<servlet container port>/punksearch/search.jsp and try find something
   * Enjoy! :)
