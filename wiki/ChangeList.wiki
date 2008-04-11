@@ -2,6 +2,7 @@
 #labels Featured
 
 = 0.8.0 (2008-04-11) =
+  * *NB!: index directories created with 0.7.3 are incompatible with this version. Please reindex the network.*
   * core: crawler engine was refactored to improve design and scalability
   * core: settings extracted to punksearch.properties and filetypes.conf files
   * usability: possibility to start crawling from command-line (bash script)
