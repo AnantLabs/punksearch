@@ -1,0 +1,109 @@
+<project name="punksearch-builder" default="dist">
+
+	<property name="version" value="0.8.0" />
+
+	<target name="clean">
+		<delete dir="dist" />
+		<delete>
+			<fileset dir="." includes="*-quickstart.zip" />
+			<fileset dir="." includes="*-slim.zip" />
+		</delete>
+	</target>
+
+	<target name="build-core">
+		<ant dir="../core" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="build-cli">
+		<ant dir="../cli" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="build-web">
+		<ant dir="../web" target="war" inheritAll="false" />
+	</target>
+
+	<target name="build-server">
+		<ant dir="../server" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="clean-war">
+		<delete dir="dist-war" />
+		<delete>
+			<fileset dir="." includes="*-war.zip" />
+		</delete>
+	</target>
+
+	<target name="dist-war" depends="clean-war,build-web">
+		<mkdir dir="dist-war" />
+
+		<copyfile dest="dist-war/punksearch.war" src="../web/punksearch.war" />
+
+		<copy todir="dist-war">
+			<fileset dir="skel">
+				<include name="punksearch.properties" />
+				<include name="filetypes.conf" />
+				<include name="punksearch.xml" />
+			</fileset>
+		</copy>
+
+		<zip destfile="punksearch-${version}-war.zip">
+			<fileset dir="dist-war">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="dist-quickstart" depends="clean,build-core,build-cli,build-web,build-server">
+		<mkdir dir="dist" />
+
+		<copy todir="dist/lib">
+			<fileset dir="../core/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../core">
+				<include name="punksearch-core.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="dist/lib">
+			<fileset dir="../cli">
+				<include name="punksearch-cli.jar" />
+			</fileset>
+		</copy>
+
+		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war" />
+
+		<zip destfile="punksearch-${version}-slim.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+
+		<copy todir="dist/lib">
+			<fileset dir="../server/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../server">
+				<include name="punksearch-server.jar" />
+			</fileset>
+		</copy>
+
+		<copydir dest="dist" src="skel" />
+
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x start.sh" />
+		</exec>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x crawler.sh" />
+		</exec>
+
+		<zip destfile="punksearch-${version}-quickstart.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="dist" depends="dist-war,dist-quickstart" />
+
+</project>

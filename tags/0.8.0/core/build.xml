@@ -1,0 +1,46 @@
+<project name="punksearch-core" default="jar">
+
+    <tstamp>
+        <format property="dateIso" pattern="yyyy-MM-dd" />
+    </tstamp>
+
+    <property name="srcDir" location="src" />
+    <property name="buildDir" location="build" />
+    <property name="docDir" location="doc" />
+
+    <property name="debug" value="on" />
+
+    <path id="run.classpath">
+        <fileset dir="lib">
+            <include name="*.jar" />
+        </fileset>
+        <pathelement path="build/classes" />
+        <pathelement path="etc" />
+    </path>
+
+    <target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
+        <mkdir dir="build/classes" />
+        <javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" debug="${debug}" includeAntRuntime="no" destdir="${buildDir}/classes">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="*.jar" />
+                </fileset>
+            </classpath>
+        </javac>
+        <jar destfile="punksearch-core.jar">
+            <fileset dir="${buildDir}/classes" />
+        </jar>
+    </target>
+
+    <target name="clean">
+        <delete file="punksearch-core.jar" />
+        <delete dir="${buildDir}" failonerror="true" />
+    </target>
+
+    <target name="crawl">
+        <java fork="true" failonerror="true" classname="org.punksearch.cli.CrawlerMain" classpathref="run.classpath">
+            <jvmarg line="-Xmx1024m" />
+        </java>
+    </target>
+
+</project>

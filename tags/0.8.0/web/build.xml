@@ -1,0 +1,54 @@
+<project name="punksearch-web" default="war">
+
+	<tstamp>
+		<format property="dateIso" pattern="yyyy-MM-dd" />
+	</tstamp>
+	<property name="srcDir" location="src" />
+	<property name="buildDir" location="build" />
+	<property name="docDir" location="doc" />
+
+	<target name="war" depends="build-core,clean,compile" description="Compiles sources and builds the WAR file.">
+		<war destfile="punksearch.war" webxml="WebContent/WEB-INF/web.xml">
+			<classes dir="${buildDir}/classes" />
+			<fileset dir="WebContent">
+				<exclude name="WEB-INF/web.xml" />
+			</fileset>
+			<lib dir="../core/lib" />
+			<lib file="../core/punksearch-core.jar" />
+		</war>
+	</target>
+
+	<target name="clean">
+		<delete file="punksearch.war" />
+		<delete dir="${buildDir}" failonerror="true" />
+	</target>
+
+	<target name="build-core">
+		<ant dir="../core" target="jar" inheritAll="false" />
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${buildDir}/classes" />
+		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+			<classpath>
+				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="WebContent/WEB-INF/lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement location="../core/punksearch-core.jar" />
+				<fileset dir="../core/lib">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" depends="clean,compile" description="Compiles the Java sources and builds the JAR file.">
+		<jar destfile="punksearch-web.jar">
+			<fileset dir="${buildDir}/classes" />
+		</jar>
+	</target>
+
+</project>
