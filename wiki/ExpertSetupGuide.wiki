@@ -1,0 +1,17 @@
+#summary setup for (linux) experts, system administrators.
+
+= Introduction =
+
+This page describes in details one of possible approaches to install (setup) the PUNKSeach on your linux server.
+We cover here servlet container configuration (Tomcat), Cron setup and arrangement of the PUNKSearch files to enable easy upgrades in the future (so you will not lost your configuration on upgrade).
+
+= Details =
+
+== Overview ==
+http://punksearch.googlecode.com/files/expert_setup.png
+
+== Tomcat ==
+
+== Cron ==
+
+== Separate configs from other stuff ==
