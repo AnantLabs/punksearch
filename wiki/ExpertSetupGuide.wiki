@@ -15,10 +15,14 @@ Please note we exploit convenient symbolic links in the proposed setup.
 == Separate configs from other stuff ==
 First of all we are lazy and want upgrades to go smoothly and do not erase our custom configuration files (namely, punksearch.properties and filetypes.conf).
 
-So we create 2 directories: 1) /opt/punksearch, 2)/opt/punksearch_dist.
+So we create 2 directories: 
+  # /opt/punksearch,
+  # /opt/punksearch_dist.
 
 In the second directory we download punksearch-<version>-quickstart.zip and unzip it into the directory.
+
 Then we copy 2 configuration files  to /opt/punksearch and midify them to satisfy our needs.
+
 The major thing we should setup in punksearch.properties is path to the index directory.
 We prefer to store index outside the configuration directory (for example in /opt/punksearch_index/index/). Please, note the extra "index" directory at the end. This was done to isolate crawler-generated junk. Yeah, crawler generates some junk during crawling process -- the small temporary index directories (in out case expect to see directories like /opt/punksearch_index/index_crawler3 from time to time). The crawler cleans the junk after it is finished to crawl the network, but still...
 
