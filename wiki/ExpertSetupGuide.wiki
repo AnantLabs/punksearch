@@ -36,6 +36,6 @@ We suggest to copy the descriptor from /opt/punksearch_dist to /opt/punksearch, 
 
 == Cron ==
 
-Ad finally, you'd like to setup the system to re-crawl the network periodically. Okay, no problem, just create tiny bash script (see Figure) and make symlink to it from /etc/cron.daily and you are done!
+And finally, you'd like to setup the system to re-crawl the network periodically. Okay, no problem, just create tiny bash script (see Figure) and make symlink to it from /etc/cron.daily and you are done!
 
 Good luck and watch the updates.
