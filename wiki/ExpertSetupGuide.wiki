@@ -33,4 +33,9 @@ The next thing we want to do is to make symbolic links to the crawler.sh and lib
 Both bundles (WAR and QuickStart) include context descriptor file proven to work with Apache Tomcat (tested on 5.5.26). In order to setup your tomcat installation to host the PUNKSearch, you should symlink the context descriptor file (punksearch.xml) to TOMCAT_HOME/conf/Catalina/localhost/punksearch.xml. The Tomcat then handle the descriptor and does the magic.
 
 We suggest to copy the descriptor from /opt/punksearch_dist to /opt/punksearch, adjust it and do symlink. Do not forget to setup the punksearch_home and admin_password properties, as well as path to the war file.
+
 == Cron ==
+
+Ad finally, you'd like to setup the system to re-crawl the network periodically. Okay, no problem, just create tiny bash script (see Figure) and make symlink to it from /etc/cron.daily and you are done!
+
+Good luck and watch the updates.
