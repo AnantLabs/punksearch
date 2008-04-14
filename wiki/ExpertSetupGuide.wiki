@@ -1,4 +1,5 @@
 #summary setup for (linux) experts, system administrators.
+#labels Featured
 
 = Introduction =
 
