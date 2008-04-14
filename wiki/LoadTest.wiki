@@ -1,5 +1,4 @@
 #summary heavy load simulation.
-#labels Featured
 
 *The results are outdated. The test was conducted on some old version of the application. We are going to repeat the test using new version soon. Stay tuned.*
 
