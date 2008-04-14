@@ -1,5 +1,4 @@
 #summary How to schedule indexing task using cron.
-#labels Featured
 
 = Introduction =
 
