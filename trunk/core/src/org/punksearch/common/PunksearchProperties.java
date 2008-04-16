@@ -31,6 +31,12 @@ public class PunksearchProperties {
 			props.load(inputStream);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+	            inputStream.close();
+            } catch (IOException e) {
+	            e.printStackTrace();
+            }
 		}
 		for (Object key : props.keySet()) {
 			System.setProperty((String) key, (String) props.get(key));
