@@ -192,6 +192,30 @@ public class IndexOperator {
 		IndexWriter iw = createIndexWriter(dir);
 		iw.close();
 	}
+	
+	public static boolean prepareIndex(String dir, boolean forceUnlock) {
+		if (!indexExists(dir)) {
+			try {
+				createIndex(dir);
+			} catch (IOException e) {
+				__log.severe("Can't create index directory: '" + dir + "'! Stop crawling.");
+				return false;
+			}
+		}
+
+		if (isLocked(dir)) {
+			if (forceUnlock) {
+				unlock(dir);
+			} else {
+				__log.info("Can't start crawling, since index directory is locked: '" + dir + "' "
+				        + "Consider to set \"*.crawler.forceunlock=true\" in punksearch.properties");
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
 
 	private static Analyzer createAnalyzer() {
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
