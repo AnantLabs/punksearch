@@ -183,6 +183,15 @@ public class IndexOperator {
 			        + "(maybe index directory just does not exist?)");
 		}
 	}
+	
+	public static boolean indexExists(String dir) {
+		return IndexReader.indexExists(dir);
+	}
+	
+	public static void createIndex(String dir) throws IOException {
+		IndexWriter iw = createIndexWriter(dir);
+		iw.close();
+	}
 
 	private static Analyzer createAnalyzer() {
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
