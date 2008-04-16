@@ -11,8 +11,8 @@
 package org.punksearch.crawler;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +42,12 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	public void run() {
+
+		boolean forceUnlock = Boolean.valueOf(System.getProperty("org.punksearch.crawler.forceunlock"));
+		if (!IndexOperator.prepareIndex(indexDirectory, forceUnlock)) {
+			return;
+		}
+
 		String range = System.getProperty("org.punksearch.crawler.range");
 		int threadCount = Integer.parseInt(System.getProperty("org.punksearch.crawler.threads"));
 
@@ -54,9 +60,12 @@ public class NetworkCrawler implements Runnable {
 			__log.info("Crawl process started");
 
 			for (int i = 0; i < threadCount; i++) {
-				// FileUtils.deleteDirectory(new File(indexDirectory + "_IndexerThread" + i));
-				HostCrawler indexerThread = new HostCrawler("HostCrawler" + i, iter, fileTypes, indexDirectory + "_crawler" + i);
-				// indexerThread.setDaemon(true);
+				String threadIndexDir = indexDirectory + "_crawler" + i;
+				if (!IndexOperator.prepareIndex(threadIndexDir, forceUnlock)) {
+					stop();
+					return;
+				}
+				HostCrawler indexerThread = new HostCrawler("HostCrawler" + i, iter, fileTypes, threadIndexDir);
 				indexerThread.start();
 				threadList.add(indexerThread);
 			}
@@ -66,12 +75,12 @@ public class NetworkCrawler implements Runnable {
 				__log.info("Crawl thread joined: " + crawlerThread.getName());
 				crawledHosts.addAll(crawlerThread.getCrawledHosts());
 			}
-			
+
 			FileUtils.writeLines(new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list"), crawledHosts);
 
 			cleanup(indexDirectory, crawledHosts);
 			__log.info("Target index directory cleaned up: " + indexDirectory);
-			
+
 			merge(indexDirectory, threadCount);
 			__log.info("Temp index directories merged into target index directory");
 
@@ -79,9 +88,6 @@ public class NetworkCrawler implements Runnable {
 				FileUtils.deleteDirectory(new File(indexDirectory + "_crawler" + i));
 			}
 			__log.info("Temp index directories cleaned up");
-			
-			// IndexOperator.getInstance().optimizeIndex();
-			// IndexOperator.getInstance().flushIndex();
 
 			long finishTime = new Date().getTime();
 			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
@@ -90,7 +96,7 @@ public class NetworkCrawler implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void cleanup(String indexDirectory, Set<String> crawled) {
 		if (Boolean.parseBoolean(System.getProperty("org.punksearch.crawler.fromscratch"))) {
 			IndexOperator.deleteAll(indexDirectory);
