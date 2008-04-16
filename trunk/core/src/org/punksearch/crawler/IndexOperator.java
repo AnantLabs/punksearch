@@ -118,6 +118,10 @@ public class IndexOperator {
 	}
 
 	public static void deleteByAge(String dir, int age) {
+		boolean indexExists = IndexReader.indexExists(dir);
+		if (!indexExists) {
+			return;
+		}
 		try {
 			IndexSearcher is = new IndexSearcher(FSDirectory.getDirectory(dir));
 			long max = System.currentTimeMillis() - age * 1000 * 3600 * 24;
@@ -155,12 +159,29 @@ public class IndexOperator {
 	}
 
 	private static IndexWriter createIndexWriter(String dir) throws IOException {
-		boolean indexLocked = IndexReader.isLocked(dir);
-		if (indexLocked) {
-			IndexReader.unlock(FSDirectory.getDirectory(dir));
-		}
 		boolean indexExists = IndexReader.indexExists(dir);
 		return new IndexWriter(dir, createAnalyzer(), !indexExists);
+	}
+
+	public static boolean isLocked(String dir) {
+		try {
+			return IndexReader.isLocked(dir);
+		} catch (IOException e) {
+			__log.warning("IOException during checking if index directory is locked, "
+			        + "assuming it is not (maybe index directory just does not exist?)");
+			return false;
+		}
+	}
+
+	public static void unlock(String dir) {
+		try {
+			if (IndexReader.isLocked(dir)) {
+				IndexReader.unlock(FSDirectory.getDirectory(dir));
+			}
+		} catch (IOException e) {
+			__log.warning("IOException during unlocking of index directory "
+			        + "(maybe index directory just does not exist?)");
+		}
 	}
 
 	private static Analyzer createAnalyzer() {
