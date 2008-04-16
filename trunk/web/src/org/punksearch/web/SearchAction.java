@@ -13,8 +13,12 @@ package org.punksearch.web;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
@@ -187,9 +191,29 @@ public class SearchAction {
 		return presentationTime;
 	}
 
+	/**
+	 * Groups items (lucene documents) into groups by size and extension (see ItemGroup for details)
+	 * 
+	 * Returns groups sorted according to the order of first group items sort order
+	 * 
+	 * @param docs the sorted list of lucene documents (sorted by relevance and by online/offline status)
+	 * @return list of item groups
+	 */
 	private static List<ItemGroup> makeGroupsFromDocs(List<Document> docs) {
-		List<ItemGroup> groups = new LinkedList<ItemGroup>();
+		List<ItemGroup> result = new LinkedList<ItemGroup>();
+		
+		// following hash was created just in order to speedup the grouping
+		// this enables us to geach potential group quickly and check if item matches it
+		// the hash key is the item size
+		Map<String, Set<ItemGroup>> hash = new HashMap<String, Set<ItemGroup>>();
+		
 		for (Document doc : docs) {
+			String size = doc.get(IndexFields.SIZE);
+			Set<ItemGroup> groups = hash.get(size);
+			if (groups == null) {
+				groups = new HashSet<ItemGroup>();
+				hash.put(size, groups);
+			}
 			boolean added = false;
 			for (ItemGroup group : groups) {
 				if (group.matches(doc)) {
@@ -199,10 +223,12 @@ public class SearchAction {
 				}
 			}
 			if (!added) {
-				groups.add(new ItemGroup(doc));
+				ItemGroup group = new ItemGroup(doc);
+				groups.add(group);
+				result.add(group); // we have to put the group in result here, since we want to preserve order of items
 			}
 		}
-		return groups;
+		return result;
 	}
 
 	private static List<SearchResult> prepareResults(List<Document> results) {
