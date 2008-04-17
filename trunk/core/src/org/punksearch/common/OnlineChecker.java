@@ -7,14 +7,22 @@ import java.net.SocketAddress;
 
 public class OnlineChecker {
 
-	// TODO: extract to settings
-	private static final int     TIMEOUT          = 2000;
+	private static int     TIMEOUT;
 	private static final boolean USE_OLD_SMB_PORT = true;
 
 	private static final int     SMB_PORT         = 445;
 	private static final int     SMB_OLD_PORT     = 139;
 	private static final int     FTP_PORT         = 21;
 
+	static {
+		String timeout = System.getProperty("org.punksearch.online.timeout");
+		if (timeout != null) {
+			TIMEOUT = Integer.valueOf(timeout);
+		} else {
+			TIMEOUT = 5000;
+		}
+	}
+	
 	public static boolean isOnline(String host) {
 		if (!(host.startsWith("smb") || host.startsWith("ftp"))) {
 			throw new IllegalArgumentException("Unknown protocol: " + host);
