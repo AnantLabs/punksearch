@@ -12,6 +12,7 @@
 			<classes dir="${buildDir}/classes" />
 			<fileset dir="WebContent">
 				<exclude name="WEB-INF/web.xml" />
+				<exclude name="META-INF/context.xml" />
 			</fileset>
 			<lib dir="../core/lib" />
 			<lib file="../core/punksearch-core.jar" />
