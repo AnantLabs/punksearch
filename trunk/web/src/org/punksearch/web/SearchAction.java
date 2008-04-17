@@ -100,16 +100,12 @@ public class SearchAction {
 
 		if (query != null) {
 			__log.info("query constructed: " + query.toString());
-			try {
-				Date startDate = new Date();
-				SearcherResult result = SearcherWrapper.search(query, params.first, params.last, filter);
-				Date stopDate = new Date();
-				searchTime = stopDate.getTime() - startDate.getTime();
-				overallCount = result.count();
-				searchResults = prepareResults(result.items());
-			} catch (SearcherException se) {
-				__log.warning(se.getMessage());
-			}
+			Date startDate = new Date();
+			SearcherResult result = SearcherWrapper.search(query, params.first, params.last, filter);
+			Date stopDate = new Date();
+			searchTime = stopDate.getTime() - startDate.getTime();
+			overallCount = result.count();
+			searchResults = prepareResults(result.items());
 		}
 
 		return searchResults;
@@ -130,20 +126,16 @@ public class SearchAction {
 
 		List<ItemGroup> searchResults = new ArrayList<ItemGroup>();
 
-		try {
-			Date startDate = new Date();
-			SearcherResult result = SearcherWrapper.search(query, filter, MAX_DOCS);
-			Date stopDate = new Date();
+		Date startDate = new Date();
+		SearcherResult result = SearcherWrapper.search(query, filter, MAX_DOCS);
+		Date stopDate = new Date();
 
-			List<Document> docs = sortDocsOnlineFirst(result.items());
-			searchResults = makeGroupsFromDocs(docs);
+		List<Document> docs = sortDocsOnlineFirst(result.items());
+		searchResults = makeGroupsFromDocs(docs);
 
-			searchTime = stopDate.getTime() - startDate.getTime();
-			presentationTime = new Date().getTime() - stopDate.getTime();
-			overallCount = searchResults.size();
-		} catch (SearcherException se) {
-			__log.warning(se.getMessage());
-		}
+		searchTime = stopDate.getTime() - startDate.getTime();
+		presentationTime = new Date().getTime() - stopDate.getTime();
+		overallCount = searchResults.size();
 
 		int min = (start > 0) ? Math.max(0, start) : 0;
 		int max = (stop > 0) ? Math.min(overallCount, stop) : 0;
@@ -196,17 +188,18 @@ public class SearchAction {
 	 * 
 	 * Returns groups sorted according to the order of first group items sort order
 	 * 
-	 * @param docs the sorted list of lucene documents (sorted by relevance and by online/offline status)
+	 * @param docs
+	 *            the sorted list of lucene documents (sorted by relevance and by online/offline status)
 	 * @return list of item groups
 	 */
 	private static List<ItemGroup> makeGroupsFromDocs(List<Document> docs) {
 		List<ItemGroup> result = new LinkedList<ItemGroup>();
-		
+
 		// following hash was created just in order to speedup the grouping
 		// this enables us to geach potential group quickly and check if item matches it
 		// the hash key is the item size
 		Map<String, Set<ItemGroup>> hash = new HashMap<String, Set<ItemGroup>>();
-		
+
 		for (Document doc : docs) {
 			String size = doc.get(IndexFields.SIZE);
 			Set<ItemGroup> groups = hash.get(size);
