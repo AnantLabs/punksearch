@@ -25,15 +25,22 @@ public class SearcherWrapper {
 
 	public static void init() {
 		System.out.println("Using index directory: " + PunksearchProperties.resolveIndexDirectory());
-		searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
+		try {
+			searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
+		} catch (IllegalArgumentException e) {
+			searcher = null;
+		}
 	}
 
-	public static SearcherResult search(Query query, Integer first, Integer last, Filter filter)
-	        throws SearcherException {
+	public static boolean isReady() {
+		return searcher != null;
+	}
+	
+	public static SearcherResult search(Query query, Integer first, Integer last, Filter filter) {
 		return searcher.search(query, first, last, filter);
 	}
 
-	public static SearcherResult search(Query query, Filter filter, Integer limit) throws SearcherException {
+	public static SearcherResult search(Query query, Filter filter, Integer limit) {
 		return searcher.search(query, filter, limit);
 	}
 
