@@ -7,7 +7,7 @@
 		<%@include file="/WEB-INF/inc/admin/tabs.jsp" %>
 		
 		<div id="searchFormContainer">
-		<div id="searchForm">&160;</div>
+		<div id="searchForm">&#160;</div>
 		</div>
 		
 		<% if (session.getAttribute("tab").equals("status")) { %>
