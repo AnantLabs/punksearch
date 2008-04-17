@@ -78,16 +78,18 @@ public class NetworkCrawler implements Runnable {
 
 			FileUtils.writeLines(new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list"), crawledHosts);
 
+			__log.info("Start cleaning target index directory: " + indexDirectory);
 			cleanup(indexDirectory, crawledHosts);
-			__log.info("Target index directory cleaned up: " + indexDirectory);
+			__log.info("Target index directory cleaned up.");
 
+			__log.info("Start merge temp index directories into target index directory.");
 			merge(indexDirectory, threadCount);
-			__log.info("Temp index directories merged into target index directory");
+			__log.info("Finished merge temp index directories into target index directory.");
 
 			for (int i = 0; i < threadCount; i++) {
 				FileUtils.deleteDirectory(new File(indexDirectory + "_crawler" + i));
 			}
-			__log.info("Temp index directories cleaned up");
+			__log.info("Temp index directories cleaned up.");
 
 			long finishTime = new Date().getTime();
 			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
