@@ -243,10 +243,8 @@ public class HostCrawler extends Thread {
 			return false;
 		}
 		if (adapter.isDirectory(item)) {
-			// return isGoodDirectory(adapter.listFiles(item));
-			return true;
+			return isGoodDirectory(adapter.listFiles(item));
 		} else {
-			// System.out.println(getExtension(adapter.getName(item)));
 			return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
 		}
 	}
