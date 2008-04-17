@@ -1,7 +1,7 @@
 #summary changelist for application versions
 #labels Featured
 
-= 0.8.1 = (soon)
+= 0.8.1 (soon) =
   * bugfix: user-friendly notification about invalid index directory in web interface (closes defect)
   * bugfix: speedup of grouping of results in web interface
   * core: "org.punksearch.online.timeout" property added to set timeout for checking online/offline status of a host
