@@ -128,13 +128,14 @@ public class IndexOperator {
 			NumberRangeFilter<Long> oldDocs = FilterFactory.createNumberFilter(IndexFields.INDEXED, null, max);
 			Query query = new WildcardQuery(new Term(IndexFields.HOST, "*"));
 			Hits hits = is.search(query, oldDocs);
+			__log.info("Deleting by age from index directory. Items to delete: " + hits.length());
 			IndexReader ir = IndexReader.open(dir);
 			for (int i = 0; i < hits.length(); i++) {
 				ir.deleteDocument(hits.id(i));
 			}
 			ir.close();
 		} catch (IOException ex) {
-			__log.log(Level.SEVERE, "Exception during merging index directories", ex);
+			__log.log(Level.SEVERE, "Exception during deleting by age from index directory", ex);
 			throw new RuntimeException(ex);
 		}
 	}
