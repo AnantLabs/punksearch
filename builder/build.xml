@@ -1,6 +1,6 @@
 <project name="punksearch-builder" default="dist">
 
-	<property name="version" value="0.8.0" />
+	<property name="version" value="0.8.1" />
 
 	<target name="clean">
 		<delete dir="dist" />
