@@ -7,7 +7,7 @@
   * core: "org.punksearch.online.timeout" property added to set timeout for checking online/offline status of a host
   * core: "org.punksearch.crawler.forceunlock" property added to forcing unlock of index (and temp) directories
   * core: improvements in logging and crawl stability
-  * core: "org.punksearch.crawler.fromscratch" property removed, use "*.keepdays=0" instead to force crawler rebuild index from scratch.
+  * core: "org.punksearch.crawler.fromscratch" property removed, use "{{{*}}}.keepdays=0" instead to force crawler rebuild index from scratch.
 
 = 0.8.0 (2008-04-11) =
   * *NB!: index directories created with 0.7.3 are incompatible with this version. Please reindex the network.*
