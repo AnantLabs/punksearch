@@ -36,7 +36,7 @@ public class TypeFilters {
 	public static final String         DIRECTORY_KEY = "directory";
 
 	private static Map<String, Filter> filters       = new HashMap<String, Filter>();
-	private static FileTypes           types         = new FileTypes();
+	private static FileTypes           types         = FileTypes.readFromDefaultFile();
 
 	static {
 		init();
@@ -47,7 +47,6 @@ public class TypeFilters {
 	}
 
 	private static void init() {
-		types.readFromDefaultFile();
 
 		for (String key : types.list()) {
 			filters.put(key, create(key));
