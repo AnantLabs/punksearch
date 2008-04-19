@@ -117,14 +117,14 @@ public class IndexOperator {
 		}
 	}
 
-	public static void deleteByAge(String dir, int age) {
+	public static void deleteByAge(String dir, float days) {
 		boolean indexExists = IndexReader.indexExists(dir);
 		if (!indexExists) {
 			return;
 		}
 		try {
 			IndexSearcher is = new IndexSearcher(FSDirectory.getDirectory(dir));
-			long max = System.currentTimeMillis() - age * 1000 * 3600 * 24;
+			long max = System.currentTimeMillis() - Math.round(days * 1000 * 3600 * 24);
 			NumberRangeFilter<Long> oldDocs = FilterFactory.createNumberFilter(IndexFields.INDEXED, null, max);
 			Query query = new WildcardQuery(new Term(IndexFields.HOST, "*"));
 			Hits hits = is.search(query, oldDocs);
@@ -150,7 +150,7 @@ public class IndexOperator {
 				i++;
 			}
 			iw.addIndexesNoOptimize(dirs);
-			iw.optimize();
+			//iw.optimize();
 			iw.flush();
 			iw.close();
 		} catch (IOException ex) {
@@ -193,30 +193,6 @@ public class IndexOperator {
 		IndexWriter iw = createIndexWriter(dir);
 		iw.close();
 	}
-	
-	public static boolean prepareIndex(String dir, boolean forceUnlock) {
-		if (!indexExists(dir)) {
-			try {
-				createIndex(dir);
-			} catch (IOException e) {
-				__log.severe("Can't create index directory: '" + dir + "'! Stop crawling.");
-				return false;
-			}
-		}
-
-		if (isLocked(dir)) {
-			if (forceUnlock) {
-				unlock(dir);
-			} else {
-				__log.info("Can't start crawling, since index directory is locked: '" + dir + "' "
-				        + "Consider to set \"*.crawler.forceunlock=true\" in punksearch.properties");
-				return false;
-			}
-		}
-		
-		return true;
-	}
-
 
 	private static Analyzer createAnalyzer() {
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
@@ -226,6 +202,18 @@ public class IndexOperator {
 		return paw;
 	}
 
+	public static void optimize(String dir) {
+		IndexWriter iw;
+        try {
+	        iw = createIndexWriter(dir);
+	        iw.optimize();
+	        iw.flush();
+	        iw.close();
+        } catch (IOException e) {
+			__log.severe("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
+        }
+	}
+	
 	public void optimize() {
 		try {
 			indexWriter.optimize();

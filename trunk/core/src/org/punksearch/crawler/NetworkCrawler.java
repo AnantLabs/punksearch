@@ -13,6 +13,7 @@ package org.punksearch.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -26,70 +27,97 @@ import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
+ * The crawling process manager. It starts crawling threads, cleans target index, merges data crawled by threads into
+ * the target index, cleans temporary files.
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class NetworkCrawler implements Runnable {
-	private static Logger     __log      = Logger.getLogger(NetworkCrawler.class.getName());
+	private static Logger      __log             = Logger.getLogger(NetworkCrawler.class.getName());
 
-	private FileTypes         fileTypes  = new FileTypes();
-	private String            indexDirectory;
+	public static final String TMP_DIR_PROPERTY  = "org.punksearch.crawler.tmpdir";
+	public static final String UNLOCK_PROPERTY   = "org.punksearch.crawler.forceunlock";
+	public static final String THREADS_PROPERTY  = "org.punksearch.crawler.threads";
+	public static final String RANGE_PROPERTY    = "org.punksearch.crawler.range";
+	public static final String KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
 
-	private List<HostCrawler> threadList = new ArrayList<HostCrawler>();
+	private FileTypes          fileTypes;
+	private String             indexDirectory;
+	private boolean            forceUnlock;
+	private List<IpRange>      ranges;
+	private int                threadCount;
+	private float              daysToKeep;
 
-	public NetworkCrawler(String indexDir) {
-		fileTypes.readFromDefaultFile();
+	private List<HostCrawler>  threadList        = new ArrayList<HostCrawler>();
+
+	public NetworkCrawler() {
+		this.indexDirectory = PunksearchProperties.resolveIndexDirectory();
+		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY));
+		this.threadCount = Integer.parseInt(System.getProperty(THREADS_PROPERTY));
+		this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
+		this.fileTypes = FileTypes.readFromDefaultFile();
+		this.daysToKeep = Float.parseFloat(System.getProperty(KEEPDAYS_PROPERTY));
+	}
+
+	public NetworkCrawler(String indexDir, boolean unlock, int threads, String ranges, FileTypes fileTypes, float days) {
 		this.indexDirectory = indexDir;
+		this.forceUnlock = unlock;
+		this.threadCount = threads;
+		this.ranges = parseRanges(ranges);
+		this.fileTypes = fileTypes;
+		this.daysToKeep = days;
 	}
 
 	public void run() {
 
-		boolean forceUnlock = Boolean.valueOf(System.getProperty("org.punksearch.crawler.forceunlock"));
-		if (!IndexOperator.prepareIndex(indexDirectory, forceUnlock)) {
+		if (!prepareIndex(indexDirectory)) {
 			return;
 		}
-
-		String range = System.getProperty("org.punksearch.crawler.range");
-		int threadCount = Integer.parseInt(System.getProperty("org.punksearch.crawler.threads"));
-
-		SynchronizedIpIterator iter = new SynchronizedIpIterator(parseRanges(range));
-
+		SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
 		threadList.clear();
 
 		try {
+
 			long startTime = new Date().getTime();
 			__log.info("Crawl process started");
 
 			for (int i = 0; i < threadCount; i++) {
-				String threadIndexDir = indexDirectory + "_crawler" + i;
-				if (!IndexOperator.prepareIndex(threadIndexDir, forceUnlock)) {
+				if (!prepareIndex(getThreadDirectory(i))) {
 					stop();
 					return;
 				}
-				HostCrawler indexerThread = new HostCrawler("HostCrawler" + i, iter, fileTypes, threadIndexDir);
+				HostCrawler indexerThread = makeThread(i, iter);
 				indexerThread.start();
 				threadList.add(indexerThread);
 			}
-			Set<String> crawledHosts = new HashSet<String>();
-			for (HostCrawler crawlerThread : threadList) {
-				crawlerThread.join();
-				__log.info("Crawl thread joined: " + crawlerThread.getName());
-				crawledHosts.addAll(crawlerThread.getCrawledHosts());
+
+			List<String> hosts = new ArrayList<String>();
+			boolean cleaned = false;
+			for (HostCrawler thread : threadList) {
+				try {
+					thread.join();
+					// we want clean the target index just once and at the end of index process
+					// also we do not want to clean the index if crawling was interrupted
+					if (!cleaned) {
+						cleanTargetIndex();
+						cleaned = true;
+					}
+					hosts.addAll(thread.getCrawledHosts());
+					removeHostsFromIndex(thread.getCrawledHosts());
+					mergeIntoIndex(thread.getName());
+					cleanTempForThread(thread.getName());
+					__log.info(thread.getName() + " finished");
+				} catch (InterruptedException e) {
+					__log.warning(thread.getName() + " was interrupted");
+				}
 			}
 
-			FileUtils.writeLines(new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list"), crawledHosts);
-
-			__log.info("Start cleaning target index directory: " + indexDirectory);
-			cleanup(indexDirectory, crawledHosts);
-			__log.info("Target index directory cleaned up.");
-
-			__log.info("Start merge temp index directories into target index directory.");
-			merge(indexDirectory, threadCount);
-			__log.info("Finished merge temp index directories into target index directory.");
-
-			for (int i = 0; i < threadCount; i++) {
-				FileUtils.deleteDirectory(new File(indexDirectory + "_crawler" + i));
+			if (hosts.size() > 0) {
+				dumpHosts(hosts);
+				IndexOperator.optimize(indexDirectory);
 			}
-			__log.info("Temp index directories cleaned up.");
+
+			threadList.clear();
 
 			long finishTime = new Date().getTime();
 			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
@@ -99,30 +127,35 @@ public class NetworkCrawler implements Runnable {
 		}
 	}
 
-	private void cleanup(String indexDirectory, Set<String> crawled) {
-		if (Boolean.parseBoolean(System.getProperty("org.punksearch.crawler.fromscratch"))) {
-			IndexOperator.deleteAll(indexDirectory);
-			__log.info("Target index directory wiped out");
-		} else {
-			__log.info("Start cleaning target index directory from indexed hosts");
-			for (String host : crawled) {
-				__log.info("Cleaning target index directory from indexed host: " + host);
-				IndexOperator.deleteByHost(indexDirectory, host);
-			}
-			__log.info("Finished cleaning target index directory from indexed hosts");
-			__log.info("Start cleaning target index directory from old items");
-			int daysToKeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.keepdays"));
-			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
-			__log.info("Finished cleaning target index directory from old items");
+	private void removeHostsFromIndex(Set<String> hosts) {
+		__log.fine("Start cleaning target index directory from set of indexed hosts");
+		for (String host : hosts) {
+			__log.info("Cleaning target index directory from indexed host: " + host);
+			IndexOperator.deleteByHost(indexDirectory, host);
 		}
+		__log.fine("Finished cleaning target index directory from set of indexed hosts");
 	}
 
-	private void merge(String indexDir, int count) {
-		Set<String> dirs = new HashSet<String>();
-		for (int i = 0; i < count; i++) {
-			dirs.add(indexDir + "_crawler" + i);
+	private void cleanTargetIndex() {
+		__log.fine("Start cleaning target index directory: " + indexDirectory);
+		if (daysToKeep == 0) {
+			IndexOperator.deleteAll(indexDirectory);
+			__log.fine("Target index directory wiped out");
+		} else {
+
+			__log.fine("Start cleaning target index directory from old items");
+			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
+			__log.fine("Finished cleaning target index directory from old items");
+
 		}
-		IndexOperator.merge(indexDir, dirs);
+		__log.fine("Target index directory cleaned up.");
+	}
+
+	private void mergeIntoIndex(String threadName) {
+		int index = Integer.valueOf(threadName.substring(threadName.length() - 1));
+		Set<String> dirs = new HashSet<String>();
+		dirs.add(getThreadDirectory(index));
+		IndexOperator.merge(indexDirectory, dirs);
 	}
 
 	public void stop() {
@@ -135,7 +168,7 @@ public class NetworkCrawler implements Runnable {
 		return threadList;
 	}
 
-	public List<IpRange> parseRanges(String rangesString) {
+	private static List<IpRange> parseRanges(String rangesString) {
 		List<IpRange> result = new ArrayList<IpRange>();
 		String[] rangeChunks = rangesString.split(",");
 		for (String chunk : rangeChunks) {
@@ -143,4 +176,59 @@ public class NetworkCrawler implements Runnable {
 		}
 		return result;
 	}
+
+	private String getThreadDirectory(int index) {
+		String tempDir = System.getProperty(TMP_DIR_PROPERTY);
+		if (tempDir == null || tempDir.length() == 0) {
+			tempDir = System.getProperty("java.io.tmpdir");
+		}
+		if (!tempDir.endsWith(System.getProperty("file.separator"))) {
+			tempDir += System.getProperty("file.separator");
+		}
+		return tempDir + "punksearch_crawler" + index;
+	}
+
+	private HostCrawler makeThread(int index, SynchronizedIpIterator iter) {
+		HostCrawler indexerThread = new HostCrawler("HostCrawler" + index, iter, fileTypes, getThreadDirectory(index));
+		return indexerThread;
+	}
+
+	private void cleanTempForThread(String threadName) throws IOException {
+		int index = Integer.valueOf(threadName.substring(threadName.length() - 1));
+		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
+	}
+
+	private static void dumpHosts(List<String> crawledHosts) {
+		Collections.sort(crawledHosts);
+		File dumpFile = new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list");
+		try {
+			FileUtils.writeLines(dumpFile, crawledHosts);
+		} catch (IOException e) {
+			__log.warning("Can't dump crawled hosts into '" + dumpFile.getAbsolutePath() + "': " + e.getMessage());
+		}
+	}
+
+	private boolean prepareIndex(String dir) {
+		if (!IndexOperator.indexExists(dir)) {
+			try {
+				IndexOperator.createIndex(dir);
+			} catch (IOException e) {
+				__log.severe("Can't create index directory: '" + dir + "'! Stop crawling.");
+				return false;
+			}
+		}
+
+		if (IndexOperator.isLocked(dir)) {
+			if (forceUnlock) {
+				IndexOperator.unlock(dir);
+			} else {
+				__log.info("Can't start crawling, since index directory is locked: '" + dir + "' "
+				        + "Consider to set \"*.crawler.forceunlock=true\" in punksearch.properties");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 }
