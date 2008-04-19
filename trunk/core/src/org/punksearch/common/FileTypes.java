@@ -20,39 +20,18 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 
 /**
+ * Wrapper class for FileType objects. Consider using static factory methods to instantiate this class.
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class FileTypes {
 
-	public static final String   DEFAULT_CONFIG_FILE = "filetypes.conf";
+	public static final String    DEFAULT_CONFIG_FILE = "filetypes.conf";
 
 	private Map<String, FileType> types               = new HashMap<String, FileType>();
 
-	public void readFromDefaultFile() {
-		String path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE;
-		readFromFile(new File(path));
-	}
-
-	public void readFromFile(File file) {
-		try {
-			List<String> lines = FileUtils.readLines(file);
-			for (String line : lines) {
-				line = line.trim();
-				if (line.startsWith("#") || line.length() == 0) {
-					continue;
-				}
-				String[] chunks = line.split(":");
-				if (chunks.length != 4) {
-					System.out.println("Line skipped, wrong count of columns: " + line);
-					continue;
-				}
-				System.out.println(line);
-				FileType type = makeItemType(chunks);
-				types.put(type.getTitle(), type);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	public FileTypes(Map<String, FileType> map) {
+		types = map;
 	}
 
 	public FileType get(String title) {
@@ -72,7 +51,7 @@ public class FileTypes {
 		return false;
 	}
 
-	private FileType makeItemType(String[] chunks) {
+	private static FileType makeItemType(String[] chunks) {
 		FileType type = new FileType();
 		type.setTitle(chunks[0].trim());
 		type.setExtensions(chunks[3].trim().split(","));
@@ -105,4 +84,35 @@ public class FileTypes {
 		}
 		return Integer.parseInt(size.substring(0, lastChar)) * multiplier;
 	}
+
+	public static FileTypes readFromDefaultFile() {
+		String path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE;
+		return readFromFile(new File(path));
+	}
+
+	public static FileTypes readFromFile(File file) {
+		try {
+			Map<String, FileType> map = new HashMap<String, FileType>();
+			List<String> lines = FileUtils.readLines(file);
+			for (String line : lines) {
+				line = line.trim();
+				if (line.startsWith("#") || line.length() == 0) {
+					continue;
+				}
+				String[] chunks = line.split(":");
+				if (chunks.length != 4) {
+					System.out.println("Line skipped, wrong count of columns: " + line);
+					continue;
+				}
+				System.out.println(line);
+				FileType type = makeItemType(chunks);
+				map.put(type.getTitle(), type);
+			}
+			FileTypes result = new FileTypes(map);
+			return result;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }
