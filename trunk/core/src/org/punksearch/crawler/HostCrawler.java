@@ -12,40 +12,41 @@ package org.punksearch.crawler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.ip.SynchronizedIpIterator;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
-	private static Logger          __log        = Logger.getLogger(HostCrawler.class.getName());
+	private static Logger    __log        = Logger.getLogger(HostCrawler.class.getName());
 
-	private String                 ip;
-	private int                    maxDeep      = 5;
+	private String           ip;
+	private int              maxDeep      = 5;
 
-	private ProtocolAdapter        adapter;
-	private FileTypes              knownFileTypes;
+	private ProtocolAdapter  adapter;
+	private FileTypes        knownFileTypes;
 
-	private SynchronizedIpIterator iterator;
+	private Iterator<String> ipIterator;
 
-	private IndexOperator          indexOperator;
+	private IndexOperator    indexOperator;
 
-	private Set<String>            crawledHosts = new HashSet<String>();
-	private Set<String>            skippedHosts = new HashSet<String>();
-	private String                 timestamp;
+	private Set<String>      crawledHosts = new HashSet<String>();
+	private Set<String>      skippedHosts = new HashSet<String>();
+	private String           timestamp;
 
-	public HostCrawler(String name, SynchronizedIpIterator iter, FileTypes fileTypes, String indexDirectoryPath) {
+	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
 
-		iterator = iter;
+		this.ipIterator = ipIterator;
 		knownFileTypes = fileTypes;
 
 		maxDeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.deep"));
@@ -58,10 +59,10 @@ public class HostCrawler extends Thread {
 		SmbAdapter smbAdapter = new SmbAdapter();
 		FtpAdapter ftpAdapter = new FtpAdapter();
 
-		while ((ip = iterator.next()) != null) {
-			
+		while ((ip = ipIterator.next()) != null) {
+
 			__log.fine(getName() + ": trying " + ip);
-			
+
 			crawlWithAdapter(smbAdapter);
 			crawlWithAdapter(ftpAdapter);
 
@@ -73,10 +74,8 @@ public class HostCrawler extends Thread {
 	}
 
 	private void crawlWithAdapter(ProtocolAdapter ad) {
-		
 		timestamp = Long.toString(System.currentTimeMillis());
-		String protocol = ad.getProtocol();
-		
+
 		boolean connected = false;
 		try {
 			connected = ad.connect(ip);
@@ -85,10 +84,10 @@ public class HostCrawler extends Thread {
 				setAdapter(ad);
 				long size = crawlDirectory(adapter.getRootDir(), 0);
 				if (size > 0) {
-					__log.info(getName() + ": " + protocol + ": " + ip + " crawled: " + size + " bytes");
-					crawledHosts.add(protocol + "_" + ip);
+					__log.info(getName() + ": " + ad.getProtocol() + ": " + ip + " crawled: " + size + " bytes");
+					crawledHosts.add(curHost());
 				} else {
-					skippedHosts.add(protocol + "_" + ip);
+					skippedHosts.add(curHost());
 				}
 			}
 		} catch (IllegalArgumentException e) {
@@ -102,7 +101,7 @@ public class HostCrawler extends Thread {
 			}
 		}
 	}
-	
+
 	public String getIp() {
 		return ip;
 	}
@@ -125,7 +124,7 @@ public class HostCrawler extends Thread {
 
 	protected Document makeDocument(String name, String ext, String size, String path, String date, float boost) {
 		Document document = new Document();
-		document.add(new Field(IndexFields.HOST, adapter.getProtocol() + "_" + getIp(), Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.HOST, curHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -134,6 +133,10 @@ public class HostCrawler extends Thread {
 		document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.setBoost(boost);
 		return document;
+	}
+
+	private String curHost() {
+		return adapter.getProtocol() + "_" + getIp();
 	}
 
 	private Document makeDirDocument(Object dir, long dirSize) {
@@ -157,7 +160,8 @@ public class HostCrawler extends Thread {
 		String fullName = adapter.getName(file);
 
 		String fileExt = getExtension(fullName);
-		String fileName = (fileExt.length() > 0) ? fullName.substring(0, fullName.length() - fileExt.length() - 1) : fullName;
+		String fileName = (fileExt.length() > 0) ? fullName.substring(0, fullName.length() - fileExt.length() - 1)
+		        : fullName;
 		String fileSize = Long.toString(adapter.getSize(file));
 		String filePath = adapter.getPath(file);
 		String lastModified = Long.toString(adapter.getModificationTime(file));
@@ -216,9 +220,10 @@ public class HostCrawler extends Thread {
 	}
 
 	/**
-	 * true if at least one good file or all items are directories
+	 * true if at least one good file or all items are directories ("hidden" files are ignored)
 	 * 
 	 * @param items
+	 *            list of items in the directory
 	 * @return
 	 */
 	private boolean isGoodDirectory(Object[] items) {
@@ -227,13 +232,16 @@ public class HostCrawler extends Thread {
 		}
 		boolean badFileFound = false;
 		for (Object item : items) {
-			if (adapter.isFile(item)) {
+			if (adapter.isFile(item) && !(adapter.getName(item).startsWith(".") || adapter.isHidden(item))) {
 				if (shouldProcess(item)) {
 					return true;
 				} else {
 					badFileFound = true;
 				}
 			}
+		}
+		if (badFileFound && __log.getLevel() == Level.FINE) {
+			__log.fine("Ignored parent dir of:" + curHost() + adapter.getFullPath(items[0]));
 		}
 		return !badFileFound;
 	}
