@@ -24,12 +24,17 @@ public class CrawlerMain {
 	 * @param args
 	 * @throws FileNotFoundException 
 	 */
-	public static void main(String[] args) throws FileNotFoundException {
-		PunksearchProperties.loadDefault();
+	public static void main(String[] args) {
+		try {
+	        PunksearchProperties.loadDefault();
+        } catch (FileNotFoundException e) {
+        	System.err.println("Can't find the properties file: " + e.getMessage());
+        	System.exit(1);
+        }
 		if (args.length > 0) {
 			System.setProperty("org.punksearch.crawler.range", args[0]);
 		}
-		NetworkCrawler crawler = new NetworkCrawler(PunksearchProperties.resolveIndexDirectory());
+		NetworkCrawler crawler = new NetworkCrawler();
 		crawler.run();
 	}
 
