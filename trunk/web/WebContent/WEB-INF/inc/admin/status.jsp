@@ -22,7 +22,7 @@
 					}
 				} else if (action.equals("start")) {
 					if (!isIndexing) {
-						indexer = new NetworkCrawler(PunksearchProperties.resolveIndexDirectory());
+						indexer = new NetworkCrawler();
 						indexThread = new Thread(indexer, "Crawler");
 						indexThread.start();
 						//pageContext.forward("admin.jsp");
