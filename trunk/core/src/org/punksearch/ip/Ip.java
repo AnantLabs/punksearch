@@ -38,6 +38,9 @@ public class Ip implements Comparable<Ip>
 	}
 	
 	public boolean equals(Object obj) {
+		if (!(obj instanceof Ip)) {
+			return false;
+		}
 		return (compareTo((Ip)obj) == 0);
 	}
 	

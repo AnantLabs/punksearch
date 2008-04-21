@@ -32,8 +32,8 @@ public class FilterFactory
 	
 	public Filter makeSizeFilter(FileTypes types, String typeName) {
 		FileType type = types.get(typeName);
-		long min = (type.getMinBytes() > 0) ? type.getMinBytes() : null;
-		long max = (type.getMaxBytes() > 0) ? type.getMaxBytes() : null;
+		Long min = (type == null || type.getMinBytes() <= 0) ? null : type.getMinBytes();
+		Long max = (type == null || type.getMaxBytes() <= 0) ? null : type.getMaxBytes();
 		NumberRangeFilter<Long> sizeFilter = createNumberFilter(IndexFields.SIZE, min, max);
 		return sizeFilter;
 	}
