@@ -14,11 +14,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 public class PunksearchProperties {
 
-	public static String PROPERTIES_FILENAME = "punksearch.properties";
+	public static final String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
 		loadFromFile(resolveHome() + System.getProperty("file.separator") + PROPERTIES_FILENAME);
@@ -38,8 +39,8 @@ public class PunksearchProperties {
 	            e.printStackTrace();
             }
 		}
-		for (Object key : props.keySet()) {
-			System.setProperty((String) key, (String) props.get(key));
+		for (Map.Entry<Object,Object> entry : props.entrySet()) {
+			System.setProperty((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
 
