@@ -18,7 +18,6 @@ import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -26,7 +25,6 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -68,7 +66,7 @@ public class FileTypeStatistics {
 		return extractDocsForType(type).length();
 	}
 
-	public static Map<String, Long> count() {
+	public static synchronized Map<String, Long> count() {
 		if (countCache == null || indexChangedAfter(countCacheTimestamp)) {
 			countCache = new HashMap<String, Long>();
 
@@ -98,7 +96,7 @@ public class FileTypeStatistics {
 		return size;
 	}
 
-	public static Map<String, Long> size() {
+	public static synchronized Map<String, Long> size() {
 		if (sizeCache == null || indexChangedAfter(sizeCacheTimestamp)) {
 			sizeCache = new HashMap<String, Long>();
 			FileTypes types = TypeFilters.getTypes();
@@ -141,16 +139,16 @@ public class FileTypeStatistics {
 
 	public static PieDataset makePieDataset(Map<String, Long> values) {
 		long total = 0;
-		for (String key : values.keySet()) {
-			total += values.get(key);
+		for (Long value : values.values()) {
+			total += value;
 		}
 		return makePieDataset(values, total);
 	}
 
 	public static PieDataset makePieDataset(Map<String, Long> values, long total) {
 		long sum = 0;
-		for (String key : values.keySet()) {
-			sum += values.get(key);
+		for (Long value : values.values()) {
+			sum += value;
 		}
 		long other = total - sum;
 
@@ -159,12 +157,14 @@ public class FileTypeStatistics {
 		nfPercent.setMaximumFractionDigits(2);
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
-		for (String key : values.keySet()) {
-			long value = values.get(key);
-			dataset.setValue(key + " " + nfPercent.format(value / (total + 0.0)) + " (" + nfNumber.format(value) + ")", value);
+		for (Map.Entry<String, Long> entry : values.entrySet()) {
+			long value = entry.getValue();
+			dataset.setValue(entry.getKey() + " " + nfPercent.format(value / (total + 0.0)) + " ("
+			        + nfNumber.format(value) + ")", value);
 		}
 		if (other > 0) {
-			dataset.setValue("other " + nfPercent.format(other / (total + 0.0)) + " (" + nfNumber.format(other) + ")", other);
+			dataset.setValue("other " + nfPercent.format(other / (total + 0.0)) + " (" + nfNumber.format(other) + ")",
+			        other);
 		}
 
 		return dataset;
