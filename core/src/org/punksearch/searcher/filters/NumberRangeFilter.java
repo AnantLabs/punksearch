@@ -104,13 +104,16 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 		return buffer.toString();
 	}
 
-	/** Returns true if <code>o</code> is equal to this. */
+	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof NumberRangeFilter))
+		}
+		if (!(o instanceof NumberRangeFilter)) {
 			return false;
-		NumberRangeFilter other = (NumberRangeFilter) o;
+		}
+
+		NumberRangeFilter<N> other = (NumberRangeFilter<N>) o;
 
 		if (!this.fieldName.equals(other.fieldName) || this.includeLower != other.includeLower
 		        || this.includeUpper != other.includeUpper) {
@@ -123,4 +126,9 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 		return true;
 	}
 
+	@Override
+	public int hashCode() {
+		return fieldName.hashCode() + lowerTerm.hashCode() + upperTerm.hashCode() + ((includeLower) ? 1 : 0)
+		        + ((includeUpper) ? 1 : 0);
+	}
 }

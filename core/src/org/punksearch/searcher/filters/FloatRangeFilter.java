@@ -27,20 +27,20 @@ public class FloatRangeFilter extends Filter {
 	private boolean includeLower;
 	private boolean includeUpper;
 
-	public FloatRangeFilter(String fieldName, Float lowerTerm, Float upperTerm, boolean includeLower, boolean includeUpper) {
+	public FloatRangeFilter(String fieldName, Float lower, Float upper, boolean includeLower, boolean includeUpper) {
 		this.fieldName = fieldName;
-		this.lowerTerm = lowerTerm;
-		this.upperTerm = upperTerm;
+		this.lowerTerm = lower;
+		this.upperTerm = upper;
 		this.includeLower = includeLower;
 		this.includeUpper = includeUpper;
 
-		if (null == lowerTerm && null == upperTerm) {
+		if (null == lower && null == upper) {
 			throw new IllegalArgumentException("At least one value must be non-null");
 		}
-		if (includeLower && null == lowerTerm) {
+		if (includeLower && null == lower) {
 			throw new IllegalArgumentException("The lower bound must be non-null to be inclusive");
 		}
-		if (includeUpper && null == upperTerm) {
+		if (includeUpper && null == upper) {
 			throw new IllegalArgumentException("The upper bound must be non-null to be inclusive");
 		}
 	}
@@ -62,7 +62,8 @@ public class FloatRangeFilter extends Filter {
 					if (term != null && term.field().equals(fieldName)) {
 						Float termFloat = Float.valueOf(term.text());
 						if (lowerTerm == null || lowerTerm < termFloat || (includeLower && lowerTerm == termFloat)) {
-							if (upperTerm != null && (upperTerm < termFloat || (!includeUpper && upperTerm == termFloat))) {
+							if (upperTerm != null
+							        && (upperTerm < termFloat || (!includeUpper && upperTerm == termFloat))) {
 								continue;
 							}
 							// we have a good term, find the docs
@@ -105,20 +106,32 @@ public class FloatRangeFilter extends Filter {
 		return buffer.toString();
 	}
 
-	/** Returns true if <code>o</code> is equal to this. */
+	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof FloatRangeFilter)) return false;
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof FloatRangeFilter)) {
+			return false;
+		}
+
 		FloatRangeFilter other = (FloatRangeFilter) o;
 
-		if (!this.fieldName.equals(other.fieldName) || this.includeLower != other.includeLower || this.includeUpper != other.includeUpper) {
+		if (!this.fieldName.equals(other.fieldName) || this.includeLower != other.includeLower
+		        || this.includeUpper != other.includeUpper) {
 			return false;
 		}
 		if (this.lowerTerm != null ? !this.lowerTerm.equals(other.lowerTerm) : other.lowerTerm != null)
-		    return false;
+			return false;
 		if (this.upperTerm != null ? !this.upperTerm.equals(other.upperTerm) : other.upperTerm != null)
-		    return false;
+			return false;
 		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return fieldName.hashCode() + lowerTerm.intValue() + upperTerm.intValue() + ((includeLower) ? 1 : 0)
+		        + ((includeUpper) ? 1 : 0);
 	}
 
 }
