@@ -33,22 +33,24 @@ import org.punksearch.ip.SynchronizedIpIterator;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class NetworkCrawler implements Runnable {
-	private static Logger      __log             = Logger.getLogger(NetworkCrawler.class.getName());
+	private static Logger       __log             = Logger.getLogger(NetworkCrawler.class.getName());
 
-	public static final String TMP_DIR_PROPERTY  = "org.punksearch.crawler.tmpdir";
-	public static final String UNLOCK_PROPERTY   = "org.punksearch.crawler.forceunlock";
-	public static final String THREADS_PROPERTY  = "org.punksearch.crawler.threads";
-	public static final String RANGE_PROPERTY    = "org.punksearch.crawler.range";
-	public static final String KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
+	public static final String  TMP_DIR_PROPERTY  = "org.punksearch.crawler.tmpdir";
+	public static final String  UNLOCK_PROPERTY   = "org.punksearch.crawler.forceunlock";
+	public static final String  THREADS_PROPERTY  = "org.punksearch.crawler.threads";
+	public static final String  RANGE_PROPERTY    = "org.punksearch.crawler.range";
+	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
 
-	private FileTypes          fileTypes;
-	private String             indexDirectory;
-	private boolean            forceUnlock;
-	private List<IpRange>      ranges;
-	private int                threadCount;
-	private float              daysToKeep;
+	private static final String THREAD_PREFIX     = "HostCrawler";
 
-	private List<HostCrawler>  threadList        = new ArrayList<HostCrawler>();
+	private FileTypes           fileTypes;
+	private String              indexDirectory;
+	private boolean             forceUnlock;
+	private List<IpRange>       ranges;
+	private int                 threadCount;
+	private float               daysToKeep;
+
+	private List<HostCrawler>   threadList        = new ArrayList<HostCrawler>();
 
 	public NetworkCrawler() {
 		this.indexDirectory = PunksearchProperties.resolveIndexDirectory();
@@ -152,7 +154,7 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private void mergeIntoIndex(String threadName) {
-		int index = Integer.valueOf(threadName.substring(threadName.length() - 1));
+		int index = Integer.valueOf(threadName.substring(THREAD_PREFIX.length()));
 		Set<String> dirs = new HashSet<String>();
 		dirs.add(getThreadDirectory(index));
 		IndexOperator.merge(indexDirectory, dirs);
@@ -189,12 +191,12 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private HostCrawler makeThread(int index, SynchronizedIpIterator iter) {
-		HostCrawler indexerThread = new HostCrawler("HostCrawler" + index, iter, fileTypes, getThreadDirectory(index));
+		HostCrawler indexerThread = new HostCrawler(THREAD_PREFIX + index, iter, fileTypes, getThreadDirectory(index));
 		return indexerThread;
 	}
 
 	private void cleanTempForThread(String threadName) throws IOException {
-		int index = Integer.valueOf(threadName.substring(threadName.length() - 1));
+		int index = Integer.valueOf(threadName.substring(THREAD_PREFIX.length()));
 		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
 	}
 
