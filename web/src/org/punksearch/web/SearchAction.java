@@ -124,14 +124,12 @@ public class SearchAction {
 
 		Filter filter = makeFilter();
 
-		List<ItemGroup> searchResults = new ArrayList<ItemGroup>();
-
 		Date startDate = new Date();
 		SearcherResult result = SearcherWrapper.search(query, filter, MAX_DOCS);
 		Date stopDate = new Date();
 
 		List<Document> docs = sortDocsOnlineFirst(result.items());
-		searchResults = makeGroupsFromDocs(docs);
+		List<ItemGroup> searchResults = makeGroupsFromDocs(docs);
 
 		searchTime = stopDate.getTime() - startDate.getTime();
 		presentationTime = new Date().getTime() - stopDate.getTime();
