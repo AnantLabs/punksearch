@@ -42,6 +42,7 @@ public class NetworkCrawler implements Runnable {
 	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
 
 	private static final String THREAD_PREFIX     = "HostCrawler";
+	private static final String HOSTS_DUMP        = "hosts.csv";
 
 	private FileTypes           fileTypes;
 	private String              indexDirectory;
@@ -73,8 +74,14 @@ public class NetworkCrawler implements Runnable {
 	public void run() {
 
 		if (!prepareIndex(indexDirectory)) {
+			__log.warning("Can't start crawling. Something wrong with index directory (check log).");
 			return;
 		}
+		if (ranges.size() == 0) {
+			__log.warning("Can't start crawling. The list of IPs to crawl is empty.");
+			return;
+		}
+
 		SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
 		threadList.clear();
 
@@ -85,6 +92,7 @@ public class NetworkCrawler implements Runnable {
 
 			for (int i = 0; i < threadCount; i++) {
 				if (!prepareIndex(getThreadDirectory(i))) {
+					__log.warning("Cancel crawling. Can't make directory for crawl thread: " + getThreadDirectory(i));
 					stop();
 					return;
 				}
@@ -93,7 +101,7 @@ public class NetworkCrawler implements Runnable {
 				threadList.add(indexerThread);
 			}
 
-			List<String> hosts = new ArrayList<String>();
+			List<HostStats> hosts = new ArrayList<HostStats>();
 			boolean cleaned = false;
 			for (HostCrawler thread : threadList) {
 				try {
@@ -129,11 +137,11 @@ public class NetworkCrawler implements Runnable {
 		}
 	}
 
-	private void removeHostsFromIndex(Set<String> hosts) {
+	private void removeHostsFromIndex(Set<HostStats> hosts) {
 		__log.fine("Start cleaning target index directory from set of indexed hosts");
-		for (String host : hosts) {
+		for (HostStats host : hosts) {
 			__log.info("Cleaning target index directory from indexed host: " + host);
-			IndexOperator.deleteByHost(indexDirectory, host);
+			IndexOperator.deleteByHost(indexDirectory, host.getProtocol() + "_" + host.getIp());
 		}
 		__log.fine("Finished cleaning target index directory from set of indexed hosts");
 	}
@@ -170,11 +178,79 @@ public class NetworkCrawler implements Runnable {
 		return threadList;
 	}
 
+	/**
+	 * Parses the IP ranges string.
+	 * 
+	 * The string can be either path to a file with IP ranges or comma-separated list of string representation of IP
+	 * ranges.
+	 * 
+	 * @param rangesString
+	 *            either path to a file with IP ranges or comma-separated list of string representation of IP ranges.
+	 * @return list of IP ranges. May return empty list, never null.
+	 */
 	private static List<IpRange> parseRanges(String rangesString) {
+		String[] parts = rangesString.split(",");
+		if (IpRange.isIpRange(parts[0])) {
+			List<IpRange> result = new ArrayList<IpRange>();
+			String[] ranges = rangesString.split(",");
+			for (String range : ranges) {
+				result.add(new IpRange(range));
+			}
+			return result;
+		} else {
+			String path;
+			if (PunksearchProperties.isAbsolutePath(rangesString)) {
+				path = rangesString;
+			} else {
+				path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + rangesString;
+			}
+			File file = new File(path);
+			if (file.exists()) {
+				return loadRangesFromFile(file);
+			} else {
+				__log.warning("Can't find IP ranges file: '" + file.getAbsolutePath() + "'");
+				return new ArrayList<IpRange>();
+			}
+		}
+	}
+
+	/**
+	 * Reads a file and creates list of IpRanges from it.
+	 * 
+	 * The file may be of random format, the single restriction is IP should be in the first column. Each row of the
+	 * file must be either comment (starts with "#") or start with IP or IP range.
+	 * 
+	 * Example:
+	 * 
+	 * <pre>
+	 * # this is a comment before single ip
+	 * 10.20.30.40
+	 * # another comment before ip range
+	 * 11.22.33.44-11.22.33.55
+	 * # comment before long row, the tail after first comma is ignored
+	 * 22.33.44.55, smth else, foo
+	 * </pre>
+	 * 
+	 * @param path
+	 *            either absolute or relative (to punksearch home) path to the file
+	 * @return list of IpRanage objects
+	 */
+	private static List<IpRange> loadRangesFromFile(File file) {
 		List<IpRange> result = new ArrayList<IpRange>();
-		String[] rangeChunks = rangesString.split(",");
-		for (String chunk : rangeChunks) {
-			result.add(new IpRange(chunk));
+		try {
+			List<String> lines = FileUtils.readLines(file);
+			for (String line : lines) {
+				line = line.trim();
+				if (line.startsWith("#")) {
+					continue;
+				}
+				String[] chunks = line.split(",");
+				if (IpRange.isIpRange(chunks[0].trim())) {
+					result.add(new IpRange(chunks[0].trim()));
+				}
+			}
+		} catch (IOException e) {
+			__log.warning("Can't load ranges from file: " + file.getAbsolutePath());
 		}
 		return result;
 	}
@@ -200,9 +276,9 @@ public class NetworkCrawler implements Runnable {
 		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
 	}
 
-	private static void dumpHosts(List<String> crawledHosts) {
+	private static void dumpHosts(List<HostStats> crawledHosts) {
 		Collections.sort(crawledHosts);
-		File dumpFile = new File(PunksearchProperties.resolveHome() + "/crawled_hosts.list");
+		File dumpFile = new File(PunksearchProperties.resolveHome() + System.getProperty("file.separator") + HOSTS_DUMP);
 		try {
 			FileUtils.writeLines(dumpFile, crawledHosts);
 		} catch (IOException e) {
@@ -215,7 +291,7 @@ public class NetworkCrawler implements Runnable {
 			try {
 				IndexOperator.createIndex(dir);
 			} catch (IOException e) {
-				__log.severe("Can't create index directory: '" + dir + "'! Stop crawling.");
+				__log.severe("Can't create index directory: '" + dir + "'!");
 				return false;
 			}
 		}
@@ -224,7 +300,7 @@ public class NetworkCrawler implements Runnable {
 			if (forceUnlock) {
 				IndexOperator.unlock(dir);
 			} else {
-				__log.info("Can't start crawling, since index directory is locked: '" + dir + "' "
+				__log.info("Index directory is locked: '" + dir + "' "
 				        + "Consider to set \"*.crawler.forceunlock=true\" in punksearch.properties");
 				return false;
 			}
