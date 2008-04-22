@@ -17,16 +17,29 @@ import org.apache.lucene.analysis.LengthFilter;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 
-public class FilenameAnalyzer extends Analyzer
-{
+/**
+ * Analyzes file names.
+ * 
+ * Tokenizes the file name using {@link FilenameTokenizer}, drops all parts with length less than MIN_TERM_LENGTH and
+ * lowercases all other parts.
+ * 
+ * @author Yury Soldak (ysoldak@gmail.com)
+ */
+public class FilenameAnalyzer extends Analyzer {
+
+	public static final int MIN_TERM_LENGTH;
+
+	static {
+		String termLength = System.getProperty("org.punksearch.crawler.termlength");
+		MIN_TERM_LENGTH = (termLength != null) ? Integer.valueOf(termLength) : 3;
+	}
 
 	@Override
-	public TokenStream tokenStream(String fieldName, Reader reader)
-	{
-	    TokenStream result = new FilenameTokenizer(reader);
-	    result = new LengthFilter(result, 3, 1000);
-	    result = new LowerCaseFilter(result);
-	    return result;
+	public TokenStream tokenStream(String fieldName, Reader reader) {
+		TokenStream result = new FilenameTokenizer(reader);
+		result = new LengthFilter(result, MIN_TERM_LENGTH, 1000);
+		result = new LowerCaseFilter(result);
+		return result;
 	}
 
 }
