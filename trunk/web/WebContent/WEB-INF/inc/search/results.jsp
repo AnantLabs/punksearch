@@ -10,7 +10,7 @@
 <%@ page import="java.util.Map" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
-<% boolean showScores = false; %>
+<% boolean showScores = Boolean.parseBoolean(System.getProperty("org.punksearch.web.showscores")); %>
 <div id="searchResultsContainer">
 	<%
 		Map parameterMap = request.getParameterMap();
