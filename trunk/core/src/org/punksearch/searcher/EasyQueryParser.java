@@ -22,18 +22,30 @@ import org.apache.lucene.search.WildcardQuery;
 import org.punksearch.common.IndexFields;
 
 /**
+ * Helper class to create Lucene queries easily.
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class EasyQueryParser {
 
-	private int       maxClauseCount;
-	private int       minTermLength;
-	private boolean   isFastSearch;
+	public static final String CLAUSES_PROPERTY     = "org.punksearch.search.clauses";
+	public static final String TERM_LENGTH_PROPERTY = "org.punksearch.search.termlength";
+	public static final String FAST_SEARCH_PROPERTY = "org.punksearch.search.fast";
+
+	private int                maxClauseCount       = 10000;
+	private int                minTermLength        = 3;
+	private boolean            isFastSearch         = true;
 
 	public EasyQueryParser() {
-		this.maxClauseCount = Integer.valueOf(System.getProperty("org.punksearch.search.clauses"));
-		this.minTermLength = Integer.valueOf(System.getProperty("org.punksearch.search.termlength"));
-		this.isFastSearch = Boolean.valueOf(System.getProperty("org.punksearch.search.fast"));
+		if (System.getProperty(CLAUSES_PROPERTY) != null) {
+			this.maxClauseCount = Integer.valueOf(System.getProperty(CLAUSES_PROPERTY));
+		}
+		if (System.getProperty(TERM_LENGTH_PROPERTY) != null) {
+			this.minTermLength = Integer.valueOf(System.getProperty(TERM_LENGTH_PROPERTY));
+		}
+		if (System.getProperty(FAST_SEARCH_PROPERTY) != null) {
+			this.isFastSearch = Boolean.valueOf(System.getProperty(FAST_SEARCH_PROPERTY));
+		}
 	}
 
 	public Query makeSimpleQuery(String userQuery) {
