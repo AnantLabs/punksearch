@@ -24,6 +24,10 @@ import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 
 /**
+ * Implementation of a crawler thread. Crawls one host a time.
+ * 
+ * @see {@link NetworkCrawler}
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
@@ -48,8 +52,7 @@ public class HostCrawler extends Thread {
 
 	private IndexOperator      indexOperator;
 
-	private Set<String>        crawledHosts      = new HashSet<String>();
-	private Set<String>        skippedHosts      = new HashSet<String>();
+	private Set<HostStats>     crawledHosts      = new HashSet<HostStats>();
 	private String             timestamp;
 
 	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
@@ -78,15 +81,18 @@ public class HostCrawler extends Thread {
 
 	public void run() {
 
-		SmbAdapter smbAdapter = new SmbAdapter();
-		FtpAdapter ftpAdapter = new FtpAdapter();
+		Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
+		adapters.add(new SmbAdapter());
+		adapters.add(new FtpAdapter());
 
 		while ((ip = ipIterator.next()) != null) {
 
-			__log.fine(getName() + ": trying " + ip);
+			__log.fine(getName() + ". Trying " + ip);
 
-			crawlWithAdapter(smbAdapter);
-			crawlWithAdapter(ftpAdapter);
+			for (ProtocolAdapter ad : adapters) {
+				setAdapter(ad);
+				crawl();
+			}
 
 			if (isInterrupted()) {
 				break;
@@ -95,31 +101,27 @@ public class HostCrawler extends Thread {
 		indexOperator.close();
 	}
 
-	private void crawlWithAdapter(ProtocolAdapter ad) {
+	private void crawl() {
 		timestamp = Long.toString(System.currentTimeMillis());
 
 		boolean connected = false;
 		try {
-			connected = ad.connect(ip);
+			connected = adapter.connect(ip);
 			if (connected) {
-				__log.info(getName() + ": start crawling " + ip);
-				setAdapter(ad);
+				__log.info(getName() + ". Start crawling " + curHost());
 				long size = crawlDirectory(adapter.getRootDir(), 0);
 				if (size > 0) {
-					__log.info(getName() + ": " + ad.getProtocol() + ": " + ip + " crawled: " + size + " bytes");
-					crawledHosts.add(curHost());
-				} else {
-					skippedHosts.add(curHost());
+					__log.info(getName() + ": " + adapter.getProtocol() + ": " + ip + " crawled: " + size + " bytes");
+					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size));
 				}
 			}
 		} catch (IllegalArgumentException e) {
-			__log.warning("IAE: " + e);
+			__log.warning(getName() + ". Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
-			__log.warning(getName() + ": Runtime exception occured");
-			e.printStackTrace();
+			__log.warning(getName() + ". Runtime exception: " + e.getMessage());
 		} finally {
 			if (connected) {
-				ad.disconnect();
+				adapter.disconnect();
 			}
 		}
 	}
@@ -315,12 +317,8 @@ public class HostCrawler extends Thread {
 		}
 	}
 
-	public Set<String> getCrawledHosts() {
+	public Set<HostStats> getCrawledHosts() {
 		return crawledHosts;
-	}
-
-	public Set<String> getSkippedHosts() {
-		return skippedHosts;
 	}
 
 }
