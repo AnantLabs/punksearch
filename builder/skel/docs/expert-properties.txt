@@ -4,16 +4,37 @@
 # The properties are subject to change and don't guaranteed to work.
 
 # Show Lucene's scores of found items in the web interface
-org.punksearch.web.showscores=true|false
+org.punksearch.web.showscores=true|false (default false)
 
 # Boost by path deep (shorter path - more scores). directories & files
-# "/2" for each directory in path
-org.punksearch.crawler.boost.deep=true|false
+# boost /= 2^(directories in path)
+org.punksearch.crawler.boost.deep=true|false (default true)
 
 # Boost by create date (most recent items pop up). files only
-# "*(1+const/(now-createdate))"
-org.punksearch.crawler.boost.createdate=true|false
+# boost *= (1+const/(now-createdate))
+org.punksearch.crawler.boost.createdate=true|false (default true)
 
 # Boost by size (big directories pop up). directories only
-# "*(sizeinbytes/1000)" 
-org.punksearch.crawler.boost.size=true|false
+# boost *= (sizeinbytes/1000) 
+org.punksearch.crawler.boost.size=true|false (default true)
+
+# Adjust term lengths during crawl
+# Drop filename parts shorter than specified.
+# Theoretically low values may affect performance.
+org.punksearch.crawler.termlength=number (default 3)
+
+# Adjust term lengths during search
+# All user query terms shorter than this value will be ignored during search
+# Theoretically low values may affect performance.
+# Setting this value less than the value for crawler (above) will not work as expected.
+# You should adjust crawler property also and re-crawl the network first.  
+org.punksearch.search.termlength=number (default 3)
+
+# Tricky property. You'd better leave it as is ;)
+# Small values may lead to exceptions in Lucene search engine on some hard queries
+# Large values may lead to out of memory exceptions. 
+org.punksearch.search.clauses=number (default 10000)
+
+# The path to use to create temp files during crawling.
+# By default (empty value) system's temporary directory to be used (/tmp on UNIX)
+org.punksearch.crawler.tmpdir=path (deafult is empty string)
