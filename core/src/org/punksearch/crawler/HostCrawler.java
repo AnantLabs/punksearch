@@ -27,31 +27,53 @@ import org.punksearch.common.IndexFields;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
-	private static Logger    __log        = Logger.getLogger(HostCrawler.class.getName());
+	private static Logger      __log             = Logger.getLogger(HostCrawler.class.getName());
 
-	private String           ip;
-	private int              maxDeep      = 5;
+	public static final String BOOST_CREATE_DATE = "org.punksearch.crawler.boost.createdate";
+	public static final String BOOST_DEEP        = "org.punksearch.crawler.boost.deep";
+	public static final String BOOST_SIZE        = "org.punksearch.crawler.boost.size";
 
-	private ProtocolAdapter  adapter;
-	private FileTypes        knownFileTypes;
+	public static final String DEEP_PROPERTY     = "org.punksearch.crawler.deep";
 
-	private Iterator<String> ipIterator;
+	private String             ip;
+	private int                maxDeep           = 5;
+	private boolean            boostCreateDate   = true;
+	private boolean            boostDeep         = true;
+	private boolean            boostSize         = true;
 
-	private IndexOperator    indexOperator;
+	private ProtocolAdapter    adapter;
+	private FileTypes          knownFileTypes;
 
-	private Set<String>      crawledHosts = new HashSet<String>();
-	private Set<String>      skippedHosts = new HashSet<String>();
-	private String           timestamp;
+	private Iterator<String>   ipIterator;
+
+	private IndexOperator      indexOperator;
+
+	private Set<String>        crawledHosts      = new HashSet<String>();
+	private Set<String>        skippedHosts      = new HashSet<String>();
+	private String             timestamp;
 
 	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
 
 		this.ipIterator = ipIterator;
-		knownFileTypes = fileTypes;
+		this.indexOperator = new IndexOperator(indexDirectoryPath);
+		this.knownFileTypes = fileTypes;
 
-		maxDeep = Integer.parseInt(System.getProperty("org.punksearch.crawler.deep"));
+		if (System.getProperty(DEEP_PROPERTY) != null) {
+			this.maxDeep = Integer.parseInt(System.getProperty(DEEP_PROPERTY));
+		}
 
-		indexOperator = new IndexOperator(indexDirectoryPath);
+		if (System.getProperty(BOOST_CREATE_DATE) != null) {
+			this.boostCreateDate = Boolean.parseBoolean(System.getProperty(BOOST_CREATE_DATE));
+		}
+
+		if (System.getProperty(BOOST_DEEP) != null) {
+			this.boostDeep = Boolean.parseBoolean(System.getProperty(BOOST_DEEP));
+		}
+
+		if (System.getProperty(BOOST_SIZE) != null) {
+			this.boostSize = Boolean.parseBoolean(System.getProperty(BOOST_SIZE));
+		}
 	}
 
 	public void run() {
@@ -146,12 +168,21 @@ public class HostCrawler extends Thread {
 		String dirPath = adapter.getPath(dir);
 		String lastModified = Long.toString(adapter.getModificationTime(dir));
 
-		String[] pathParts = dirPath.split("/");
 		float boost = 1.0f;
-		for (int i = 0; i < pathParts.length; i++) {
-			boost /= 2;
+
+		// boosting by deep (we want directories closer to root to pop up)
+		// the closer a file to the root -- the more boost it to receive
+		if (boostDeep) {
+			String[] pathParts = dirPath.split("/");
+			for (int i = 0; i < pathParts.length; i++) {
+				boost /= 2;
+			}
 		}
-		boost *= dirSize / 1000.0f;
+
+		// boost size (we want big directories to pop up)
+		if (boostSize) {
+			boost *= dirSize / 1000.0f;
+		}
 
 		return makeDocument(dirName, dirExtension, dirSizeStr, dirPath, lastModified, boost);
 	}
@@ -166,10 +197,28 @@ public class HostCrawler extends Thread {
 		String filePath = adapter.getPath(file);
 		String lastModified = Long.toString(adapter.getModificationTime(file));
 
-		String[] pathParts = filePath.split("/");
+		// default boost value
 		float boost = 1.0f;
-		for (int i = 0; i < pathParts.length; i++) {
-			boost /= 2;
+
+		// boosting by deep (we want files closer to root to pop up)
+		// the closer a file to the root -- the more boost it to receive
+		if (boostDeep) {
+			String[] pathParts = filePath.split("/");
+			for (int i = 0; i < pathParts.length; i++) {
+				boost /= 2;
+			}
+		}
+
+		// boosting by create date (we want most recent files to pop up)
+		// the effect is similar to sorting by create date (in reverse order),
+		// but this is true only for several most recent files
+		// the rest is "sorted" according to other boost strategies
+		if (boostCreateDate) {
+			long modified = adapter.getModificationTime(file);
+			long now = System.currentTimeMillis();
+			long hour = 1000 * 3600;
+			float ageBoostMultiplier = (now > modified) ? 1 + (1000 * hour * 24) / (now - modified) : 1;
+			boost *= ageBoostMultiplier;
 		}
 
 		return makeDocument(fileName, fileExt, fileSize, filePath, lastModified, boost);
