@@ -140,8 +140,9 @@ public class NetworkCrawler implements Runnable {
 	private void removeHostsFromIndex(Set<HostStats> hosts) {
 		__log.fine("Start cleaning target index directory from set of indexed hosts");
 		for (HostStats host : hosts) {
-			__log.info("Cleaning target index directory from indexed host: " + host);
-			IndexOperator.deleteByHost(indexDirectory, host.getProtocol() + "_" + host.getIp());
+			String hostTerm = host.getProtocol() + "_" + host.getIp();
+			__log.info("Cleaning target index directory from indexed host: " + hostTerm);
+			IndexOperator.deleteByHost(indexDirectory, hostTerm);
 		}
 		__log.fine("Finished cleaning target index directory from set of indexed hosts");
 	}
