@@ -24,6 +24,11 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
 
+/**
+ * Helper class to search over Lucene index. Tracks changes in the index and re-inits itself if necessary.
+ * 
+ * @author Yury Soldak (ysoldak@gmail.com)
+ */
 public class Searcher {
 	private static final Logger __log                = Logger.getLogger(Searcher.class.getName());
 
@@ -34,10 +39,10 @@ public class Searcher {
 
 	public Searcher(String dir) {
 		this.indexDir = dir;
-		initIndexSearcher(dir);
+		init(dir);
 	}
 
-	private void initIndexSearcher(String dir) {
+	private void init(String dir) {
 		try {
 			indexSearcher = new IndexSearcher(FSDirectory.getDirectory(dir));
 		} catch (IOException e) {
@@ -48,7 +53,7 @@ public class Searcher {
 
 	public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
 
-		checkIndexSearcher();
+		checkIndexDirectory();
 
 		if (null != start && null != stop && (start > stop || start < 0 || stop < 0)) {
 			throw new IllegalArgumentException("First (" + start + ") and last (" + stop
@@ -86,8 +91,8 @@ public class Searcher {
 	}
 
 	public SearcherResult search(Query query, Filter filter, Integer limit) {
-		
-		checkIndexSearcher();
+
+		checkIndexDirectory();
 
 		try {
 			Hits hits = indexSearcher.search(query, filter);
@@ -106,10 +111,10 @@ public class Searcher {
 		}
 	}
 
-	private void checkIndexSearcher() {
+	private void checkIndexDirectory() {
 		try {
 			if (IndexReader.lastModified(indexDir) > indexSearcherCreated) {
-				initIndexSearcher(indexDir);
+				init(indexDir);
 			}
 		} catch (CorruptIndexException e1) {
 			e1.printStackTrace();
