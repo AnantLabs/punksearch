@@ -128,7 +128,10 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 
 	@Override
 	public int hashCode() {
-		return fieldName.hashCode() + lowerTerm.hashCode() + upperTerm.hashCode() + ((includeLower) ? 1 : 0)
-		        + ((includeUpper) ? 1 : 0);
+		int result = fieldName.hashCode();
+		result += (lowerTerm != null) ? lowerTerm.hashCode() : 0;
+		result += (upperTerm != null) ? upperTerm.hashCode() : 0;
+		result += ((includeLower) ? 1 : 0) + ((includeUpper) ? 1 : 0);
+		return result;
 	}
 }
