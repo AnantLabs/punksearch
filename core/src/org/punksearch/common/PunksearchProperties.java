@@ -34,12 +34,12 @@ public class PunksearchProperties {
 			e.printStackTrace();
 		} finally {
 			try {
-	            inputStream.close();
-            } catch (IOException e) {
-	            e.printStackTrace();
-            }
+				inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		for (Map.Entry<Object,Object> entry : props.entrySet()) {
+		for (Map.Entry<Object, Object> entry : props.entrySet()) {
 			System.setProperty((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
@@ -52,10 +52,14 @@ public class PunksearchProperties {
 		return indexDir;
 	}
 
-	private static boolean isAbsolutePath(String path) {
-		return path.startsWith("/");
+	public static boolean isAbsolutePath(String path) {
+		if (System.getProperty("os.name").contains("Windows")) {
+			return path.substring(1).startsWith(":");
+		} else {
+			return path.startsWith("/");
+		}
 	}
-	
+
 	public static String resolveHome() {
 		String home = System.getProperty("org.punksearch.home");
 		if (home == null) {
