@@ -1,0 +1,19 @@
+# This file lists some extra and expert system properties 
+# which can be used to fine-tune PUNKSearch or for debugging purposes
+#
+# The properties are subject to change and don't guaranteed to work.
+
+# Show Lucene's scores of found items in the web interface
+org.punksearch.web.showscores=true|false
+
+# Boost by path deep (shorter path - more scores). directories & files
+# "/2" for each directory in path
+org.punksearch.crawler.boost.deep=true|false
+
+# Boost by create date (most recent items pop up). files only
+# "*(1+const/(now-createdate))"
+org.punksearch.crawler.boost.createdate=true|false
+
+# Boost by size (big directories pop up). directories only
+# "*(sizeinbytes/1000)" 
+org.punksearch.crawler.boost.size=true|false
