@@ -1,13 +1,17 @@
 #summary changelist for application versions
 #labels Featured
 
-= 0.8.1 (soon) =
+= 0.8.1 (2008-04-23) =
   * bugfix: user-friendly notification about invalid index directory in web interface (closes defect)
   * bugfix: speedup of grouping of results in web interface (closes defect)
+  * bugfix: others size is always positive now in statistics chart (closes defect)
+  * usability: boost by create date -- new items pop up in search results (closes feature request)
+  * crawl: list of IPs to crawl from external file (use "org.punksearch.crawler.range" property to set path to a file). (closes feature request)
+  * crawl: "org.punksearch.crawler.forceunlock" property added to forcing unlock of index (and temp) directories
+  * crawl: improvements in logging and crawl stability
+  * crawl: "org.punksearch.crawler.fromscratch" property removed, use "{{{*}}}.keepdays=0" instead to force crawler rebuild index from scratch
   * core: "org.punksearch.online.timeout" property added to set timeout for checking online/offline status of a host
-  * core: "org.punksearch.crawler.forceunlock" property added to forcing unlock of index (and temp) directories
-  * core: improvements in logging and crawl stability
-  * core: "org.punksearch.crawler.fromscratch" property removed, use "{{{*}}}.keepdays=0" instead to force crawler rebuild index from scratch.
+  * gui: host online status check speedup
 
 = 0.8.0 (2008-04-11) =
   * *NB!: index directories created with 0.7.3 are incompatible with this version. Please reindex the network.*
