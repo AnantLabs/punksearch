@@ -13,6 +13,7 @@ package org.punksearch.web.online;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -26,38 +27,27 @@ import org.punksearch.web.ResultFilter;
  */
 public class OnlineResultFilter implements ResultFilter {
 
-	// TODO: extract OnlineResultFilter.THREAD_COUNT to settings
-	private static final int THREAD_COUNT = 10;
+	private static final int THREAD_COUNT;
 	
+	static {
+		String onlineThreads = System.getProperty("org.punksearch.online.threads");
+		THREAD_COUNT = (onlineThreads != null)? Integer.valueOf(onlineThreads) : 10;
+	}
+
 	public boolean matches(Document doc) {
 		return CachedOnlineChecker.isOnline(doc.get(IndexFields.HOST));
 	}
 
 	public List<Integer> filter(final List<Document> docs) {
-
 		List<String> hosts = extractDistinctHosts(docs);
-
-		int size = hosts.size();
-		//System.out.println("Size: " + size);
-		int chunkSize = size / THREAD_COUNT;
-		int lastChunk = size % THREAD_COUNT;
-
-		List<Integer> onlineIndexes = Collections.synchronizedList(new ArrayList<Integer>());
+		Iterator<String> iter = hosts.iterator();
+		Set<String> onlineHosts = Collections.synchronizedSet(new HashSet<String>());
 
 		List<Thread> threadList = new ArrayList<Thread>();
 		for (int i = 0; i < THREAD_COUNT; i++) {
-			final int chunkStart = i * chunkSize;
-			final int chunkStop = chunkStart + chunkSize - 1;
-			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, chunkStart, chunkStop, hosts, onlineIndexes);
+			Thread thread = new OnlineCheckThread("OnlineCheckThread" + i, iter, onlineHosts);
 			thread.start();
 			threadList.add(thread);
-			//System.out.println(chunkStart + ":" + chunkStop);
-		}
-		if (lastChunk != 0) {
-			Thread thread = new OnlineCheckThread("OnlineCheckThread" + THREAD_COUNT, THREAD_COUNT * chunkSize, size - 1, hosts, onlineIndexes);
-			thread.start();
-			threadList.add(thread);
-			//System.out.println((THREAD_COUNT * chunkSize) + ":" + (size - 1));
 		}
 
 		try {
@@ -68,13 +58,9 @@ public class OnlineResultFilter implements ResultFilter {
 			e.printStackTrace();
 			return new LinkedList<Integer>();
 		}
-		Set<String> onlineHosts = new HashSet<String>(onlineIndexes.size());
-		for (Integer idx : onlineIndexes) {
-			onlineHosts.add(hosts.get(idx));
-			//System.out.println("Online host: " + hosts.get(idx));
-		}
+
 		List<Integer> docIds = new LinkedList<Integer>();
-		for (int i = 0 ; i < docs.size() ; i++) {
+		for (int i = 0; i < docs.size(); i++) {
 			Document doc = docs.get(i);
 			if (onlineHosts.contains(doc.get(IndexFields.HOST))) {
 				docIds.add(i);
@@ -92,33 +78,34 @@ public class OnlineResultFilter implements ResultFilter {
 		}
 		return result;
 	}
-	
+
 }
 
 class OnlineCheckThread extends Thread {
-	private int           start = 0;
-	private int           stop  = 0;
-	private List<String>  hosts = null;
-	private List<Integer> out   = null;
+	private Set<String>      out;
+	private Iterator<String> iter;
 
-	public OnlineCheckThread(String name, int start, int stop, List<String> hosts, List<Integer> out) {
+	public OnlineCheckThread(String name, Iterator<String> iter, Set<String> out) {
 		super(name);
-		this.start = start;
-		this.stop = stop;
-		this.hosts = hosts;
+		this.iter = iter;
 		this.out = out;
 	}
 
 	public void run() {
-		//System.out.println("> onlineCheckThread. checking " + start + ":" + stop);
-		for (int j = start; j <= stop; j++) {
-			String host = hosts.get(j).replace("smb_", "smb://").replace("ftp_", "ftp://");
-			if (CachedOnlineChecker.isOnline(host)) {
-				out.add(j);
-				//System.out.println(getName() + " Online in thread: " + host);
+		String host;
+		while (true) {
+			synchronized (iter) {
+				if (iter.hasNext()) {
+					host = iter.next();
+				} else {
+					break;
+				}
+			}
+			String url = host.replace("smb_", "smb://").replace("ftp_", "ftp://");
+			if (CachedOnlineChecker.isOnline(url)) {
+				out.add(host);
 			}
 		}
-		//System.out.println("< onlineCheckThread. checking " + start + ":" + stop);
 	}
 
 }
