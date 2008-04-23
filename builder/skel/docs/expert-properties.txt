@@ -38,3 +38,6 @@ org.punksearch.search.clauses=number (default 10000)
 # The path to use to create temp files during crawling.
 # By default (empty value) system's temporary directory to be used (/tmp on UNIX)
 org.punksearch.crawler.tmpdir=path (deafult is empty string)
+
+# Count of threads to use for online status checking for search results
+org.punksearch.online.threads=number (default 10)
