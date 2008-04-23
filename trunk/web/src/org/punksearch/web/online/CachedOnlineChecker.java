@@ -19,17 +19,17 @@ import org.punksearch.common.OnlineChecker;
 
 public class CachedOnlineChecker {
 
-	// TODO: extract to properties
-	private static int                     timeout = 600;
+	public static final long               timeout;
 
-	private static Map<String, HostStatus> cache   = Collections.synchronizedMap(new HashMap<String, HostStatus>());
+	private static Map<String, HostStatus> cache = Collections.synchronizedMap(new HashMap<String, HostStatus>());
 
-	public static void setTimeout(int timeout) {
-		CachedOnlineChecker.timeout = timeout;
+	static {
+		String timeoutStr = System.getProperty("org.punksearch.online.cache.timeout");
+		timeout = (timeoutStr != null) ? Long.parseLong(timeoutStr) * 1000 : 600 * 1000;
 	}
 
 	public static boolean isOnline(String host) {
-		Date recheckLimit = new Date(System.currentTimeMillis() - timeout * 1000);
+		Date recheckLimit = new Date(System.currentTimeMillis() - timeout);
 		HostStatus hs = cache.get(host);
 
 		if (hs != null && hs.date.after(recheckLimit)) {
