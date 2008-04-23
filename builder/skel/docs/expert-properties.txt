@@ -44,3 +44,6 @@ org.punksearch.crawler.tmpdir=path (default is empty string)
 
 # Count of threads to use for online status checking for search results
 org.punksearch.online.threads=number (default 10)
+
+# Timeout (in seconds) for status cache to refresh
+org.punksearch.online.cache.timeout=number (default 600 == 10 minutes)
