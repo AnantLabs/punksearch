@@ -43,6 +43,7 @@
 				<include name="punksearch.properties" />
 				<include name="filetypes.conf" />
 				<include name="punksearch.xml" />
+				<include name="docs/*.*" />
 			</fileset>
 		</copy>
 
