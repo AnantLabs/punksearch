@@ -24,9 +24,11 @@ public class InitServlet extends HttpServlet {
 		super.init(config);
 
 		try {
-			String home = getServletContext().getInitParameter("punksearch_home");
-			if (home != null) {
-				System.setProperty("org.punksearch.home", home);
+			if (System.getProperty("org.punksearch.home") == null) {
+				String home = getServletContext().getInitParameter("punksearch_home");
+				if (home != null) {
+					System.setProperty("org.punksearch.home", home);
+				}
 			}
 			PunksearchProperties.loadDefault();
 		} catch (FileNotFoundException e) {
