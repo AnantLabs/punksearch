@@ -10,7 +10,7 @@
  ***************************************************************************/
 package org.punksearch.ip;
 
-public class IpRange {
+public class IpRange implements Comparable<IpRange> {
 	private Ip startIp;
 	private Ip finishIp;
 
@@ -51,6 +51,22 @@ public class IpRange {
 		} else {
 			return Ip.isIp(parts[0]);
 		}
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof IpRange && startIp.equals(((IpRange) obj).startIp)
+		        && finishIp.equals(((IpRange) obj).finishIp)) {
+			return true;
+		}
+		return false;
+	}
+
+	public int hashCode() {
+		return startIp.hashCode() + finishIp.hashCode();
+	}
+
+	public int compareTo(IpRange o) {
+		return startIp.compareTo(o.startIp);
 	}
 
 }

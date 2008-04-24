@@ -237,7 +237,7 @@ public class NetworkCrawler implements Runnable {
 	 * @return list of IpRanage objects
 	 */
 	private static List<IpRange> loadRangesFromFile(File file) {
-		List<IpRange> result = new ArrayList<IpRange>();
+		Set<IpRange> result = new HashSet<IpRange>();
 		try {
 			List<String> lines = FileUtils.readLines(file);
 			for (String line : lines) {
@@ -253,7 +253,9 @@ public class NetworkCrawler implements Runnable {
 		} catch (IOException e) {
 			__log.warning("Can't load ranges from file: " + file.getAbsolutePath());
 		}
-		return result;
+		ArrayList<IpRange> list = new ArrayList<IpRange>(result);
+		Collections.sort(list);
+		return list;
 	}
 
 	private String getThreadDirectory(int index) {
