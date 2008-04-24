@@ -1,0 +1,23 @@
+/opt/tomcat (TOMCAT_HOME or CATALINA_HOME)
+ conf/Catalina/localhost/punksearch.xml -> [1.1]
+
+/etc/cron.daily
+ punksearch-crawl -> [1.2]
+ ...
+
+/opt/punksearch (PUNKSEARCH_HOME)
+ punksearch.xml [1.1] (punksearch_home=/opt/punksearch, docBase=/opt/punksearch_dist/punksearch.war)
+ punksearch.properties (indexdir = /opt/punksearch_index/index)
+ filetypes.conf
+ lib/ -> [2.1]
+ crawler.sh -> [2.2]
+ crawler_cron.sh [1.2] (cd /opt/punksearch; ./crawler.sh > crawler.log 2>&1)
+
+/opt/punksearch_dist
+ punksearch.war
+ lib [2.1]
+ crawler.sh [2.2]
+ ...
+ 
+/opt/punksearch_index
+ index
