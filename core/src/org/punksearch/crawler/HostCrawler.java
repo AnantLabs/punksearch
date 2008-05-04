@@ -37,14 +37,22 @@ public class HostCrawler extends Thread {
 	public static final String BOOST_DEEP        = "org.punksearch.crawler.boost.deep";
 	public static final String BOOST_SIZE        = "org.punksearch.crawler.boost.size";
 
-	public static final String DEEP_PROPERTY     = "org.punksearch.crawler.deep";
+	public static final String DEEP              = "org.punksearch.crawler.deep";
+	public static final String HEADER_USE        = "org.punksearch.crawler.header.use";
+	public static final String HEADER_LENGTH     = "org.punksearch.crawler.header.length";
+	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.header.threshold";
+
+	private int                maxDeep           = Integer.parseInt(System.getProperty(DEEP, "5"));
+
+	private boolean            boostCreateDate   = Boolean.parseBoolean(System.getProperty(BOOST_CREATE_DATE, "true"));
+	private boolean            boostDeep         = Boolean.parseBoolean(System.getProperty(BOOST_DEEP, "true"));
+	private boolean            boostSize         = Boolean.parseBoolean(System.getProperty(BOOST_SIZE, "true"));
+
+	private boolean            headerUse         = Boolean.parseBoolean(System.getProperty(HEADER_USE, "true"));
+	private int                headerLength      = Integer.valueOf(System.getProperty(HEADER_LENGTH, "128"));
+	private long               headerThreshold   = Long.valueOf(System.getProperty(HEADER_THRESHOLD, "500000"));
 
 	private String             ip;
-	private int                maxDeep           = 5;
-	private boolean            boostCreateDate   = true;
-	private boolean            boostDeep         = true;
-	private boolean            boostSize         = true;
-
 	private ProtocolAdapter    adapter;
 	private FileTypes          knownFileTypes;
 
@@ -57,26 +65,9 @@ public class HostCrawler extends Thread {
 
 	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
-
 		this.ipIterator = ipIterator;
 		this.indexOperator = new IndexOperator(indexDirectoryPath);
 		this.knownFileTypes = fileTypes;
-
-		if (System.getProperty(DEEP_PROPERTY) != null) {
-			this.maxDeep = Integer.parseInt(System.getProperty(DEEP_PROPERTY));
-		}
-
-		if (System.getProperty(BOOST_CREATE_DATE) != null) {
-			this.boostCreateDate = Boolean.parseBoolean(System.getProperty(BOOST_CREATE_DATE));
-		}
-
-		if (System.getProperty(BOOST_DEEP) != null) {
-			this.boostDeep = Boolean.parseBoolean(System.getProperty(BOOST_DEEP));
-		}
-
-		if (System.getProperty(BOOST_SIZE) != null) {
-			this.boostSize = Boolean.parseBoolean(System.getProperty(BOOST_SIZE));
-		}
 	}
 
 	public void run() {
@@ -109,7 +100,7 @@ public class HostCrawler extends Thread {
 			connected = adapter.connect(ip);
 			if (connected) {
 				__log.info(getName() + ". Start crawling " + curHost());
-				long size = crawlDirectory(adapter.getRootDir(), 0);
+				long size = crawlDirectory(adapter.getRootDir(), "", 0);
 				if (size > 0) {
 					__log.info(getName() + ": " + adapter.getProtocol() + ": " + ip + " crawled: " + size + " bytes");
 					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size));
@@ -118,7 +109,7 @@ public class HostCrawler extends Thread {
 		} catch (IllegalArgumentException e) {
 			__log.warning(getName() + ". Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
-			__log.warning(getName() + ". Runtime exception: " + e.getMessage());
+			__log.warning(getName() + ". Crawling of a host " + ip + " was cancelled due to: " + e.getMessage());
 		} finally {
 			if (connected) {
 				adapter.disconnect();
@@ -146,7 +137,8 @@ public class HostCrawler extends Thread {
 		this.knownFileTypes = fileTypes;
 	}
 
-	protected Document makeDocument(String name, String ext, String size, String path, String date, float boost) {
+	protected Document makeDocument(String name, String ext, String size, String path, String date, byte[] header,
+	        float boost) {
 		Document document = new Document();
 		document.add(new Field(IndexFields.HOST, curHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
@@ -155,6 +147,9 @@ public class HostCrawler extends Thread {
 		document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		if (header != null) {
+			document.add(new Field(IndexFields.HEADER, header, Field.Store.YES));
+		}
 		document.setBoost(boost);
 		return document;
 	}
@@ -163,11 +158,11 @@ public class HostCrawler extends Thread {
 		return adapter.getProtocol() + "_" + getIp();
 	}
 
-	private Document makeDirDocument(Object dir, long dirSize) {
+	private Document makeDirDocument(Object dir, String path, long dirSize) {
 		String dirName = adapter.getName(dir);
 		String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 		String dirSizeStr = Long.toString(dirSize);
-		String dirPath = adapter.getPath(dir);
+		String dirPath = path; // adapter.getPath(dir);
 		String lastModified = Long.toString(adapter.getModificationTime(dir));
 
 		float boost = 1.0f;
@@ -186,18 +181,20 @@ public class HostCrawler extends Thread {
 			boost *= dirSize / 1000.0f;
 		}
 
-		return makeDocument(dirName, dirExtension, dirSizeStr, dirPath, lastModified, boost);
+		return makeDocument(dirName, dirExtension, dirSizeStr, dirPath, lastModified, null, boost);
 	}
 
-	private Document makeFileDocument(Object file) {
+	private Document makeFileDocument(Object file, String path) {
 		String fullName = adapter.getName(file);
 
-		String fileExt = getExtension(fullName);
-		String fileName = (fileExt.length() > 0) ? fullName.substring(0, fullName.length() - fileExt.length() - 1)
-		        : fullName;
-		String fileSize = Long.toString(adapter.getSize(file));
-		String filePath = adapter.getPath(file);
+		String ext = getExtension(fullName);
+		String name = (ext.length() > 0) ? fullName.substring(0, fullName.length() - ext.length() - 1) : fullName;
+		// String path = adapter.getPath(file);
 		String lastModified = Long.toString(adapter.getModificationTime(file));
+
+		long sizeValue = adapter.getSize(file);
+		byte[] header = extractHeader(file, path, sizeValue);
+		String size = Long.toString(sizeValue);
 
 		// default boost value
 		float boost = 1.0f;
@@ -205,7 +202,7 @@ public class HostCrawler extends Thread {
 		// boosting by deep (we want files closer to root to pop up)
 		// the closer a file to the root -- the more boost it to receive
 		if (boostDeep) {
-			String[] pathParts = filePath.split("/");
+			String[] pathParts = path.split("/");
 			for (int i = 0; i < pathParts.length; i++) {
 				boost /= 2;
 			}
@@ -223,10 +220,18 @@ public class HostCrawler extends Thread {
 			boost *= ageBoostMultiplier;
 		}
 
-		return makeDocument(fileName, fileExt, fileSize, filePath, lastModified, boost);
+		return makeDocument(name, ext, size, path, lastModified, header, boost);
 	}
 
-	protected long crawlDirectory(Object dir, int deep) {
+	private byte[] extractHeader(Object item, String path, long size) {
+		if (headerUse && size > headerThreshold) {
+			return adapter.header(item, path, headerLength);
+		} else {
+			return null;
+		}
+	}
+
+	protected long crawlDirectory(Object dir, String path, int deep) {
 		if (deep > maxDeep) {
 			return 0L;
 		}
@@ -234,15 +239,17 @@ public class HostCrawler extends Thread {
 		// __log.finest(getName() + ": crawling: " + adapter.getProtocol() + "://" + getIp() +
 		// adapter.getFullPath(dir));
 
-		Object[] items = adapter.listFiles(dir);
+		Object[] items = adapter.listFiles(dir, path);
+
+		String dirPath = (path.length() != 0) ? path + adapter.getName(dir) + "/" : "/";
 
 		// start actual crawling
 		long size = 0L;
 		List<Document> documentList = new ArrayList<Document>();
 
 		for (Object item : items) {
-			if (shouldProcess(item)) {
-				Document doc = processResource(item, deep);
+			if (shouldProcess(item, path)) {
+				Document doc = processResource(item, dirPath, deep);
 				if (doc != null) {
 					documentList.add(doc);
 					size += Long.parseLong(doc.get(IndexFields.SIZE));
@@ -255,16 +262,16 @@ public class HostCrawler extends Thread {
 		return size;
 	}
 
-	private Document processResource(Object res, int deep) {
+	private Document processResource(Object res, String path, int deep) {
 		Document doc = null;
 
 		if (adapter.isDirectory(res)) {
-			long size = crawlDirectory(res, deep + 1);
+			long size = crawlDirectory(res, path, deep + 1);
 			if (size != 0L) {
-				doc = makeDirDocument(res, size);
+				doc = makeDirDocument(res, path, size);
 			}
 		} else if (adapter.isFile(res)) {
-			doc = makeFileDocument(res);
+			doc = makeFileDocument(res, path);
 		}
 
 		return doc;
@@ -277,14 +284,14 @@ public class HostCrawler extends Thread {
 	 *            list of items in the directory
 	 * @return
 	 */
-	private boolean isGoodDirectory(Object[] items) {
+	private boolean isGoodDirectory(Object[] items, String path) {
 		if (items == null || items.length == 0) {
 			return false;
 		}
 		boolean badFileFound = false;
 		for (Object item : items) {
 			if (adapter.isFile(item) && !(adapter.getName(item).startsWith(".") || adapter.isHidden(item))) {
-				if (shouldProcess(item)) {
+				if (shouldProcess(item, path)) {
 					return true;
 				} else {
 					badFileFound = true;
@@ -292,17 +299,17 @@ public class HostCrawler extends Thread {
 			}
 		}
 		if (badFileFound && __log.getLevel() == Level.FINE) {
-			__log.fine("Ignored parent dir of:" + curHost() + adapter.getFullPath(items[0]));
+			__log.fine("Ignored parent dir of:" + curHost() + path); // adapter.getFullPath(items[0]));
 		}
 		return !badFileFound;
 	}
 
-	private boolean shouldProcess(Object item) {
+	private boolean shouldProcess(Object item, String path) {
 		if (adapter.getName(item).startsWith(".") || adapter.isLink(item) || adapter.isHidden(item)) {
 			return false;
 		}
 		if (adapter.isDirectory(item)) {
-			return isGoodDirectory(adapter.listFiles(item));
+			return isGoodDirectory(adapter.listFiles(item, path), path);
 		} else {
 			return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
 		}

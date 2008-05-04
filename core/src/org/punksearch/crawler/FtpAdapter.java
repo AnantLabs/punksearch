@@ -11,41 +11,45 @@
 package org.punksearch.crawler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.punksearch.common.OnlineChecker;
-
-import com.enterprisedt.net.ftp.FTPClient;
-import com.enterprisedt.net.ftp.FTPConnectMode;
-import com.enterprisedt.net.ftp.FTPException;
-import com.enterprisedt.net.ftp.FTPFile;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class FtpAdapter implements ProtocolAdapter {
 
-	private static Logger __log     = Logger.getLogger(FtpAdapter.class.getName());
+	private static Logger __log = Logger.getLogger(FtpAdapter.class.getName());
 
-	private FTPClient     ftp       = new FTPClient();
+	private FTPClient     ftp   = new FTPClient();
 
 	private String        rootPath;
 
 	public boolean connect(String ip) {
 		disconnect();
-		
+
 		if (!OnlineChecker.isActiveFtp(ip)) {
 			return false;
 		}
 
 		try {
 			setupFtpClient(ip);
-			ftp.connect();
+			ftp.connect(ip);
+			// ftp.setUserName(getUser());
+			// ftp.setPassword(getPassword());
+			// ftp.manualLogin();
 			ftp.login(getUser(), getPassword());
-			ftp.keepAlive();
-			setRootPath(ftp.pwd());
+			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+			// ftp.keepAlive();
+			//setRootPath(ftp.printWorkingDirectory());
+			setRootPath("/");
+			//System.out.println("!!!" + ftp.printWorkingDirectory());
 			return true;
 		} catch (Exception e) {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during connecting the server: " + ip);
@@ -56,8 +60,8 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	public void disconnect() {
 		try {
-			if (ftp.connected()) {
-				ftp.quit();
+			if (ftp.isConnected()) {
+				ftp.disconnect();
 			}
 		} catch (Exception e) {
 			__log.info("ftp: exception during disconnect " + e.getMessage());
@@ -74,12 +78,37 @@ public class FtpAdapter implements ProtocolAdapter {
 		rootPath = path;
 	}
 
+	public byte[] header(Object item, String path, int length) {
+		FTPFile file = (FTPFile) item;
+		try {
+			if (file.isFile()) {
+				InputStream is = ftp.retrieveFileStream(path + file.getName());
+				if (is == null) {
+					__log.warning(ftp.getReplyString());
+					return null;
+				}
+				byte[] buf = new byte[length];
+				is.read(buf);
+				is.close();
+				ftp.completePendingCommand();
+				return buf;
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			__log.warning("Can't read header for the file (i/o error): " + path + getName(item));
+			return null;
+		}
+	}
+
+	/*
 	public String getFullPath(Object item) {
 		return getPath(item) + getName(item);
 	}
+	*/
 
 	public long getModificationTime(Object item) {
-		return ((FTPFile) item).lastModified().getTime();
+		return ((FTPFile) item).getTimestamp().getTime().getTime();
 	}
 
 	public String getName(Object item) {
@@ -87,9 +116,11 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public String getPath(Object item) {
-		String path = ((FTPFile) item).getPath().replaceAll("^/+", "/");
-		String suffix = (path.length() == 1) ? "" : "/";
-		return path.substring(rootPath.length() - 1) + suffix;
+		// String path = ((FTPFile) item).getPath().replaceAll("^/+", "/");
+		//System.out.println(((FTPFile) item).getRawListing());
+			String path = ((FTPFile) item).getName();
+			String suffix = (path.length() == 1) ? "" : "/";
+			return path.substring(rootPath.length() - 1) + suffix;
 	}
 
 	public String getProtocol() {
@@ -97,27 +128,28 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public Object getRootDir() {
-		if (ftp == null || !ftp.connected()) {
-			throw new IllegalStateException("can't get root dir since not connected to any ftp host");
+		if (ftp == null || !ftp.isConnected()) {
+			__log.warning("Can't get root dir since not connected to any ftp host");
+			throw new IllegalStateException("Can't get root dir since not connected to any ftp host");
 		}
-		try {
+		//try {
 			return rootPath;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException();
-		}
+		//} catch (Exception e) {
+		//	e.printStackTrace();
+		//	throw new RuntimeException();
+		//}
 	}
 
 	public long getSize(Object item) {
-		return ((FTPFile) item).size();
+		return ((FTPFile) item).getSize();
 	}
 
 	public boolean isDirectory(Object item) {
-		return ((FTPFile) item).isDir();
+		return ((FTPFile) item).isDirectory();
 	}
 
 	public boolean isFile(Object item) {
-		return (!((FTPFile) item).isDir() && !((FTPFile) item).isLink());
+		return (!((FTPFile) item).isDirectory() && !((FTPFile) item).isSymbolicLink());
 	}
 
 	public boolean isHidden(Object item) {
@@ -125,23 +157,29 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public boolean isLink(Object item) {
-		return ((FTPFile) item).isLink();
+		return ((FTPFile) item).isSymbolicLink();
 	}
 
-	public Object[] listFiles(Object dir) {
+	public Object[] listFiles(Object dir, String path) {
+		//return list(path + getName(dir) + "/");
+		
 		if (dir instanceof String) {
 			return list((String) dir);
 		} else {
-			return list(getFullPath(dir));
+			//return list(getFullPath(dir));
+			return list(path + getName(dir) + "/");
 		}
+		
 	}
 
 	private Object[] list(String path) {
 		FTPFile[] items = {};
 		try {
-			items = ftp.dirDetails(path);
+			items = ftp.listFiles(path);
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
+			__log.warning("Exception during listing of dir");
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		} catch (Exception e) {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
@@ -192,18 +230,16 @@ public class FtpAdapter implements ProtocolAdapter {
 		return (modeStr.equals("active"));
 	}
 
-	private void setupFtpClient(String ip) throws FTPException, IOException {
+	private void setupFtpClient(String ip) throws IOException {
 		if (ftp == null) {
 			ftp = new FTPClient();
 		}
+
 		ftp.setControlEncoding(getFtpEncodingForIp(ip));
-		if (isActiveModeForIp(ip)) {
-			ftp.setConnectMode(FTPConnectMode.ACTIVE);
-		} else {
-			ftp.setConnectMode(FTPConnectMode.PASV);
-		}
-		ftp.setRemoteHost(ip);
-		ftp.setTimeout(Integer.parseInt(System.getProperty("org.punksearch.crawler.ftp.timeout")));
+		// if (isActiveModeForIp(ip)) {
+		// ftp.setConnectMode(FTPConnectMode.ACTIVE); } else { ftp.setConnectMode(FTPConnectMode.PASV); }
+		// ftp.setRemoteHost(ip);
+		ftp.setDefaultTimeout(Integer.parseInt(System.getProperty("org.punksearch.crawler.ftp.timeout")));
 	}
 
 	private String getUser() {

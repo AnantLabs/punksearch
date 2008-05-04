@@ -14,17 +14,15 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import com.enterprisedt.net.ftp.FTPClient;
-import com.enterprisedt.net.ftp.FTPConnectMode;
-import com.enterprisedt.net.ftp.FTPException;
-import com.enterprisedt.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class FtpAdapterTest extends TestCase {
 
-	private static String ip       = "127.0.0.1";
+	private static String ip       = "10.0.0.21";
 	private static String login    = "anonymous";
 	private static String password = "some@email.com";
 
@@ -44,14 +42,14 @@ public class FtpAdapterTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		setupFtpClient(ip);
-		ftp.connect();
+		ftp.connect(ip);
 		ftp.login(login, password);
-		ftp.keepAlive();
+		//ftp.keepAlive();
 
-		rootPath = ftp.pwd();
+		rootPath = ftp.printWorkingDirectory();
 		
 		adapter = new FtpAdapter();
-		adapter.setRootPath(ftp.pwd());
+		adapter.setRootPath(ftp.printWorkingDirectory());
 	}
 
 	/* (non-Javadoc)
@@ -67,7 +65,7 @@ public class FtpAdapterTest extends TestCase {
 	 */
 	public void testGetModificationTime() {
 		FTPFile file = getSomeFile();
-		assertEquals(file.lastModified().getTime(), adapter.getModificationTime(file));
+		assertEquals(file.getTimestamp().getTimeInMillis(), adapter.getModificationTime(file));
 	}
 
 	/**
@@ -86,45 +84,49 @@ public class FtpAdapterTest extends TestCase {
 	/**
 	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getPath(java.lang.Object)}.
 	 */
+	/*
 	public void testGetPath() {
 		FTPFile file = getSomeFile();
 		String path = adapter.getPath(file);
 		assertTrue(path.startsWith("/"));
 		assertTrue(path.endsWith("/"));
 		assertFalse(path.endsWith(adapter.getName(file) + "/"));
-		assertEquals(file.getPath().substring(rootPath.length()) + "/", path);
+		//assertEquals(file.getPath().substring(rootPath.length()) + "/", path);
 		
 		FTPFile dir = getSomeDir();
 		String path2 = adapter.getPath(dir);
 		assertTrue(path2.startsWith("/"));
 		assertTrue(path2.endsWith("/"));
 		assertFalse(path2.endsWith(adapter.getName(dir) + "/"));
-		assertEquals((dir.getPath().substring(rootPath.length()) + "/").replaceAll("^/+", "/"), path2);
+		//assertEquals((dir.getPath().substring(rootPath.length()) + "/").replaceAll("^/+", "/"), path2);
 	}
+	*/
+
 
 	/**
 	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getFullPath(java.lang.Object)}.
 	 */
+	/*
 	public void testGetFullPath() {
 		FTPFile file = getSomeFile();
 		assertTrue(adapter.getFullPath(file).startsWith("/"));
 		assertFalse(adapter.getFullPath(file).endsWith("/"));
-		String expected = file.getPath().substring(rootPath.length()) + "/" + adapter.getName(file);
-		assertEquals(expected, adapter.getFullPath(file));
+		//String expected = file.getPath().substring(rootPath.length()) + "/" + adapter.getName(file);
+		//assertEquals(expected, adapter.getFullPath(file));
 		
 		FTPFile dir = getSomeDir();
 		assertTrue(adapter.getFullPath(dir).startsWith("/"));
 		assertFalse(adapter.getFullPath(dir).endsWith("/"));
-		String expected2 = dir.getPath().substring(rootPath.length()) + "/" + adapter.getName(dir);
-		assertEquals(expected2.replaceAll("^/+", "/"), adapter.getFullPath(dir));
+		//String expected2 = dir.getPath().substring(rootPath.length()) + "/" + adapter.getName(dir);
+		//assertEquals(expected2.replaceAll("^/+", "/"), adapter.getFullPath(dir));
 	}
-
+	*/
 	/**
 	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getSize(java.lang.Object)}.
 	 */
 	public void testGetSize() {
 		FTPFile file = getSomeFile();
-		assertEquals(file.size(), adapter.getSize(file));
+		assertEquals(file.getSize(), adapter.getSize(file));
 	}
 
 	/**
@@ -132,9 +134,9 @@ public class FtpAdapterTest extends TestCase {
 	 */
 	public void testIsDirectory() {
 		FTPFile file = getSomeFile();
-		assertEquals(file.isDir(), adapter.isDirectory(file));
+		assertEquals(file.isDirectory(), adapter.isDirectory(file));
 		FTPFile dir = getSomeDir();
-		assertEquals(dir.isDir(), adapter.isDirectory(dir));
+		assertEquals(dir.isDirectory(), adapter.isDirectory(dir));
 	}
 
 	/**
@@ -142,14 +144,14 @@ public class FtpAdapterTest extends TestCase {
 	 */
 	public void testIsFile() {
 		FTPFile file = getSomeFile();
-		assertEquals(!file.isDir(), adapter.isFile(file));
+		assertEquals(!file.isDirectory(), adapter.isFile(file));
 		FTPFile dir = getSomeDir();
-		assertEquals(!dir.isDir(), adapter.isFile(dir));
+		assertEquals(!dir.isDirectory(), adapter.isFile(dir));
 	}
 
 	private boolean disconnect() {
 		try {
-			if (ftp.connected()) {
+			if (ftp.isConnected()) {
 				ftp.quit();
 			}
 			return true;
@@ -158,32 +160,34 @@ public class FtpAdapterTest extends TestCase {
 		}
 	}
 
-	private void setupFtpClient(String ip) throws FTPException, IOException {
+	private void setupFtpClient(String ip) throws IOException {
 		if (ftp == null) {
 			ftp = new FTPClient();
 		}
 		ftp.setControlEncoding(encoding);
+		/*
 		if (mode == MODE.active) {
 			ftp.setConnectMode(FTPConnectMode.ACTIVE);
 		} else {
 			ftp.setConnectMode(FTPConnectMode.PASV);
 		}
 		ftp.setRemoteHost(ip);
-		ftp.setTimeout(timeout);
+		*/
+		ftp.setDefaultTimeout(timeout);
 	}
 
 	private FTPFile getSomeFile() {
 		try {
-			FTPFile[] items = ftp.dirDetails("/");
+			FTPFile[] items = ftp.listFiles("/");
 			for (FTPFile item : items) {
-				if (item.isDir() && !item.getName().startsWith(".")) {
+				if (item.isDirectory() && !item.getName().startsWith(".")) {
 					// ftp.chdir(item.getName());
-					FTPFile[] items2 = ftp.dirDetails(item.getName());
+					FTPFile[] items2 = ftp.listFiles(item.getName());
 					if (items2 == null) {
 						continue;
 					}
 					for (FTPFile item2 : items2) {
-						if (!item2.isDir() && !item2.isLink() && !item2.getName().startsWith(".")) {
+						if (!item2.isDirectory() && !item2.isSymbolicLink() && !item2.getName().startsWith(".")) {
 							return item2;
 						}
 					}
@@ -197,9 +201,9 @@ public class FtpAdapterTest extends TestCase {
 	
 	private FTPFile getSomeDir() {
 		try {
-			FTPFile[] items = ftp.dirDetails("/");
+			FTPFile[] items = ftp.listFiles("/");
 			for (FTPFile item : items) {
-				if (item.isDir() && !item.getName().startsWith(".")) {
+				if (item.isDirectory() && !item.getName().startsWith(".")) {
 					return item;
 				}
 			}
