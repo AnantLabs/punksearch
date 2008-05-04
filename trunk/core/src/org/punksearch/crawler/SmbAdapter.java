@@ -10,6 +10,8 @@
  ***************************************************************************/
 package org.punksearch.crawler;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.logging.Logger;
 
@@ -33,12 +35,14 @@ public class SmbAdapter implements ProtocolAdapter {
 	public static final String SMB_USER     = "org.punksearch.crawler.smb.user";
 	public static final String SMB_PASSWORD = "org.punksearch.crawler.smb.password";
 
+	public static final int    HASH_MIN     = 1024 * 512;
+	
 	private SmbFile            smb;
 
 	private String             rootPath;
 
 	static {
-		System.setProperty("jcifs.smb.client.soTimeout", System.getProperty("org.punksearch.crawler.smb.timeout"));
+		System.setProperty("jcifs.smb.client.soTimeout", System.getProperty("org.punksearch.crawler.smb.timeout", "3000"));
 	}
 
 	/**
@@ -50,14 +54,38 @@ public class SmbAdapter implements ProtocolAdapter {
 		rootPath = path;
 	}
 
+	public byte[] header(Object item, String path, int length) {
+		SmbFile file = (SmbFile) item;
+		try {
+			if (file.isFile()) {
+				InputStream is = file.getInputStream();
+				byte[] buf = new byte[length];
+				is.read(buf);
+				is.close();
+				return buf;
+			} else {
+				return null;
+			}
+		} catch (SmbAuthException e) {
+			__log.warning("Can't read header for the file (restricted access): " + file.getServer() + path + getName(item));
+			return null;
+		} catch (IOException e) {
+			__log.warning("Can't read header for the file (i/o error): " + file.getServer() + path + getName(item));
+			//e.printStackTrace();
+			return null;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.punksearch.crawler.ProtocolAdapter#getFullPath(java.lang.Object)
 	 */
+	/*
 	public String getFullPath(Object item) {
 		return getPath(item) + getName(item);
 	}
+	*/
 
 	/*
 	 * (non-Javadoc)
@@ -94,12 +122,14 @@ public class SmbAdapter implements ProtocolAdapter {
 	 * 
 	 * @see org.punksearch.crawler.ProtocolAdapter#getPath(java.lang.Object)
 	 */
+	/*
 	public String getPath(Object item) {
 		String fullPath = ((SmbFile) item).getPath();
 		int nameLength = getName(item).length();
 		int endPos = (isDirectory(item)) ? fullPath.length() - 1 - nameLength : fullPath.length() - nameLength;
 		return (endPos > rootPath.length()) ? fullPath.substring(rootPath.length(), endPos) : "/";
 	}
+	*/
 
 	/*
 	 * (non-Javadoc)
@@ -197,25 +227,25 @@ public class SmbAdapter implements ProtocolAdapter {
 
 	public Object getRootDir() {
 		if (smb == null) {
-			throw new IllegalStateException("can't get root dir since not connected to any smb host");
+			throw new IllegalStateException("Can't get root dir since not connected to any smb host");
 		}
 		return smb;
 	}
 
-	public Object[] listFiles(Object dir) {
+	public Object[] listFiles(Object dir, String path) {
 		try {
 			return ((SmbFile) dir).listFiles();
 		} catch (SmbAuthException e) {
-			__log.fine("smb: restricted directory: " + ((SmbFile) dir).getPath());
+			__log.fine("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
 			return new Object[0];
 		} catch (SmbException e) {
-			__log.fine("smb: exception (" + e.getMessage() + ") occured while listing directory: "
+			__log.fine("Can't list files (" + e.getMessage() + ") in directory: "
 			        + ((SmbFile) dir).getPath());
 			try {
 				smb.listFiles(); // check if we still connected
 				return new Object[0];
 			} catch (SmbException e1) {
-				throw new RuntimeException(e1);
+				throw new RuntimeException("Connection with host was dropped");
 			}
 		}
 	}
