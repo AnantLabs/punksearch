@@ -10,6 +10,8 @@
  ***************************************************************************/
 package org.punksearch.web;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,14 +23,20 @@ import org.punksearch.common.IndexFields;
  */
 public class ItemGroup {
 
-	private List<Document> items = new LinkedList<Document>();
-	private long           size  = 0;
-	private String         ext   = "";
+	public static final int HASH_MIN  = 1024 * 512;
+
+	private List<Document>  items     = new LinkedList<Document>();
+	private long            size      = 0;
+	private String          ext       = "";
+	private byte[]          header;
+	//private String          timestamp = "";
 
 	public ItemGroup(Document item) {
 		items.add(item);
 		size = Long.valueOf(item.get(IndexFields.SIZE));
 		ext = item.get(IndexFields.EXTENSION);
+		header = item.getBinaryValue(IndexFields.HEADER);
+		//timestamp = item.get(IndexFields.LAST_MODIFIED);
 	}
 
 	public void add(Document item) {
@@ -41,7 +49,25 @@ public class ItemGroup {
 	public boolean matches(Document item) {
 		long itemSize = Long.valueOf(item.get(IndexFields.SIZE));
 		String itemExt = item.get(IndexFields.EXTENSION);
-		return (itemSize == size && itemExt.equalsIgnoreCase(ext));
+		boolean sizeExtMatch = (itemSize == size && itemExt.equalsIgnoreCase(ext));
+		if (itemSize > HASH_MIN && sizeExtMatch) {
+			byte[] itemHeader = item.getBinaryValue(IndexFields.HEADER);
+			if (itemHeader != null) {
+				return Arrays.equals(itemHeader, header);
+			} else {
+				return sizeExtMatch;
+			}
+			/*
+			String itemTimestamp = item.get(IndexFields.LAST_MODIFIED);
+			if (itemTimestamp != null) {
+				return itemTimestamp.equals(timestamp);
+			} else {
+				return sizeExtMatch;
+			}
+			*/
+		} else { // TODO: group < HASH_MIN ?
+			return sizeExtMatch;
+		}
 	}
 
 	public List<Document> getItems() {
