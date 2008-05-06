@@ -39,12 +39,12 @@ public class HostCrawler extends Thread {
 	public static final String BOOST_DEEP        = "org.punksearch.crawler.boost.deep";
 	public static final String BOOST_SIZE        = "org.punksearch.crawler.boost.size";
 
-	public static final String HEADER_USE        = "org.punksearch.crawler.header.use";
-	public static final String HEADER_LENGTH     = "org.punksearch.crawler.header.length";
-	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.header.threshold";
+	public static final String HEADER_USE        = "org.punksearch.crawler.data.header";
+	public static final String HEADER_LENGTH     = "org.punksearch.crawler.data.header.length";
+	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.data.header.threshold";
 
-	public static final String SMB_ENABLED       = "org.punksearch.crawler.smb.enabled";
-	public static final String FTP_ENABLED       = "org.punksearch.crawler.ftp.enabled";
+	public static final String SMB_ENABLED       = "org.punksearch.crawler.smb";
+	public static final String FTP_ENABLED       = "org.punksearch.crawler.ftp";
 
 	private int                maxDeep           = Integer.parseInt(System.getProperty(DEEP, "5"));
 
