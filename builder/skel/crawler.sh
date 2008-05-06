@@ -7,4 +7,4 @@ done;
 
 echo $CP
 
-java -Xmx256m -cp $CP org.punksearch.cli.CrawlerMain $1
+java -Xmx1024m -Djava.util.logging.config.file=log.properties -cp $CP org.punksearch.cli.CrawlerMain $1

@@ -23,4 +23,4 @@ set DEBUG=
 rem set DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=8000,suspend=y
 
 @echo on
-java %DEBUG% -Xmx512m -Xbootclasspath/a:%CLASSPATH% -jar lib\punksearch-server.jar %PORT% %WAR%
+java %DEBUG% -Xmx1024m -Djava.util.logging.config.file=log.properties -Xbootclasspath/a:%CLASSPATH% -jar lib\punksearch-server.jar %PORT% %WAR%
