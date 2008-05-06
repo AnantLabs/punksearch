@@ -42,7 +42,6 @@ public class NetworkCrawler implements Runnable {
 	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
 
 	private static final String THREAD_PREFIX     = "HostCrawler";
-	private static final String HOSTS_DUMP        = "hosts.csv";
 
 	private FileTypes           fileTypes;
 	private String              indexDirectory;
@@ -123,7 +122,8 @@ public class NetworkCrawler implements Runnable {
 			}
 
 			if (hosts.size() > 0) {
-				dumpHosts(hosts);
+				HostStats.dump(getLogDir(), hosts);
+				HostStats.merge(getLogDir(), PunksearchProperties.resolveHome() + File.separator + "hosts.csv");
 				IndexOperator.optimize(indexDirectory);
 			}
 
@@ -203,7 +203,7 @@ public class NetworkCrawler implements Runnable {
 			if (PunksearchProperties.isAbsolutePath(rangesString)) {
 				path = rangesString;
 			} else {
-				path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + rangesString;
+				path = PunksearchProperties.resolveHome() + File.separator + rangesString;
 			}
 			File file = new File(path);
 			if (file.exists()) {
@@ -245,9 +245,9 @@ public class NetworkCrawler implements Runnable {
 				if (line.startsWith("#")) {
 					continue;
 				}
-				String[] chunks = line.split(",");
-				if (IpRange.isIpRange(chunks[0].trim())) {
-					result.add(new IpRange(chunks[0].trim()));
+				String[] parts = line.split(",");
+				if (IpRange.isIpRange(parts[0].trim())) {
+					result.add(new IpRange(parts[0].trim()));
 				}
 			}
 		} catch (IOException e) {
@@ -279,14 +279,8 @@ public class NetworkCrawler implements Runnable {
 		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
 	}
 
-	private static void dumpHosts(List<HostStats> crawledHosts) {
-		Collections.sort(crawledHosts);
-		File dumpFile = new File(PunksearchProperties.resolveHome() + System.getProperty("file.separator") + HOSTS_DUMP);
-		try {
-			FileUtils.writeLines(dumpFile, crawledHosts);
-		} catch (IOException e) {
-			__log.warning("Can't dump crawled hosts into '" + dumpFile.getAbsolutePath() + "': " + e.getMessage());
-		}
+	private static String getLogDir() {
+		return PunksearchProperties.resolveHome() + File.separator + "logs" + File.separator;
 	}
 
 	private boolean prepareIndex(String dir) {
