@@ -47,3 +47,18 @@ org.punksearch.online.threads=number (default 10)
 
 # Timeout (in seconds) for status cache to refresh
 org.punksearch.online.cache.timeout=number (default 600 == 10 minutes)
+
+# Try to crawl SMB shares for hosts
+org.punksearch.crawler.smb.enabled=true|false (default true)
+
+# Try to crawl FTP shares for hosts
+org.punksearch.crawler.ftp.enabled=true|false (default true)
+
+# Whatever collect headers for files at all 
+org.punksearch.crawler.header.use=true|false (default true)
+
+# Length of headers to collect
+org.punksearch.crawler.header.length=number (default 128)
+
+# Trigger header collecting for files with size > than specified
+org.punksearch.crawler.header.threshold=number (default 500000)
