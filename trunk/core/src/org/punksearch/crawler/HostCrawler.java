@@ -33,14 +33,18 @@ import org.punksearch.common.IndexFields;
 public class HostCrawler extends Thread {
 	private static Logger      __log             = Logger.getLogger(HostCrawler.class.getName());
 
+	public static final String DEEP              = "org.punksearch.crawler.deep";
+
 	public static final String BOOST_CREATE_DATE = "org.punksearch.crawler.boost.createdate";
 	public static final String BOOST_DEEP        = "org.punksearch.crawler.boost.deep";
 	public static final String BOOST_SIZE        = "org.punksearch.crawler.boost.size";
 
-	public static final String DEEP              = "org.punksearch.crawler.deep";
 	public static final String HEADER_USE        = "org.punksearch.crawler.header.use";
 	public static final String HEADER_LENGTH     = "org.punksearch.crawler.header.length";
 	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.header.threshold";
+
+	public static final String SMB_ENABLED       = "org.punksearch.crawler.smb.enabled";
+	public static final String FTP_ENABLED       = "org.punksearch.crawler.ftp.enabled";
 
 	private int                maxDeep           = Integer.parseInt(System.getProperty(DEEP, "5"));
 
@@ -52,6 +56,9 @@ public class HostCrawler extends Thread {
 	private int                headerLength      = Integer.valueOf(System.getProperty(HEADER_LENGTH, "128"));
 	private long               headerThreshold   = Long.valueOf(System.getProperty(HEADER_THRESHOLD, "500000"));
 
+	private boolean            smbEnabled        = Boolean.parseBoolean(System.getProperty(SMB_ENABLED, "true"));
+	private boolean            ftpEnabled        = Boolean.parseBoolean(System.getProperty(FTP_ENABLED, "true"));
+
 	private String             ip;
 	private ProtocolAdapter    adapter;
 	private FileTypes          knownFileTypes;
@@ -62,6 +69,7 @@ public class HostCrawler extends Thread {
 
 	private Set<HostStats>     crawledHosts      = new HashSet<HostStats>();
 	private String             timestamp;
+	private long               docCount;
 
 	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
@@ -71,11 +79,13 @@ public class HostCrawler extends Thread {
 	}
 
 	public void run() {
-
 		Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
-		adapters.add(new SmbAdapter());
-		adapters.add(new FtpAdapter());
-
+		if (smbEnabled) {
+			adapters.add(new SmbAdapter());
+		}
+		if (ftpEnabled) {
+			adapters.add(new FtpAdapter());
+		}
 		while ((ip = ipIterator.next()) != null) {
 
 			__log.fine(getName() + ". Trying " + ip);
@@ -94,6 +104,7 @@ public class HostCrawler extends Thread {
 
 	private void crawl() {
 		timestamp = Long.toString(System.currentTimeMillis());
+		docCount = 0;
 
 		boolean connected = false;
 		try {
@@ -102,14 +113,19 @@ public class HostCrawler extends Thread {
 				__log.info(getName() + ". Start crawling " + curHost());
 				long size = crawlDirectory(adapter.getRootDir(), "", 0);
 				if (size > 0) {
-					__log.info(getName() + ": " + adapter.getProtocol() + ": " + ip + " crawled: " + size + " bytes");
-					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size));
+					__log.info(getName() + ". Stop crawling " + curHost() + ", crawled " + size + " bytes");
+					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size, docCount));
+				} else {
+					__log.info(getName() + ". Stop crawling " + curHost() + ", crawled 0 bytes (ignored)");
 				}
 			}
 		} catch (IllegalArgumentException e) {
 			__log.warning(getName() + ". Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
-			__log.warning(getName() + ". Crawling of a host " + ip + " was cancelled due to: " + e.getMessage());
+			__log.warning(getName() + ". Crawling of a host " + curHost() + " was cancelled due to: " + e.getMessage());
+			// if (__log.getLevel().intValue() <= Level.FINE.intValue()) { TODO: why NPE?
+			// e.printStackTrace();
+			// }
 		} finally {
 			if (connected) {
 				adapter.disconnect();
@@ -139,6 +155,7 @@ public class HostCrawler extends Thread {
 
 	protected Document makeDocument(String name, String ext, String size, String path, String date, byte[] header,
 	        float boost) {
+		docCount++;
 		Document document = new Document();
 		document.add(new Field(IndexFields.HOST, curHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
@@ -236,8 +253,7 @@ public class HostCrawler extends Thread {
 			return 0L;
 		}
 
-		// __log.finest(getName() + ": crawling: " + adapter.getProtocol() + "://" + getIp() +
-		// adapter.getFullPath(dir));
+		__log.fine(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
 
 		Object[] items = adapter.listFiles(dir, path);
 
@@ -305,7 +321,8 @@ public class HostCrawler extends Thread {
 	}
 
 	private boolean shouldProcess(Object item, String path) {
-		if (adapter.getName(item).startsWith(".") || adapter.isLink(item) || adapter.isHidden(item)) {
+		// TODO: why we sometimes get "null" items? observed once for FTP with folder name in CP1251 encoding
+		if (item == null || adapter.getName(item).startsWith(".") || adapter.isLink(item) || adapter.isHidden(item)) {
 			return false;
 		}
 		if (adapter.isDirectory(item)) {
