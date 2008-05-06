@@ -92,7 +92,7 @@ public class HostStats implements Comparable<HostStats> {
 
 	@Override
 	public String toString() {
-		return ip + "," + protocol + "," + size;
+		return ip + "," + protocol + "," + size + "," + count;
 	}
 
 	public static void merge(String inputDirPath, String outFilePath) {
