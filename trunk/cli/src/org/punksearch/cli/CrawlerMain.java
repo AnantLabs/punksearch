@@ -16,14 +16,12 @@ import org.punksearch.common.PunksearchProperties;
 import org.punksearch.crawler.NetworkCrawler;
 
 /**
+ * Utility class to kick the crawling process from command-line
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class CrawlerMain {
 
-	/**
-	 * @param args
-	 * @throws FileNotFoundException 
-	 */
 	public static void main(String[] args) {
 		try {
 	        PunksearchProperties.loadDefault();
