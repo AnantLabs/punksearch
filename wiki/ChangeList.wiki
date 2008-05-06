@@ -1,6 +1,10 @@
 #summary changelist for application versions
 #labels Featured
 
+= 0.8.2 (soon) = 
+  * core: migrated to commons-net for FTP crawling (was edtftpj)
+  * gui: grouping using file headers
+
 = 0.8.1 (2008-04-24) =
   * bugfix: user-friendly notification about invalid index directory in web interface (closes defect)
   * bugfix: speedup of grouping of results in web interface (closes defect)
