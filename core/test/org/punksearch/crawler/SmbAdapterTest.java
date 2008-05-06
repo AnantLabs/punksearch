@@ -35,7 +35,6 @@ public class SmbAdapterTest extends TestCase {
 		root = new SmbFile("smb://" + ip + "/");
 
 		adapter = new SmbAdapter();
-		adapter.setRootPath("smb://" + ip);
 	}
 
 	/**
