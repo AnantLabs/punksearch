@@ -33,15 +33,29 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.SearcherException;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 
+/**
+ * Utility class to work with an index. Hides all Lucene's read/write logics.
+ * 
+ * It has both instance and static methods. The instance methods affect the index directory IndexOperator was
+ * instantiated with. The static methods are for utility tasks -- they open and close an index themselves.
+ * 
+ * @author Yury Soldak (ysoldak@gmail.com)
+ * 
+ */
 public class IndexOperator {
 	private static Logger __log = Logger.getLogger(IndexOperator.class.getName());
 
 	private IndexWriter   indexWriter;
 
+	/**
+	 * Creates an instance of the class and opens index directory.
+	 * 
+	 * @param indexDirectory
+	 *            Index directory to operate under.
+	 */
 	public IndexOperator(String indexDirectory) {
 		try {
 			this.indexWriter = createIndexWriter(indexDirectory);
@@ -51,14 +65,20 @@ public class IndexOperator {
 	}
 
 	/**
-	 * Adds documents in index
+	 * Adds documents to the current index.
 	 * 
 	 * @param documentList
-	 *            List of Document
-	 * @throws org.punksearch.common.SearcherException
-	 *             Failed adding documents in index
+	 *            List of Document. Null value is synonymous to an empty list.
+	 * @return Boolean result. False in the case of internal I/O exception.
+	 * 
+	 * @throws IllegalStateException
+	 *             In the case "close" method was called before.
 	 */
 	public boolean addDocuments(List<Document> documentList) {
+		if (isClosed()) {
+			throw new IllegalStateException("Index was closed already.");
+		}
+
 		if (documentList == null || documentList.size() == 0) {
 			return true;
 		}
@@ -76,14 +96,21 @@ public class IndexOperator {
 	}
 
 	/**
-	 * Deletes from index all documents for given ip
+	 * Deletes all documents (what match IP and protocol) from the current index.
 	 * 
-	 * @param host
-	 *            for ex. smb://10.20.0.155
-	 * @throws SearcherException
-	 *             Failed deleting documents
+	 * @param ip
+	 *            IP of a host to delete documents for.
+	 * @param proto
+	 *            Protocol to match for documents to be deleted. "smb" or "ftp".
+	 * @return Boolean result. False in the case of internal I/O exception.
+	 * 
+	 * @throws IllegalStateException
+	 *             In the case "close" method was called before.
 	 */
 	public boolean deleteDocuments(String ip, String proto) {
+		if (isClosed()) {
+			throw new IllegalStateException("Index was closed already.");
+		}
 		try {
 			indexWriter.deleteDocuments(new Term(IndexFields.HOST, proto + "_" + ip));
 			return true;
@@ -91,6 +118,74 @@ public class IndexOperator {
 			__log.warning("Failed deleting documents for host '" + proto + "://" + ip + "'. " + e.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * Optimizes the current index.
+	 * 
+	 * @throws IllegalStateException
+	 *             In the case "close" method was called before.
+	 */
+	public void optimize() {
+		if (isClosed()) {
+			throw new IllegalStateException("Index was closed already.");
+		}
+		try {
+			indexWriter.optimize();
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Ensures all data was merged into the current index on disk.
+	 * 
+	 * @throws IllegalStateException
+	 *             In the case "close" method was called before.
+	 */
+	public void flush() {
+		if (isClosed()) {
+			throw new IllegalStateException("Index was closed already.");
+		}
+		try {
+			indexWriter.flush();
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Closes the index, unlocks it. It is not possible to use any instance methods except "isClosed" after this method
+	 * was called.
+	 * 
+	 * @throws IllegalStateException
+	 *             In the case "close" method was called before.
+	 */
+	public void close() {
+		if (isClosed()) {
+			throw new IllegalStateException("Index was closed already.");
+		}
+		try {
+			indexWriter.close();
+			indexWriter = null;
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Checks if index was closed. Use this method to check (if unsure) if you can call instance methods.
+	 * 
+	 * @return True if index was closed (i.e. "close" method called before).
+	 */
+	public boolean isClosed() {
+		return indexWriter == null;
 	}
 
 	public static void deleteByHost(String dir, String host) {
@@ -150,7 +245,7 @@ public class IndexOperator {
 				i++;
 			}
 			iw.addIndexesNoOptimize(dirs);
-			//iw.optimize();
+			// iw.optimize();
 			iw.flush();
 			iw.close();
 		} catch (IOException ex) {
@@ -184,11 +279,11 @@ public class IndexOperator {
 			        + "(maybe index directory just does not exist?)");
 		}
 	}
-	
+
 	public static boolean indexExists(String dir) {
 		return IndexReader.indexExists(dir);
 	}
-	
+
 	public static void createIndex(String dir) throws IOException {
 		IndexWriter iw = createIndexWriter(dir);
 		iw.close();
@@ -204,44 +299,13 @@ public class IndexOperator {
 
 	public static void optimize(String dir) {
 		IndexWriter iw;
-        try {
-	        iw = createIndexWriter(dir);
-	        iw.optimize();
-	        iw.flush();
-	        iw.close();
-        } catch (IOException e) {
+		try {
+			iw = createIndexWriter(dir);
+			iw.optimize();
+			iw.flush();
+			iw.close();
+		} catch (IOException e) {
 			__log.severe("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
-        }
-	}
-	
-	public void optimize() {
-		try {
-			indexWriter.optimize();
-		} catch (CorruptIndexException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
-
-	public void flush() {
-		try {
-			indexWriter.flush();
-		} catch (CorruptIndexException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void close() {
-		try {
-			indexWriter.close();
-		} catch (CorruptIndexException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 }
