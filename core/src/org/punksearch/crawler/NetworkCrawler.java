@@ -35,10 +35,25 @@ import org.punksearch.ip.SynchronizedIpIterator;
 public class NetworkCrawler implements Runnable {
 	private static Logger       __log             = Logger.getLogger(NetworkCrawler.class.getName());
 
+	/**
+	 * Use this property to customize directory for temporary indexes
+	 */
 	public static final String  TMP_DIR_PROPERTY  = "org.punksearch.crawler.tmpdir";
+	/**
+	 * Whatever to unlock main and temporary index directories
+	 */
 	public static final String  UNLOCK_PROPERTY   = "org.punksearch.crawler.forceunlock";
+	/**
+	 * Number of threads to use for crawling the network (use values between 1 and 10)
+	 */
 	public static final String  THREADS_PROPERTY  = "org.punksearch.crawler.threads";
+	/**
+	 * The comma separated list of IP ranges or path to the file with IPs.
+	 */
 	public static final String  RANGE_PROPERTY    = "org.punksearch.crawler.range";
+	/**
+	 * Lifetime of old items in the index (may be real number).
+	 */
 	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
 
 	private static final String THREAD_PREFIX     = "HostCrawler";
@@ -52,6 +67,10 @@ public class NetworkCrawler implements Runnable {
 
 	private List<HostCrawler>   threadList        = new ArrayList<HostCrawler>();
 
+	/**
+	 * The default constructor. Extracts configuration from system properties. The system property names are defined by
+	 * static final fields of this class.
+	 */
 	public NetworkCrawler() {
 		this.indexDirectory = PunksearchProperties.resolveIndexDirectory();
 		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY));
@@ -61,6 +80,22 @@ public class NetworkCrawler implements Runnable {
 		this.daysToKeep = Float.parseFloat(System.getProperty(KEEPDAYS_PROPERTY));
 	}
 
+	/**
+	 * Customized constructor. Must specify all the configuration properties.
+	 * 
+	 * @param indexDir
+	 *            Path to directory where main index should be located.
+	 * @param unlock
+	 *            Whatever to unlock main and temporary index directories.
+	 * @param threads
+	 *            Number of threads to use for crawling the network (use values between 1 and 10).
+	 * @param ranges
+	 *            Comma separated list of IP ranges or path to the file with IPs.
+	 * @param fileTypes
+	 *            Collection of known file types.
+	 * @param days
+	 *            Lifetime of old items in the index.
+	 */
 	public NetworkCrawler(String indexDir, boolean unlock, int threads, String ranges, FileTypes fileTypes, float days) {
 		this.indexDirectory = indexDir;
 		this.forceUnlock = unlock;
@@ -70,12 +105,34 @@ public class NetworkCrawler implements Runnable {
 		this.daysToKeep = days;
 	}
 
+	/**
+	 * Signals all threads to stop crawling.
+	 */
+	public void stop() {
+		for (Thread thread : threadList) {
+			thread.interrupt();
+		}
+	}
+
+	/**
+	 * The getter method to access current running crawling threads.
+	 * 
+	 * @return List of crawling threads.
+	 */
+	public List<HostCrawler> getThreads() {
+		return threadList;
+	}
+
+	/**
+	 * Starts the crawling process. Starts all threads, merges temp indexes into main one, clears temp files.
+	 */
 	public void run() {
 
-		if (!prepareIndex(indexDirectory)) {
-			__log.warning("Can't start crawling. Something wrong with index directory (check log).");
+		if (!prepareAllIndexDirs()) {
+			__log.warning("Can't start crawling. Something wrong with an index directory (check log).");
 			return;
 		}
+
 		if (ranges.size() == 0) {
 			__log.warning("Can't start crawling. The list of IPs to crawl is empty.");
 			return;
@@ -90,11 +147,6 @@ public class NetworkCrawler implements Runnable {
 			__log.info("Crawl process started");
 
 			for (int i = 0; i < threadCount; i++) {
-				if (!prepareIndex(getThreadDirectory(i))) {
-					__log.warning("Cancel crawling. Can't make directory for crawl thread: " + getThreadDirectory(i));
-					stop();
-					return;
-				}
 				HostCrawler indexerThread = makeThread(i, iter);
 				indexerThread.start();
 				threadList.add(indexerThread);
@@ -124,8 +176,10 @@ public class NetworkCrawler implements Runnable {
 			if (hosts.size() > 0) {
 				HostStats.dump(getLogDir(), hosts);
 				HostStats.merge(getLogDir(), PunksearchProperties.resolveHome() + File.separator + "hosts.csv");
-				IndexOperator.optimize(indexDirectory);
 			}
+			
+			// should always optimize, since some old items could have been deleted and no one new host crawled.
+			IndexOperator.optimize(indexDirectory);
 
 			threadList.clear();
 
@@ -135,6 +189,20 @@ public class NetworkCrawler implements Runnable {
 			__log.warning("NetworkCrawler.run(): exception occured. " + e.getMessage());
 			e.printStackTrace();
 		}
+	}
+
+	private boolean prepareAllIndexDirs() {
+		if (!prepareIndex(indexDirectory)) {
+			__log.warning("Can't prepare main index directory (check log).");
+			return false;
+		}
+		for (int i = 0; i < threadCount; i++) {
+			if (!prepareIndex(getThreadDirectory(i))) {
+				__log.warning("Can't prepare directory for crawl thread: " + getThreadDirectory(i));
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void removeHostsFromIndex(Set<HostStats> hosts) {
@@ -167,16 +235,6 @@ public class NetworkCrawler implements Runnable {
 		Set<String> dirs = new HashSet<String>();
 		dirs.add(getThreadDirectory(index));
 		IndexOperator.merge(indexDirectory, dirs);
-	}
-
-	public void stop() {
-		for (Thread thread : threadList) {
-			thread.interrupt();
-		}
-	}
-
-	public List<HostCrawler> getThreads() {
-		return threadList;
 	}
 
 	/**
