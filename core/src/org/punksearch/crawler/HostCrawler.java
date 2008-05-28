@@ -26,7 +26,9 @@ import org.punksearch.common.IndexFields;
 /**
  * Implementation of a crawler thread. Crawls one host a time.
  * 
- * @see {@link NetworkCrawler}
+ * @see NetworkCrawler
+ * @see ProtocolAdapter
+ * @see IndexOperator
  * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
@@ -253,7 +255,7 @@ public class HostCrawler extends Thread {
 			return 0L;
 		}
 
-		__log.fine(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
+		__log.finest(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
 
 		Object[] items = adapter.listFiles(dir, path);
 

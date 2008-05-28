@@ -30,6 +30,10 @@ import org.punksearch.ip.SynchronizedIpIterator;
  * The crawling process manager. It starts crawling threads, cleans target index, merges data crawled by threads into
  * the target index, cleans temporary files.
  * 
+ * @see HostCrawler
+ * @see IndexOperator
+ * @see HostStats
+ * 
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class NetworkCrawler implements Runnable {
@@ -81,7 +85,7 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	/**
-	 * Customized constructor. Must specify all the configuration properties.
+	 * The custom constructor. Must specify all the configuration properties.
 	 * 
 	 * @param indexDir
 	 *            Path to directory where main index should be located.
