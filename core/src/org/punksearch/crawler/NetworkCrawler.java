@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -59,6 +61,10 @@ public class NetworkCrawler implements Runnable {
 	 * Lifetime of old items in the index (may be real number).
 	 */
 	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
+	/**
+	 * Maximum hours to wait until a crawling thread to finish, then interrupt it.
+	 */
+	public static final String  MAXHOURS_PROPERTY = "org.punksearch.crawler.maxhours";
 
 	private static final String THREAD_PREFIX     = "HostCrawler";
 
@@ -68,6 +74,7 @@ public class NetworkCrawler implements Runnable {
 	private List<IpRange>       ranges;
 	private int                 threadCount;
 	private float               daysToKeep;
+	private int                 maxHours;
 
 	private List<HostCrawler>   threadList        = new ArrayList<HostCrawler>();
 
@@ -77,11 +84,12 @@ public class NetworkCrawler implements Runnable {
 	 */
 	public NetworkCrawler() {
 		this.indexDirectory = PunksearchProperties.resolveIndexDirectory();
-		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY));
-		this.threadCount = Integer.parseInt(System.getProperty(THREADS_PROPERTY));
+		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY, "false"));
+		this.threadCount = Integer.parseInt(System.getProperty(THREADS_PROPERTY, "5"));
 		this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
 		this.fileTypes = FileTypes.readFromDefaultFile();
-		this.daysToKeep = Float.parseFloat(System.getProperty(KEEPDAYS_PROPERTY));
+		this.daysToKeep = Float.parseFloat(System.getProperty(KEEPDAYS_PROPERTY, "7"));
+		this.maxHours = Integer.parseInt(System.getProperty(MAXHOURS_PROPERTY, "12"));
 	}
 
 	/**
@@ -107,6 +115,7 @@ public class NetworkCrawler implements Runnable {
 		this.ranges = parseRanges(ranges);
 		this.fileTypes = fileTypes;
 		this.daysToKeep = days;
+		this.maxHours = 12;
 	}
 
 	/**
@@ -142,14 +151,15 @@ public class NetworkCrawler implements Runnable {
 			return;
 		}
 
-		SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
-		threadList.clear();
-
 		try {
-
 			long startTime = new Date().getTime();
 			__log.info("Crawl process started");
 
+			Timer processTimer = new Timer();
+			processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
+			
+			SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
+			threadList.clear();
 			for (int i = 0; i < threadCount; i++) {
 				HostCrawler indexerThread = makeThread(i, iter);
 				indexerThread.start();
@@ -181,12 +191,13 @@ public class NetworkCrawler implements Runnable {
 				HostStats.dump(getLogDir(), hosts);
 				HostStats.merge(getLogDir(), PunksearchProperties.resolveHome() + File.separator + "hosts.csv");
 			}
-			
+
 			// should always optimize, since some old items could have been deleted and no one new host crawled.
 			IndexOperator.optimize(indexDirectory);
 
 			threadList.clear();
-
+			processTimer.cancel();
+			
 			long finishTime = new Date().getTime();
 			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
 		} catch (Exception e) {
@@ -368,4 +379,17 @@ public class NetworkCrawler implements Runnable {
 		return true;
 	}
 
+	private class MaxRunWatchDog extends TimerTask {
+		
+		private NetworkCrawler crawler;
+		
+		public MaxRunWatchDog(NetworkCrawler crawler) {
+			this.crawler = crawler;
+		}
+		
+		public void run() {
+			crawler.stop();
+		}
+	}
 }
+
