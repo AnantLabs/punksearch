@@ -17,12 +17,19 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * The loader of PUNKSearch's system properties.
+ * 
+ * 
+ * @author Yury Soldak (ysoldak@gmail.com)
+ * 
+ */
 public class PunksearchProperties {
 
 	public static final String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
-		loadFromFile(resolveHome() + System.getProperty("file.separator") + PROPERTIES_FILENAME);
+		loadFromFile(PunksearchFs.resolve(PROPERTIES_FILENAME));
 	}
 
 	public static void loadFromFile(String path) throws FileNotFoundException {
@@ -42,33 +49,6 @@ public class PunksearchProperties {
 		for (Map.Entry<Object, Object> entry : props.entrySet()) {
 			System.setProperty((String) entry.getKey(), (String) entry.getValue());
 		}
-	}
-
-	public static String resolveIndexDirectory() {
-		String indexDir = System.getProperty("org.punksearch.index.dir");
-		if (!isAbsolutePath(indexDir)) {
-			indexDir = resolveHome() + System.getProperty("file.separator") + indexDir;
-		}
-		return indexDir;
-	}
-
-	public static boolean isAbsolutePath(String path) {
-		if (System.getProperty("os.name").contains("Windows")) {
-			return path.substring(1).startsWith(":");
-		} else {
-			return path.startsWith("/");
-		}
-	}
-
-	public static String resolveHome() {
-		String home = System.getProperty("org.punksearch.home");
-		if (home == null) {
-			home = System.getenv("PUNKSEARCH_HOME");
-			if (home == null) {
-				home = System.getProperty("user.dir");
-			}
-		}
-		return home;
 	}
 
 }
