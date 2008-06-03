@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
+import org.punksearch.common.PunksearchFs;
 import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
@@ -83,7 +84,7 @@ public class NetworkCrawler implements Runnable {
 	 * static final fields of this class.
 	 */
 	public NetworkCrawler() {
-		this.indexDirectory = PunksearchProperties.resolveIndexDirectory();
+		this.indexDirectory = PunksearchFs.resolveIndexDirectory();
 		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY, "false"));
 		this.threadCount = Integer.parseInt(System.getProperty(THREADS_PROPERTY, "5"));
 		this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
@@ -151,59 +152,56 @@ public class NetworkCrawler implements Runnable {
 			return;
 		}
 
-		try {
-			long startTime = new Date().getTime();
-			__log.info("Crawl process started");
+		long startTime = new Date().getTime();
+		__log.info("Crawl process started");
 
-			Timer processTimer = new Timer();
-			processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
-			
-			SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
-			threadList.clear();
-			for (int i = 0; i < threadCount; i++) {
-				HostCrawler indexerThread = makeThread(i, iter);
-				indexerThread.start();
-				threadList.add(indexerThread);
-			}
+		Timer processTimer = new Timer();
+		processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
 
-			List<HostStats> hosts = new ArrayList<HostStats>();
-			boolean cleaned = false;
-			for (HostCrawler thread : threadList) {
-				try {
-					thread.join();
-					// we want clean the target index just once and at the end of index process
-					// also we do not want to clean the index if crawling was interrupted
-					if (!cleaned) {
-						cleanTargetIndex();
-						cleaned = true;
-					}
-					hosts.addAll(thread.getCrawledHosts());
-					removeHostsFromIndex(thread.getCrawledHosts());
-					mergeIntoIndex(thread.getName());
-					cleanTempForThread(thread.getName());
-					__log.info(thread.getName() + " finished");
-				} catch (InterruptedException e) {
-					__log.warning(thread.getName() + " was interrupted");
-				}
-			}
-
-			if (hosts.size() > 0) {
-				HostStats.dump(getLogDir(), hosts);
-				HostStats.merge(getLogDir(), PunksearchProperties.resolveHome() + File.separator + "hosts.csv");
-			}
-
-			// should always optimize, since some old items could have been deleted and no one new host crawled.
-			IndexOperator.optimize(indexDirectory);
-
-			threadList.clear();
-			processTimer.cancel();
-			
-			long finishTime = new Date().getTime();
-			__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
-		} catch (Exception e) {
-			__log.warning("NetworkCrawler.run(): exception occured. " + e.getMessage());
-			e.printStackTrace();
+		SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
+		threadList.clear();
+		for (int i = 0; i < threadCount; i++) {
+			HostCrawler indexerThread = makeThread(i, iter);
+			indexerThread.start();
+			threadList.add(indexerThread);
 		}
+
+		List<HostStats> hosts = new ArrayList<HostStats>();
+		boolean cleaned = false;
+		for (HostCrawler thread : threadList) {
+			try {
+				thread.join();
+				// we want clean the target index just once and at the end of index process
+				// also we do not want to clean the index if crawling was interrupted
+				if (!cleaned) {
+					cleanTargetIndex();
+					cleaned = true;
+				}
+				hosts.addAll(thread.getCrawledHosts());
+				removeHostsFromIndex(thread.getCrawledHosts());
+				mergeIntoIndex(thread.getName());
+				cleanTempForThread(thread.getName());
+			} catch (InterruptedException e) {
+				__log.warning(thread.getName() + " was interrupted");
+			} catch (IOException e) {
+				__log.warning("Temp directory for thread '" + thread.getName()
+				        + "' was not cleaned up. Check permissions");
+			}
+			__log.info(thread.getName() + " finished");
+		}
+		if (hosts.size() > 0) {
+			HostStats.dump(PunksearchFs.resolveStatsDirectory(), hosts);
+			HostStats.merge(PunksearchFs.resolveStatsDirectory(), PunksearchFs.resolve("hosts.csv"));
+		}
+
+		// should always optimize, since some old items could have been deleted and no one new host crawled.
+		IndexOperator.optimize(indexDirectory);
+
+		long finishTime = new Date().getTime();
+		__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
+
+		threadList.clear();
+		processTimer.cancel();
 	}
 
 	private boolean prepareAllIndexDirs() {
@@ -259,33 +257,20 @@ public class NetworkCrawler implements Runnable {
 	 * ranges.
 	 * 
 	 * @param rangesString
-	 *            either path to a file with IP ranges or comma-separated list of string representation of IP ranges.
+	 *            Either path to a file with IP ranges or comma-separated list of string representation of IP ranges.
 	 * @return list of IP ranges. May return empty list, never null.
 	 */
 	private static List<IpRange> parseRanges(String rangesString) {
-		String[] parts = rangesString.split(",");
-		if (IpRange.isIpRange(parts[0])) {
-			List<IpRange> result = new ArrayList<IpRange>();
-			String[] ranges = rangesString.split(",");
-			for (String range : ranges) {
-				result.add(new IpRange(range));
-			}
-			return result;
-		} else {
-			String path;
-			if (PunksearchProperties.isAbsolutePath(rangesString)) {
-				path = rangesString;
-			} else {
-				path = PunksearchProperties.resolveHome() + File.separator + rangesString;
-			}
-			File file = new File(path);
+		List<IpRange> result = IpRange.parseList(rangesString);
+		if (result.isEmpty()) {
+			File file = new File(PunksearchFs.resolve(rangesString));
 			if (file.exists()) {
-				return loadRangesFromFile(file);
+				result = loadRangesFromFile(file);
 			} else {
 				__log.warning("Can't find IP ranges file: '" + file.getAbsolutePath() + "'");
-				return new ArrayList<IpRange>();
 			}
 		}
+		return result;
 	}
 
 	/**
@@ -306,7 +291,7 @@ public class NetworkCrawler implements Runnable {
 	 * </pre>
 	 * 
 	 * @param path
-	 *            either absolute or relative (to punksearch home) path to the file
+	 *            Either absolute or relative (to punksearch home) path to the file
 	 * @return list of IpRanage objects
 	 */
 	private static List<IpRange> loadRangesFromFile(File file) {
@@ -331,7 +316,7 @@ public class NetworkCrawler implements Runnable {
 		return list;
 	}
 
-	private String getThreadDirectory(int index) {
+	private static String getThreadDirectory(int index) {
 		String tempDir = System.getProperty(TMP_DIR_PROPERTY);
 		if (tempDir == null || tempDir.length() == 0) {
 			tempDir = System.getProperty("java.io.tmpdir");
@@ -343,17 +328,12 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private HostCrawler makeThread(int index, SynchronizedIpIterator iter) {
-		HostCrawler indexerThread = new HostCrawler(THREAD_PREFIX + index, iter, fileTypes, getThreadDirectory(index));
-		return indexerThread;
+		return new HostCrawler(THREAD_PREFIX + index, iter, fileTypes, getThreadDirectory(index));
 	}
 
-	private void cleanTempForThread(String threadName) throws IOException {
+	private static void cleanTempForThread(String threadName) throws IOException {
 		int index = Integer.valueOf(threadName.substring(THREAD_PREFIX.length()));
 		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
-	}
-
-	private static String getLogDir() {
-		return PunksearchProperties.resolveHome() + File.separator + "logs" + File.separator;
 	}
 
 	private boolean prepareIndex(String dir) {
@@ -380,16 +360,15 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private class MaxRunWatchDog extends TimerTask {
-		
+
 		private NetworkCrawler crawler;
-		
+
 		public MaxRunWatchDog(NetworkCrawler crawler) {
 			this.crawler = crawler;
 		}
-		
+
 		public void run() {
 			crawler.stop();
 		}
 	}
 }
-
