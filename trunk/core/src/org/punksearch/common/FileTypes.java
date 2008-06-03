@@ -86,7 +86,7 @@ public class FileTypes {
 	}
 
 	public static FileTypes readFromDefaultFile() {
-		String path = PunksearchProperties.resolveHome() + System.getProperty("file.separator") + DEFAULT_CONFIG_FILE;
+		String path = PunksearchFs.resolve(DEFAULT_CONFIG_FILE);
 		return readFromFile(new File(path));
 	}
 
