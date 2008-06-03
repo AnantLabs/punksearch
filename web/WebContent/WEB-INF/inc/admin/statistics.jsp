@@ -1,5 +1,5 @@
 <%@page import="org.punksearch.web.statistics.FileTypeStatistics"%>
-<%@page import="org.punksearch.common.PunksearchProperties"%>
+<%@page import="org.punksearch.common.PunksearchFs"%>
 <%@page import="org.apache.lucene.index.IndexReader"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
@@ -12,7 +12,7 @@
 	<div id="statistics">
 		<h2>Index Statistics</h2>
 		<%
-			String indexDir = PunksearchProperties.resolveIndexDirectory();
+			String indexDir = PunksearchFs.resolveIndexDirectory();
 			IndexReader ir = IndexReader.open(indexDir);
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			NumberFormat nfPercent = NumberFormat.getPercentInstance();

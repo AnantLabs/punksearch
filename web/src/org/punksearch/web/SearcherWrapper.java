@@ -12,8 +12,7 @@ package org.punksearch.web;
 
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
-import org.punksearch.common.PunksearchProperties;
-import org.punksearch.common.SearcherException;
+import org.punksearch.common.PunksearchFs;
 import org.punksearch.searcher.Searcher;
 import org.punksearch.searcher.SearcherResult;
 
@@ -24,9 +23,9 @@ public class SearcherWrapper {
 	private static Searcher searcher;
 
 	public static void init() {
-		System.out.println("Using index directory: " + PunksearchProperties.resolveIndexDirectory());
+		System.out.println("Using index directory: " + PunksearchFs.resolveIndexDirectory());
 		try {
-			searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
+			searcher = new Searcher(PunksearchFs.resolveIndexDirectory());
 		} catch (IllegalArgumentException e) {
 			searcher = null;
 		}

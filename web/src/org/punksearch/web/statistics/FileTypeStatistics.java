@@ -30,7 +30,7 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.PunksearchProperties;
+import org.punksearch.common.PunksearchFs;
 import org.punksearch.web.filters.TypeFilters;
 
 public class FileTypeStatistics {
@@ -54,7 +54,7 @@ public class FileTypeStatistics {
 	private static Hits extractDocsForType(String type) {
 		Filter filter = TypeFilters.get(type);
 		try {
-			IndexSearcher indexSearcher = new IndexSearcher(PunksearchProperties.resolveIndexDirectory());
+			IndexSearcher indexSearcher = new IndexSearcher(PunksearchFs.resolveIndexDirectory());
 			Hits hits = indexSearcher.search(makeQuery(), filter);
 			return hits;
 		} catch (Exception e) {
@@ -118,7 +118,7 @@ public class FileTypeStatistics {
 				String approxQuery = "Host:ftp_* Host:smb_* -Path:{a TO Z*} -Path:{0 TO 9*}";
 				QueryParser parser = new QueryParser("Host", new SimpleAnalyzer());
 				Query query = parser.parse(approxQuery);
-				IndexSearcher indexSearcher = new IndexSearcher(PunksearchProperties.resolveIndexDirectory());
+				IndexSearcher indexSearcher = new IndexSearcher(PunksearchFs.resolveIndexDirectory());
 				Hits hits = indexSearcher.search(query);
 				for (int i = 0; i < hits.length(); i++) {
 					Document doc = hits.doc(i);
@@ -172,7 +172,7 @@ public class FileTypeStatistics {
 
 	private static boolean indexChangedAfter(long timestamp) {
 		try {
-			return (IndexReader.lastModified(PunksearchProperties.resolveIndexDirectory()) > timestamp);
+			return (IndexReader.lastModified(PunksearchFs.resolveIndexDirectory()) > timestamp);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
