@@ -4,7 +4,7 @@
 		SearchParams params = new SearchParams(request);
 		session.setAttribute("params", params);
 %>
-<%@page import="org.punksearch.common.PunksearchProperties"%>
+<%@page import="org.punksearch.common.PunksearchFs"%>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	
 	<%@ include file="/WEB-INF/inc/head.jsp"%>
@@ -20,7 +20,7 @@
 		<% } else { %>
 		<div class="errorMessage">
 			PUNKSearch is not ready.<br/>
-			Index directory "<%= PunksearchProperties.resolveIndexDirectory() %>" is invalid.<br/>
+			Index directory "<%= PunksearchFs.resolveIndexDirectory() %>" is invalid.<br/>
 			Either crawl the network or supply correct index directory.
 		</div>
 		<% } %>
