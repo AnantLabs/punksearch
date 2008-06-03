@@ -13,7 +13,7 @@ package org.punksearch.cli;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Query;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.PunksearchProperties;
+import org.punksearch.common.PunksearchFs;
 import org.punksearch.searcher.EasyQueryParser;
 import org.punksearch.searcher.Searcher;
 import org.punksearch.searcher.SearcherResult;
@@ -36,7 +36,7 @@ public class SearcherMain {
 		EasyQueryParser parser = new EasyQueryParser();
 		Query query = parser.makeSimpleQuery(args[0]);
 
-		Searcher searcher = new Searcher(PunksearchProperties.resolveIndexDirectory());
+		Searcher searcher = new Searcher(PunksearchFs.resolveIndexDirectory());
 		SearcherResult result = searcher.search(query, null, 30);
 		System.out.println("Found items: " + result.count());
 		for (Document doc : result.items()) {
