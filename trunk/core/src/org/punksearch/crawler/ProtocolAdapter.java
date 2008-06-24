@@ -24,22 +24,6 @@ public interface ProtocolAdapter {
 	 */
 	public String getName(Object item);
 
-	/**
-	 * In form: /long/path/to !note: not from filesystem root at the server
-	 * 
-	 * @param item
-	 * @return
-	 */
-	//public String getPath(Object item);
-
-	/**
-	 * In form: /long/path/to/name.ext
-	 * 
-	 * @param item
-	 * @return
-	 */
-	//public String getFullPath(Object item);
-
 	public long getModificationTime(Object item);
 
 	public long getSize(Object item);
@@ -59,6 +43,8 @@ public interface ProtocolAdapter {
 	public void disconnect();
 
 	public Object getRootDir();
+
+	public String[] list(Object dir, String path);
 
 	public Object[] listFiles(Object dir, String path);
 
