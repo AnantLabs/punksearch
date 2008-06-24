@@ -139,28 +139,47 @@ public class FtpAdapter implements ProtocolAdapter {
 	public boolean isLink(Object item) {
 		return ((FTPFile) item).isSymbolicLink();
 	}
-
-	public Object[] listFiles(Object dir, String path) {
+	
+	public String[] list(Object dir, String path) {
 		if (dir instanceof String) {
 			return list((String) dir);
 		} else {
 			return list(path + getName(dir) + "/");
 		}
-
 	}
 
-	private Object[] list(String path) {
-		FTPFile[] items = {};
+	private String[] list(String path) {
 		try {
-			items = ftp.listFiles(path);
+			return ftp.listNames(path);
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
 			__log.warning("I/O Exception during listing of dir: " + e.getMessage());
 			throw new RuntimeException(e);
 		} catch (Exception e) {
 			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
+			return new String[0];
 		}
-		return items;
+	}
+
+	public Object[] listFiles(Object dir, String path) {
+		if (dir instanceof String) {
+			return listFiles((String) dir);
+		} else {
+			return listFiles(path + getName(dir) + "/");
+		}
+	}
+
+	private Object[] listFiles(String path) {
+		try {
+			return ftp.listFiles(path);
+		} catch (IOException e) {
+			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
+			__log.warning("I/O Exception during listing of dir: " + e.getMessage());
+			throw new RuntimeException(e);
+		} catch (Exception e) {
+			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
+			return new FTPFile[0];
+		}
 	}
 
 	public Map<String, String> parseCustomEncodings(String encString) {

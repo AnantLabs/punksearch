@@ -84,14 +84,10 @@ public class SmbAdapter implements ProtocolAdapter {
 	 */
 	public String getName(Object item) {
 		SmbFile res = (SmbFile) item;
-		try {
-			if (res.getName().startsWith(res.getServer())) {
-				return "";
-			}
-			return (res.isFile()) ? res.getName() : res.getName().substring(0, res.getName().length() - 1);
-		} catch (SmbException e) {
-			throw new RuntimeException(e);
+		if (res.getName().startsWith(res.getServer())) {
+			return "";
 		}
+		return (!res.getName().endsWith("/")) ? res.getName() : res.getName().substring(0, res.getName().length() - 1);
 	}
 
 	/*
@@ -192,6 +188,23 @@ public class SmbAdapter implements ProtocolAdapter {
 			throw new IllegalStateException("Can't get root dir since not connected to any smb host");
 		}
 		return smb;
+	}
+
+	public String[] list(Object dir, String path) {
+		try {
+			return ((SmbFile) dir).list();
+		} catch (SmbAuthException e) {
+			__log.fine("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
+			return new String[0];
+		} catch (SmbException e) {
+			__log.fine("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
+			try {
+				smb.list(); // check if we still connected
+				return new String[0];
+			} catch (SmbException e1) {
+				throw new RuntimeException("Connection with host was dropped");
+			}
+		}
 	}
 
 	public Object[] listFiles(Object dir, String path) {
