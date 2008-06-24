@@ -10,6 +10,7 @@
  ***************************************************************************/
 package org.punksearch.crawler;
 
+import java.io.IOException;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -34,9 +35,20 @@ public class FilenameAnalyzer extends Analyzer {
 		MIN_TERM_LENGTH = (termLength != null) ? Integer.valueOf(termLength) : 3;
 	}
 
+	private FilenameTokenizer tokenizer = null;
+	
 	@Override
 	public TokenStream tokenStream(String fieldName, Reader reader) {
-		TokenStream result = new FilenameTokenizer(reader);
+		if (tokenizer == null) {
+			tokenizer = new FilenameTokenizer(reader);
+		} else {
+			try {
+	            tokenizer.reset(reader);
+            } catch (IOException e) {
+            	throw new RuntimeException(e);
+            }
+		}
+		TokenStream result = tokenizer;
 		result = new LengthFilter(result, MIN_TERM_LENGTH, 1000);
 		result = new LowerCaseFilter(result);
 		return result;
