@@ -5,7 +5,7 @@
 		<%@ include file="/WEB-INF/inc/header.jsp"%>
 		<br/><br/>
 		<table align="center" class="data">
-		 <tr><th>Version</th><td>0.8.1</td></tr>
+		 <tr><th>Version</th><td>0.8.2</td></tr>
 		 <tr><th>Java</th><td><%= System.getProperty("java.version") %> by <%= System.getProperty("java.vendor") %></td></tr>
 		 <tr><th>OS</th><td><%= System.getProperty("os.name") %> <%= System.getProperty("os.version") %></td></tr>
 		 <tr><th>Architecture</th><td><%= System.getProperty("os.arch") %></td></tr>
