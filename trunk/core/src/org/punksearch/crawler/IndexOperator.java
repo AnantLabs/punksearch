@@ -46,9 +46,10 @@ import org.punksearch.searcher.filters.NumberRangeFilter;
  * 
  */
 public class IndexOperator {
-	private static Logger __log = Logger.getLogger(IndexOperator.class.getName());
+	private static Logger   __log    = Logger.getLogger(IndexOperator.class.getName());
 
-	private IndexWriter   indexWriter;
+	private IndexWriter     indexWriter;
+	private static Analyzer analyzer = createAnalyzer();
 
 	/**
 	 * Creates an instance of the class and opens index directory.
@@ -256,7 +257,7 @@ public class IndexOperator {
 
 	private static IndexWriter createIndexWriter(String dir) throws IOException {
 		boolean indexExists = IndexReader.indexExists(dir);
-		return new IndexWriter(dir, createAnalyzer(), !indexExists);
+		return new IndexWriter(dir, analyzer, !indexExists);
 	}
 
 	public static boolean isLocked(String dir) {
@@ -291,8 +292,9 @@ public class IndexOperator {
 
 	private static Analyzer createAnalyzer() {
 		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
-		paw.addAnalyzer(IndexFields.NAME, new FilenameAnalyzer());
-		paw.addAnalyzer(IndexFields.PATH, new FilenameAnalyzer());
+		FilenameAnalyzer analyzer = new FilenameAnalyzer();
+		paw.addAnalyzer(IndexFields.NAME, analyzer);
+		paw.addAnalyzer(IndexFields.PATH, analyzer);
 		paw.addAnalyzer(IndexFields.EXTENSION, new LowerCaseAnalyzer());
 		return paw;
 	}
