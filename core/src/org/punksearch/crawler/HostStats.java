@@ -214,7 +214,7 @@ public class HostStats implements Comparable<HostStats> {
 
 		DateFormat df = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss");
 		String fileName = DUMP_PREFIX + df.format(new Date()) + DUMP_SUFFIX;
-		File dumpFile = new File(dirPath + fileName);
+		File dumpFile = new File(dirPath + File.separator + fileName);
 		try {
 			FileUtils.writeLines(dumpFile, hostStats);
 		} catch (IOException e) {
