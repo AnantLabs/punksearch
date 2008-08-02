@@ -25,7 +25,6 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.PunksearchFs;
-import org.punksearch.common.PunksearchProperties;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
 
@@ -123,8 +122,8 @@ public class NetworkCrawler implements Runnable {
 	 * Signals all threads to stop crawling.
 	 */
 	public void stop() {
-		for (Thread thread : threadList) {
-			thread.interrupt();
+		for (HostCrawler thread : threadList) {
+			thread.requestStop();
 		}
 	}
 
