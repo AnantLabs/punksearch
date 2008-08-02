@@ -64,6 +64,7 @@ public class HostCrawler extends Thread {
 	private String             ip;
 	private ProtocolAdapter    adapter;
 	private FileTypes          knownFileTypes;
+	private boolean            stopRequested     = false;
 
 	private Iterator<String>   ipIterator;
 
@@ -90,14 +91,15 @@ public class HostCrawler extends Thread {
 		}
 		while ((ip = ipIterator.next()) != null) {
 
-			__log.fine(getName() + ". Trying " + ip);
+			__log.fine(getName() + ": Trying " + ip);
 
 			for (ProtocolAdapter ad : adapters) {
 				setAdapter(ad);
 				crawl();
 			}
 
-			if (isInterrupted()) {
+			if (isStopRequested() || isInterrupted()) {
+				__log.info(getName() + ": Thread was stopped");
 				break;
 			}
 		}
@@ -255,7 +257,8 @@ public class HostCrawler extends Thread {
 			return 0L;
 		}
 
-		__log.finest(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
+		__log.finest(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path
+		        + adapter.getName(dir));
 
 		Object[] items = adapter.listFiles(dir, path);
 
@@ -345,6 +348,14 @@ public class HostCrawler extends Thread {
 
 	public Set<HostStats> getCrawledHosts() {
 		return crawledHosts;
+	}
+
+	public synchronized void requestStop() {
+		stopRequested = true;
+	}
+
+	private synchronized boolean isStopRequested() {
+		return stopRequested;
 	}
 
 }
