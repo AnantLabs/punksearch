@@ -8,24 +8,31 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.analysis;
 
 import java.io.Reader;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseTokenizer;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.CharTokenizer;
 
-/**
- * @author Yury Soldak (ysoldak@gmail.com)
- *
- */
-public class LowerCaseAnalyzer extends Analyzer
+public class FilenameTokenizer extends CharTokenizer
 {
+	private static String CHARS_TO_DROP = "_-.,:[]#!()'/&";
+	
+	public FilenameTokenizer(Reader input)
+	{
+		super(input);
+	}
 
 	@Override
-	public TokenStream tokenStream(String fieldName, Reader reader)
+	protected boolean isTokenChar(char c)
 	{
-		return new LowerCaseTokenizer(reader);
+		if (Character.isWhitespace(c))
+			return false;
+		
+		if (CHARS_TO_DROP.indexOf(c) >= 0)
+			return false;
+		
+		return true;
 	}
+
 }
