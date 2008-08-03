@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.PunksearchFs;
+import org.punksearch.ip.IpIterator;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.SynchronizedIpIterator;
 
@@ -157,7 +158,7 @@ public class NetworkCrawler implements Runnable {
 		Timer processTimer = new Timer();
 		processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
 
-		SynchronizedIpIterator iter = new SynchronizedIpIterator(ranges);
+		IpIterator iter = new SynchronizedIpIterator(ranges);
 		threadList.clear();
 		for (int i = 0; i < threadCount; i++) {
 			HostCrawler indexerThread = makeThread(i, iter);
@@ -326,7 +327,7 @@ public class NetworkCrawler implements Runnable {
 		return tempDir + "punksearch_crawler" + index;
 	}
 
-	private HostCrawler makeThread(int index, SynchronizedIpIterator iter) {
+	private HostCrawler makeThread(int index, IpIterator iter) {
 		return new HostCrawler(THREAD_PREFIX + index, iter, fileTypes, getThreadDirectory(index));
 	}
 

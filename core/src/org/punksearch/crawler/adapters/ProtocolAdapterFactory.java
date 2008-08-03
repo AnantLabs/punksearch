@@ -8,46 +8,33 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.adapters;
+
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  * 
  */
-public interface ProtocolAdapter {
+public class ProtocolAdapterFactory {
 
-	/**
-	 * In form: name.ext
-	 * 
-	 * @param item
-	 * @return
-	 */
-	public String getName(Object item);
+	public static final String SMB_ENABLED = "org.punksearch.crawler.smb";
+	public static final String FTP_ENABLED = "org.punksearch.crawler.ftp";
 
-	public long getModificationTime(Object item);
+	private static boolean     smbEnabled  = Boolean.parseBoolean(System.getProperty(SMB_ENABLED, "true"));
+	private static boolean     ftpEnabled  = Boolean.parseBoolean(System.getProperty(FTP_ENABLED, "true"));
 
-	public long getSize(Object item);
-
-	public boolean isDirectory(Object item);
-
-	public boolean isFile(Object item);
-
-	public boolean isHidden(Object item);
-
-	public boolean isLink(Object item);
-
-	public String getProtocol();
-
-	public boolean connect(String ip);
-
-	public void disconnect();
-
-	public Object getRootDir();
-
-	public String[] list(Object dir, String path);
-
-	public Object[] listFiles(Object dir, String path);
-
-	public byte[] header(Object item, String path, int length);
+	public static Set<ProtocolAdapter> createAll() {
+		Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
+		if (smbEnabled) {
+			adapters.add(new SmbAdapter());
+		}
+		if (ftpEnabled) {
+			adapters.add(new FtpAdapter());
+		}
+		return adapters;
+	}
 
 }

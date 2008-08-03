@@ -8,32 +8,46 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.ip;
+package org.punksearch.crawler.adapters;
 
-import java.util.Iterator;
-import java.util.List;
+/**
+ * @author Yury Soldak (ysoldak@gmail.com)
+ * 
+ */
+public interface ProtocolAdapter {
 
-public class SynchronizedIpIterator extends IpIterator implements Iterator<Ip> {
-	IpIterator iterator;
+	/**
+	 * In form: name.ext
+	 * 
+	 * @param item
+	 * @return
+	 */
+	public String getName(Object item);
 
-	public SynchronizedIpIterator(List<IpRange> ranges) {
-		super(ranges);
-	}
+	public long getModificationTime(Object item);
 
-	public synchronized boolean hasNext() {
-		return super.hasNext();
-	}
+	public long getSize(Object item);
 
-	public synchronized Ip next() {
-		if (hasNext()) {
-			return super.next();
-		} else {
-			return null;
-		}
-	}
+	public boolean isDirectory(Object item);
 
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+	public boolean isFile(Object item);
+
+	public boolean isHidden(Object item);
+
+	public boolean isLink(Object item);
+
+	public String getProtocol();
+
+	public boolean connect(String ip);
+
+	public void disconnect();
+
+	public Object getRootDir();
+
+	public String[] list(Object dir, String path);
+
+	public Object[] listFiles(Object dir, String path);
+
+	public byte[] header(Object item, String path, int length);
 
 }
