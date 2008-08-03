@@ -127,7 +127,7 @@ public class HostCrawler extends Thread {
 	}
 
 	public String getIp() {
-		return ip.toString();
+		return (ip != null)? ip.toString() : null;
 	}
 
 	public void setMaxDeep(int deep) {
@@ -242,7 +242,7 @@ public class HostCrawler extends Thread {
 	}
 
 	protected long crawlDirectory(Object dir, String path, int deep) {
-		if (deep > maxDeep) {
+		if (deep > maxDeep || isStopRequested()) {
 			return 0L;
 		}
 
@@ -258,7 +258,7 @@ public class HostCrawler extends Thread {
 		List<Document> documentList = new ArrayList<Document>();
 
 		for (Object item : items) {
-			if (shouldProcess(item, path)) {
+			if (!isStopRequested() && shouldProcess(item, path)) {
 				Document doc = processResource(item, dirPath, deep);
 				if (doc != null) {
 					documentList.add(doc);
