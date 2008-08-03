@@ -19,7 +19,7 @@
 			nfPercent.setMaximumFractionDigits(2);
 			//nfPercent.setMinimumIntegerDigits(2);
 			
-			Long totalSize = FileTypeStatistics.totalSize();
+			Long totalSize = (FileTypeStatistics.isUpToDate())? FileTypeStatistics.totalSize() : null;
 			int totalCount = ir.numDocs();
 
 		%>
@@ -38,9 +38,26 @@
 			</tr>
 			<tr>
 				<th>Total Size of Indexed Data</th>
-				<td><%= nf.format(totalSize) %> bytes</td>
+				<td><%= (totalSize != null)? nf.format(totalSize) : "?" %> bytes</td>
 			</tr>
 		</table>
+
+		<%
+			if (!FileTypeStatistics.isUpToDate()) {
+		%>
+				<h3>Calculating detailed statistics. Please, wait...</h3>
+		<%
+				FileTypeStatistics.updateAsync();
+				String refresh = request.getParameter("refresh");
+				if (refresh == null) {
+					response.sendRedirect(request.getRequestURI() + "?refresh=10");
+				}
+			} else {
+				String refresh = request.getParameter("refresh");
+				if (refresh != null) {
+					response.sendRedirect(request.getRequestURI());
+				}
+		%>
 		
 		<%
 		
@@ -99,4 +116,5 @@
 		<span id="hint">
 		* assuming filetypes.conf defines disjunct file sets
 		</span>
+	<% } %>
 	</div>

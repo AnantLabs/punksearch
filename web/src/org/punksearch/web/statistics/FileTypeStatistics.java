@@ -42,6 +42,8 @@ public class FileTypeStatistics {
 	private static long              sizeCacheTimestamp      = 0;
 	private static long              totalSizeCacheTimestamp = 0;
 
+	private static Thread            updater                 = new AsyncUpdater();
+
 	private static Query makeQuery() {
 		BooleanQuery query = new BooleanQuery();
 		Query smbQuery = new WildcardQuery(new Term(IndexFields.HOST, "smb_*"));
@@ -108,7 +110,7 @@ public class FileTypeStatistics {
 		return sizeCache;
 	}
 
-	public static Long totalSize() {
+	public static synchronized Long totalSize() {
 		if (totalSizeCache == null || indexChangedAfter(totalSizeCacheTimestamp)) {
 			long size = 0;
 			try {
@@ -178,4 +180,36 @@ public class FileTypeStatistics {
 		}
 	}
 
+	public static boolean isUpToDate() {
+		boolean countCacheOk = !indexChangedAfter(countCacheTimestamp);
+		boolean sizeCacheOk = !indexChangedAfter(sizeCacheTimestamp);
+		boolean totalSizeCacheOk = !indexChangedAfter(totalSizeCacheTimestamp);
+		return countCacheOk && sizeCacheOk && totalSizeCacheOk;
+	}
+
+	public static synchronized void update(boolean force) {
+		if (force) {
+			countCache = null;
+			sizeCache = null;
+			totalSizeCache = null;
+		}
+		count();
+		size();
+		totalSize();
+	}
+
+	public static void updateAsync() {
+		synchronized (updater) {
+			if (!updater.isAlive()) {
+				updater = new AsyncUpdater();
+				updater.start();
+			}
+		}
+	}
+
+	private static class AsyncUpdater extends Thread {
+		public void run() {
+			FileTypeStatistics.update(false);
+		}
+	}
 }
