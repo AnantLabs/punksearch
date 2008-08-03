@@ -33,6 +33,8 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
+import org.punksearch.crawler.analysis.FilenameAnalyzer;
+import org.punksearch.crawler.analysis.LowerCaseAnalyzer;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 

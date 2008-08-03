@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.analysis;
 
 import java.io.IOException;
 import java.io.Reader;

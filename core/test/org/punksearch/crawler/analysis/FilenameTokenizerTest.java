@@ -1,6 +1,6 @@
-package org.punksearch.crawler;
+package org.punksearch.crawler.analysis;
 
-import org.punksearch.crawler.FilenameTokenizer;
+import org.punksearch.crawler.analysis.FilenameTokenizer;
 
 import junit.framework.TestCase;
 
