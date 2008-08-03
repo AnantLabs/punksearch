@@ -30,6 +30,10 @@ import org.punksearch.crawler.NetworkCrawler;
  */
 public class CrawlerMain {
 
+	public static String DUMP_STATUS_PERIOD = "org.punksearch.cli.dump.status.period";
+
+	private static long  dumpPeriodSec      = Long.parseLong(System.getProperty(DUMP_STATUS_PERIOD, "10000"));
+
 	public static void main(String[] args) throws InterruptedException {
 		try {
 			PunksearchProperties.loadDefault();
@@ -41,32 +45,61 @@ public class CrawlerMain {
 			System.setProperty("org.punksearch.crawler.range", args[0]);
 		}
 
+		CrawlerMain cm = new CrawlerMain();
+		cm.start();
+	}
+
+	public void start() throws InterruptedException {
 		final NetworkCrawler crawler = new NetworkCrawler();
 		Thread crawlerThread = new Thread(crawler);
 		crawlerThread.start();
 
-		TimerTask dumpStatus = new TimerTask() {
-			public void run() {
-				List<HostCrawler> threads = crawler.getThreads();
-				String dump = "";
-				for (HostCrawler thread : threads) {
-					String ip = (thread.getIp() == null) ? "inactive" : thread.getIp();
-					dump += thread.getName() + " : " + ip + " : " + thread.getCrawledHosts().size() + "\n";
-				}
-				try {
-					String path = PunksearchFs.resolve("crawler.status");
-					FileUtils.writeStringToFile(new File(path), dump);
-				} catch (IOException e) {
-					System.out.println("Can't write crawler status");
-				}
-			}
-		};
+		TimerTask dumpStatus = new StatusDumpTask(crawler);
 
 		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(dumpStatus, 60000, 60000);
+		timer.scheduleAtFixedRate(dumpStatus, dumpPeriodSec, dumpPeriodSec);
 
 		crawlerThread.join();
 		timer.cancel();
 	}
 
+	private class StatusDumpTask extends TimerTask {
+
+		public static final String STATUS_FILENAME = "crawler.status";
+		
+		private NetworkCrawler crawler;
+
+		public StatusDumpTask(NetworkCrawler crawler) {
+			this.crawler = crawler;
+		}
+
+		public void run() {
+			List<HostCrawler> threads = crawler.getThreads();
+			String dump = "";
+			for (HostCrawler thread : threads) {
+				boolean stop = thread.isStopRequested();
+				String status = "unknown";
+				if (stop) {
+					if (thread.getIp() != null) {
+						status = "stopping";
+					} else {
+						status = "stopped manually";
+					}
+				} else {
+					if (thread.getIp() != null) {
+						status = "crawling " + thread.getIp();
+					} else {
+						status = "finished successfully";
+					}
+				}
+				dump += thread.getName() + " : " + status + " : " + thread.getCrawledHosts().size() + "\n";
+			}
+			try {
+				String path = PunksearchFs.resolve(STATUS_FILENAME);
+				FileUtils.writeStringToFile(new File(path), dump);
+			} catch (IOException e) {
+				System.err.println("Can't write crawler status");
+			}
+		}
+	}
 }
