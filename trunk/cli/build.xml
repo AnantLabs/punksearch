@@ -63,7 +63,7 @@
 	<target name="compile" description="Compiles the JAVA sources">
 		<delete dir="${buildDir}" failonerror="true" />
 		<mkdir dir="${buildDir}/classes" />
-		<javac srcdir="${srcDir}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
+		<javac srcdir="${srcDir}" debug="${debug}" sourcepath="" deprecation="on" includeAntRuntime="no" destdir="${buildDir}/classes">
 			<classpath>
 				<pathelement location="../core/punksearch-core.jar" />
 				<fileset dir="../core/lib">
