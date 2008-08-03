@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.adapters;
 
 import java.io.IOException;
 
@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
+import org.punksearch.crawler.adapters.FtpAdapter;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -61,7 +62,7 @@ public class FtpAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getModificationTime(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.FtpAdapter#getModificationTime(java.lang.Object)}.
 	 */
 	public void testGetModificationTime() {
 		FTPFile file = getSomeFile();
@@ -69,7 +70,7 @@ public class FtpAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getName(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.FtpAdapter#getName(java.lang.Object)}.
 	 */
 	public void testGetName() {
 		FTPFile file = getSomeFile();
@@ -122,7 +123,7 @@ public class FtpAdapterTest extends TestCase {
 	}
 	*/
 	/**
-	 * Test method for {@link org.punksearch.crawler.FtpAdapter#getSize(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.FtpAdapter#getSize(java.lang.Object)}.
 	 */
 	public void testGetSize() {
 		FTPFile file = getSomeFile();
@@ -130,7 +131,7 @@ public class FtpAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.FtpAdapter#isDirectory(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.FtpAdapter#isDirectory(java.lang.Object)}.
 	 */
 	public void testIsDirectory() {
 		FTPFile file = getSomeFile();
@@ -140,7 +141,7 @@ public class FtpAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.FtpAdapter#isFile(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.FtpAdapter#isFile(java.lang.Object)}.
 	 */
 	public void testIsFile() {
 		FTPFile file = getSomeFile();
