@@ -26,7 +26,7 @@
 						indexThread = new Thread(indexer, "Crawler");
 						indexThread.start();
 						//pageContext.forward("admin.jsp");
-						response.sendRedirect("admin.jsp?refresh=5");
+						response.sendRedirect("admin.jsp?refresh=30");
 					}
 				}
 			} else {
