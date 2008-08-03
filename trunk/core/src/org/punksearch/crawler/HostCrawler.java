@@ -22,6 +22,9 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
+import org.punksearch.crawler.adapters.ProtocolAdapter;
+import org.punksearch.crawler.adapters.ProtocolAdapterFactory;
+import org.punksearch.ip.Ip;
 
 /**
  * Implementation of a crawler thread. Crawls one host a time.
@@ -45,9 +48,6 @@ public class HostCrawler extends Thread {
 	public static final String HEADER_LENGTH     = "org.punksearch.crawler.data.header.length";
 	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.data.header.threshold";
 
-	public static final String SMB_ENABLED       = "org.punksearch.crawler.smb";
-	public static final String FTP_ENABLED       = "org.punksearch.crawler.ftp";
-
 	private int                maxDeep           = Integer.parseInt(System.getProperty(DEEP, "5"));
 
 	private boolean            boostCreateDate   = Boolean.parseBoolean(System.getProperty(BOOST_CREATE_DATE, "true"));
@@ -58,23 +58,18 @@ public class HostCrawler extends Thread {
 	private int                headerLength      = Integer.valueOf(System.getProperty(HEADER_LENGTH, "128"));
 	private long               headerThreshold   = Long.valueOf(System.getProperty(HEADER_THRESHOLD, "500000"));
 
-	private boolean            smbEnabled        = Boolean.parseBoolean(System.getProperty(SMB_ENABLED, "true"));
-	private boolean            ftpEnabled        = Boolean.parseBoolean(System.getProperty(FTP_ENABLED, "true"));
-
-	private String             ip;
-	private ProtocolAdapter    adapter;
+	private Iterator<Ip>       ipIterator;
 	private FileTypes          knownFileTypes;
-	private boolean            stopRequested     = false;
-
-	private Iterator<String>   ipIterator;
-
 	private IndexOperator      indexOperator;
 
+	private Ip                 ip;
+	private ProtocolAdapter    adapter;
+	private boolean            stopRequested     = false;
 	private Set<HostStats>     crawledHosts      = new HashSet<HostStats>();
 	private String             timestamp;
 	private long               docCount;
 
-	public HostCrawler(String name, Iterator<String> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
+	public HostCrawler(String name, Iterator<Ip> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
 		this.ipIterator = ipIterator;
 		this.indexOperator = new IndexOperator(indexDirectoryPath);
@@ -82,13 +77,7 @@ public class HostCrawler extends Thread {
 	}
 
 	public void run() {
-		Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
-		if (smbEnabled) {
-			adapters.add(new SmbAdapter());
-		}
-		if (ftpEnabled) {
-			adapters.add(new FtpAdapter());
-		}
+		Set<ProtocolAdapter> adapters = ProtocolAdapterFactory.createAll();
 		while ((ip = ipIterator.next()) != null) {
 
 			__log.fine(getName() + ": Trying " + ip);
@@ -112,7 +101,7 @@ public class HostCrawler extends Thread {
 
 		boolean connected = false;
 		try {
-			connected = adapter.connect(ip);
+			connected = adapter.connect(ip.toString());
 			if (connected) {
 				__log.info(getName() + ". Start crawling " + curHost());
 				long size = crawlDirectory(adapter.getRootDir(), "", 0);
@@ -138,7 +127,7 @@ public class HostCrawler extends Thread {
 	}
 
 	public String getIp() {
-		return ip;
+		return ip.toString();
 	}
 
 	public void setMaxDeep(int deep) {
@@ -354,7 +343,7 @@ public class HostCrawler extends Thread {
 		stopRequested = true;
 	}
 
-	private synchronized boolean isStopRequested() {
+	public synchronized boolean isStopRequested() {
 		return stopRequested;
 	}
 

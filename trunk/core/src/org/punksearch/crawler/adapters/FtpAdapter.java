@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.adapters;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -211,7 +211,7 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	private String getFtpEncodingForIp(String ip) {
-		String defaultEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.default");
+		String defaultEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.default", "UTF-8");
 		String customEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.custom");
 		Map<String, String> encMap = parseCustomEncodings(customEnc);
 		return (encMap.containsKey(ip)) ? encMap.get(ip) : defaultEnc;
