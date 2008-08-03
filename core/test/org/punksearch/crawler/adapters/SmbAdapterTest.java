@@ -8,7 +8,9 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.crawler;
+package org.punksearch.crawler.adapters;
+
+import org.punksearch.crawler.adapters.SmbAdapter;
 
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
@@ -20,7 +22,7 @@ import junit.framework.TestCase;
  */
 public class SmbAdapterTest extends TestCase {
 
-	private static String ip = "10.0.2.15";
+	private static String ip = "10.20.111.107";
 
 	private SmbFile       root;
 
@@ -53,7 +55,7 @@ public class SmbAdapterTest extends TestCase {
 	*/
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#getModificationTime(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getModificationTime(java.lang.Object)}.
 	 * 
 	 * @throws SmbException
 	 * @throws SmbException
@@ -64,7 +66,7 @@ public class SmbAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#getName(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getName(java.lang.Object)}.
 	 */
 	public void testGetName() {
 		SmbFile file = getSomeFile();
@@ -105,7 +107,7 @@ public class SmbAdapterTest extends TestCase {
 	*/
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#getSize(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getSize(java.lang.Object)}.
 	 * @throws SmbException 
 	 */
 	public void testGetSize() throws SmbException {
@@ -114,7 +116,7 @@ public class SmbAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#isDirectory(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isDirectory(java.lang.Object)}.
 	 * @throws SmbException 
 	 */
 	public void testIsDirectory() throws SmbException {
@@ -125,7 +127,7 @@ public class SmbAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#isFile(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isFile(java.lang.Object)}.
 	 * @throws SmbException 
 	 */
 	public void testIsFile() throws SmbException {
@@ -136,7 +138,7 @@ public class SmbAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#isHidden(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isHidden(java.lang.Object)}.
 	 * @throws SmbException 
 	 */
 	public void testIsHidden() throws SmbException {
@@ -145,7 +147,7 @@ public class SmbAdapterTest extends TestCase {
 	}
 
 	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#isLink(java.lang.Object)}.
+	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isLink(java.lang.Object)}.
 	 */
 	public void testIsLink() {
 		SmbFile file = getSomeFile();
