@@ -11,7 +11,6 @@
 package org.punksearch.web.online;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,38 +18,43 @@ import org.punksearch.common.OnlineChecker;
 
 public class CachedOnlineChecker {
 
-	public static final long               timeout;
+	public static final long               TIMEOUT;
 
 	private static Map<String, HostStatus> cache = Collections.synchronizedMap(new HashMap<String, HostStatus>());
 
 	static {
 		String timeoutStr = System.getProperty("org.punksearch.online.cache.timeout");
-		timeout = (timeoutStr != null) ? Long.parseLong(timeoutStr) * 1000 : 600 * 1000;
+		TIMEOUT = (timeoutStr != null) ? Long.parseLong(timeoutStr) * 1000 : 600 * 1000;
 	}
 
 	public static boolean isOnline(String host) {
-		Date recheckLimit = new Date(System.currentTimeMillis() - timeout);
+		long now = System.currentTimeMillis();
 		HostStatus hs = cache.get(host);
 
-		if (hs != null && hs.date.after(recheckLimit)) {
+		if ((hs != null) && (hs.date + TIMEOUT > now)) {
 			return hs.online;
 		}
 
 		boolean online = OnlineChecker.isOnline(host);
-		cache.put(host, new HostStatus(new Date(), online));
+		if (hs != null) {
+			hs.date = now;
+			hs.online = online;
+		} else {
+			hs = new HostStatus(now, online);
+		}
+		cache.put(host, hs);
 		return online;
 	}
 
-}
+	private static class HostStatus {
 
-class HostStatus {
+		long    date;
+		boolean online;
 
-	Date    date;
-	boolean online;
+		HostStatus(long date, boolean online) {
+			this.date = date;
+			this.online = online;
+		}
 
-	HostStatus(Date date, boolean online) {
-		this.date = date;
-		this.online = online;
 	}
-
 }
