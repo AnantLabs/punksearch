@@ -35,6 +35,7 @@ public class CachedOnlineChecker {
 			return hs.online;
 		}
 
+		// TODO: avoid active check several times if several threads want to check simultaneously
 		boolean online = OnlineChecker.isOnline(host);
 		if (hs != null) {
 			hs.date = now;
@@ -42,6 +43,8 @@ public class CachedOnlineChecker {
 		} else {
 			hs = new HostStatus(now, online);
 		}
+		
+		// TODO: clean very old items to avoid potential memory leak
 		cache.put(host, hs);
 		return online;
 	}
