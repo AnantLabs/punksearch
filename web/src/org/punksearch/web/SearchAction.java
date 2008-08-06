@@ -25,7 +25,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.SearcherException;
 import org.punksearch.searcher.EasyQueryParser;
 import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
