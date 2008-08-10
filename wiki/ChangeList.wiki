@@ -5,6 +5,7 @@
   * core: migrated to commons-net for FTP crawling (was edtftpj)
   * core: harvest headers of files (with size > some predefined value)
   * core: possibility to enable/disable smb and ftp adaptors
+  * core: negative values in size statistics chart bug fixed (closes defect 17)
   * gui: grouping using file headers in addition to file extension and size (closes defect)
   * cli: crawler.status file is created and updated during crawling
   * crawl: crawling statistics for each crawling session is dumped into PUNKSEARCH_HOME/stats dir
