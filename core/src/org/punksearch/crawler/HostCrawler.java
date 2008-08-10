@@ -116,9 +116,8 @@ public class HostCrawler extends Thread {
 			__log.warning(getName() + ". Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
 			__log.warning(getName() + ". Crawling of a host " + curHost() + " was cancelled due to: " + e.getMessage());
-			// if (__log.getLevel().intValue() <= Level.FINE.intValue()) { TODO: why NPE?
-			// e.printStackTrace();
-			// }
+			// delete files of failed host from temp index
+			indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
 		} finally {
 			if (connected) {
 				adapter.disconnect();
