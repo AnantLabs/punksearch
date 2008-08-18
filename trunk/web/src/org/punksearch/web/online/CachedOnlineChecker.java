@@ -10,24 +10,63 @@
  ***************************************************************************/
 package org.punksearch.web.online;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.punksearch.common.OnlineChecker;
 
 public class CachedOnlineChecker {
 
-	public static final long               TIMEOUT;
+	public static final String                           TIMEOUT_PROPERTY = "org.punksearch.online.cache.timeout";
+	public static final long                             TIMEOUT          = Long.getLong(TIMEOUT_PROPERTY, 600) * 1000;
 
-	private static Map<String, HostStatus> cache = Collections.synchronizedMap(new HashMap<String, HostStatus>());
-
-	static {
-		String timeoutStr = System.getProperty("org.punksearch.online.cache.timeout");
-		TIMEOUT = (timeoutStr != null) ? Long.parseLong(timeoutStr) * 1000 : 600 * 1000;
-	}
+	private static ConcurrentHashMap<String, HostStatus> cache            = new ConcurrentHashMap<String, HostStatus>();
+	private static Map<String, String>                   cacheKeys        = new HashMap<String, String>();
+	private static final HostStatus                      INIT_STATUS      = new HostStatus();
 
 	public static boolean isOnline(String host) {
+		long now = System.currentTimeMillis();
+		String lock = "";
+
+		// sync on the whole cache to: 1) get cached data, 2) insert init_status if necessary
+		synchronized (cache) {
+			HostStatus hs = cache.putIfAbsent(host, INIT_STATUS);
+			if ((hs != null) && (hs.date + TIMEOUT > now)) { // "null" only if this is the first time we see this host
+				return hs.online;
+			}
+			if (hs == null) { // we see the host for the first time, store the key (host name)
+				cacheKeys.put(host, host);
+			}
+			// init lock with the stored reference to the key for required host status
+			lock = cacheKeys.get(host);
+		}
+
+		// grab the lock only on the part of the cache map, so online checks for different hosts can go simultaneously
+		// can't use "host" as lock here, since we want to sync on cache's object
+		synchronized (lock) {
+			HostStatus hs = cache.get(host);
+			// maybe it was already updated by other thread while we were waiting for lock? go into if was not
+			if ((hs == INIT_STATUS) || (hs.date + TIMEOUT > now)) {
+				boolean online = OnlineChecker.isOnline(host);
+				// create new object if it is init status in the cache now (i.e. this is first time case)
+				if (hs == INIT_STATUS) {
+					hs = new HostStatus(now, online);
+					cache.put(host, hs);
+				} else { // otherwise reuse existing object (i.e. this is timeout case)
+					hs.date = now;
+					hs.online = online;
+				}
+			}
+			return hs.online;
+		}
+	}
+
+	@Deprecated
+	/*
+	 * not thread-safe
+	 */
+	public static boolean isOnlineOld(String host) {
 		long now = System.currentTimeMillis();
 		HostStatus hs = cache.get(host);
 
@@ -43,7 +82,7 @@ public class CachedOnlineChecker {
 		} else {
 			hs = new HostStatus(now, online);
 		}
-		
+
 		// TODO: clean very old items to avoid potential memory leak
 		cache.put(host, hs);
 		return online;
@@ -53,6 +92,10 @@ public class CachedOnlineChecker {
 
 		long    date;
 		boolean online;
+
+		HostStatus() {
+			this(0L, false);
+		}
 
 		HostStatus(long date, boolean online) {
 			this.date = date;
