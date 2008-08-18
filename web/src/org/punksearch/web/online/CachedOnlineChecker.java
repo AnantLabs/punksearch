@@ -32,7 +32,7 @@ public class CachedOnlineChecker {
 		// sync on the whole cache to: 1) get cached data, 2) insert init_status if necessary
 		synchronized (cache) {
 			HostStatus hs = cache.putIfAbsent(host, INIT_STATUS);
-			if ((hs != null) && (hs.date + TIMEOUT > now)) { // "null" only if this is the first time we see this host
+			if ((hs != null) && (hs != INIT_STATUS) && (hs.date + TIMEOUT > now)) { // "null" only if this is the first time we see this host
 				return hs.online;
 			}
 			if (hs == null) { // we see the host for the first time, store the key (host name)
