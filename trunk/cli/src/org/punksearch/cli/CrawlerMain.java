@@ -32,7 +32,7 @@ public class CrawlerMain {
 
 	public static String DUMP_STATUS_PERIOD = "org.punksearch.cli.dump.status.period";
 
-	private static long  dumpPeriodSec      = Long.parseLong(System.getProperty(DUMP_STATUS_PERIOD, "10000"));
+	private static long  dumpPeriodSec      = Long.getLong(DUMP_STATUS_PERIOD, 10L);
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
@@ -57,7 +57,7 @@ public class CrawlerMain {
 		TimerTask dumpStatus = new StatusDumpTask(crawler);
 
 		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(dumpStatus, dumpPeriodSec, dumpPeriodSec);
+		timer.scheduleAtFixedRate(dumpStatus, dumpPeriodSec * 1000, dumpPeriodSec * 1000);
 
 		crawlerThread.join();
 		timer.cancel();
