@@ -15,9 +15,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
@@ -48,7 +49,7 @@ import org.punksearch.searcher.filters.NumberRangeFilter;
  * 
  */
 public class IndexOperator {
-	private static Logger   __log    = Logger.getLogger(IndexOperator.class.getName());
+	private static Log   __log    = LogFactory.getLog(IndexOperator.class);
 
 	private IndexWriter     indexWriter;
 	private static Analyzer analyzer = createAnalyzer();
@@ -92,7 +93,7 @@ public class IndexOperator {
 			}
 			return true;
 		} catch (IOException e) {
-			__log.warning("Failed adding documents into index. " + e.getMessage());
+			__log.warn("Failed adding documents into index. " + e.getMessage());
 			return false;
 		}
 
@@ -118,7 +119,7 @@ public class IndexOperator {
 			indexWriter.deleteDocuments(new Term(IndexFields.HOST, proto + "_" + ip));
 			return true;
 		} catch (IOException e) {
-			__log.warning("Failed deleting documents for host '" + proto + "://" + ip + "'. " + e.getMessage());
+			__log.warn("Failed deleting documents for host '" + proto + "://" + ip + "'. " + e.getMessage());
 			return false;
 		}
 	}
@@ -197,7 +198,7 @@ public class IndexOperator {
 			iw.deleteDocuments(new Term(IndexFields.HOST, host));
 			iw.close();
 		} catch (IOException ex) {
-			__log.log(Level.SEVERE, "Exception during merging index directories", ex);
+			__log.error("Exception during merging index directories", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -233,7 +234,7 @@ public class IndexOperator {
 			}
 			ir.close();
 		} catch (IOException ex) {
-			__log.log(Level.SEVERE, "Exception during deleting by age from index directory", ex);
+			__log.error("Exception during deleting by age from index directory", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -252,7 +253,7 @@ public class IndexOperator {
 			iw.flush();
 			iw.close();
 		} catch (IOException ex) {
-			__log.log(Level.SEVERE, "Exception during merging index directories", ex);
+			__log.error("Exception during merging index directories", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -266,7 +267,7 @@ public class IndexOperator {
 		try {
 			return IndexReader.isLocked(dir);
 		} catch (IOException e) {
-			__log.warning("IOException during checking if index directory is locked, "
+			__log.warn("IOException during checking if index directory is locked, "
 			        + "assuming it is not (maybe index directory just does not exist?)");
 			return false;
 		}
@@ -278,7 +279,7 @@ public class IndexOperator {
 				IndexReader.unlock(FSDirectory.getDirectory(dir));
 			}
 		} catch (IOException e) {
-			__log.warning("IOException during unlocking of index directory "
+			__log.warn("IOException during unlocking of index directory "
 			        + "(maybe index directory just does not exist?)");
 		}
 	}
@@ -309,7 +310,7 @@ public class IndexOperator {
 			iw.flush();
 			iw.close();
 		} catch (IOException e) {
-			__log.severe("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
+			__log.error("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
 		}
 	}
 }

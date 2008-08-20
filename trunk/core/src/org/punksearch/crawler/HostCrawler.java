@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.common.FileTypes;
@@ -36,7 +36,7 @@ import org.punksearch.ip.Ip;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
-	private static Logger   __log           = Logger.getLogger(HostCrawler.class.getName());
+	private static Log      __log           = LogFactory.getLog(HostCrawler.class);
 
 	private int             maxDeep         = Integer.getInteger(Settings.DEEP, 7);
 
@@ -71,7 +71,7 @@ public class HostCrawler extends Thread {
 		Set<ProtocolAdapter> adapters = ProtocolAdapterFactory.createAll();
 		while ((ip = ipIterator.next()) != null) {
 
-			__log.fine(getName() + ": Trying " + ip);
+			__log.debug("Trying " + ip);
 
 			for (ProtocolAdapter ad : adapters) {
 				setAdapter(ad);
@@ -79,7 +79,7 @@ public class HostCrawler extends Thread {
 			}
 
 			if (isStopRequested() || isInterrupted()) {
-				__log.info(getName() + ": Thread was stopped");
+				__log.info("Thread was stopped");
 				break;
 			}
 		}
@@ -94,19 +94,19 @@ public class HostCrawler extends Thread {
 		try {
 			connected = adapter.connect(ip.toString());
 			if (connected) {
-				__log.info(getName() + ". Start crawling " + curHost());
+				__log.info("Start crawling " + curHost());
 				long size = crawlDirectory(adapter.getRootDir(), "", 0);
 				if (size > 0) {
-					__log.info(getName() + ". Stop crawling " + curHost() + ", crawled " + size + " bytes");
+					__log.info("Stop crawling " + curHost() + ", crawled " + size + " bytes");
 					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size, docCount));
 				} else {
-					__log.info(getName() + ". Stop crawling " + curHost() + ", crawled 0 bytes (ignored)");
+					__log.info("Stop crawling " + curHost() + ", crawled 0 bytes (ignored)");
 				}
 			}
 		} catch (IllegalArgumentException e) {
-			__log.warning(getName() + ". Illegal argument exception: " + e.getMessage());
+			__log.warn("Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
-			__log.warning(getName() + ". Crawling of a host " + curHost() + " was cancelled due to: " + e.getMessage());
+			__log.warn("Crawling of a host " + curHost() + " was cancelled due to: " + e.getMessage());
 			// delete files of failed host from temp index
 			indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
 		} finally {
@@ -236,8 +236,9 @@ public class HostCrawler extends Thread {
 			return 0L;
 		}
 
-		__log.finest(getName() + ": processing " + adapter.getProtocol() + "://" + getIp() + path
-		        + adapter.getName(dir));
+		if (__log.isTraceEnabled()) {
+			__log.trace("Processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
+		}
 
 		Object[] items = adapter.listFiles(dir, path);
 
@@ -298,8 +299,8 @@ public class HostCrawler extends Thread {
 				}
 			}
 		}
-		if (badFileFound && __log.getLevel() == Level.FINE) {
-			__log.fine("Ignored parent dir of:" + curHost() + path); // adapter.getFullPath(items[0]));
+		if (badFileFound && __log.isTraceEnabled()) {
+			__log.trace("Ignored parent dir of: " + curHost() + path);
 		}
 		return !badFileFound;
 	}
