@@ -1,7 +1,5 @@
 <project name="punksearch-builder" default="dist">
 
-	<property name="version" value="0.8.2" />
-
 	<target name="clean">
 		<delete dir="dist" />
 		<delete>
@@ -11,19 +9,31 @@
 	</target>
 
 	<target name="build-core">
-		<ant dir="../core" target="jar" inheritAll="false" />
+		<ant dir="../core" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+		</ant>
 	</target>
 
 	<target name="build-cli">
-		<ant dir="../cli" target="jar" inheritAll="false" />
+		<ant dir="../cli" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+		</ant>
 	</target>
 
 	<target name="build-web">
-		<ant dir="../web" target="war" inheritAll="false" />
+		<ant dir="../web" target="war" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+		</ant>
 	</target>
 
 	<target name="build-server">
-		<ant dir="../server" target="jar" inheritAll="false" />
+		<ant dir="../server" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+		</ant>
 	</target>
 
 	<target name="clean-war">
