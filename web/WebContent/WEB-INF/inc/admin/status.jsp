@@ -9,7 +9,6 @@
 
 		<%!
 			public static Thread indexThread = null;
-			public static NetworkCrawler indexer = null;
 		%>
 		<%
 			boolean isIndexing = (indexThread != null && indexThread.isAlive());
@@ -18,12 +17,11 @@
 			if (action != null) {
 				if (action.equals("stop")) {
 					if (isIndexing) {
-						indexer.stop();
+						NetworkCrawler.getInstance().stop();
 					}
 				} else if (action.equals("start")) {
 					if (!isIndexing) {
-						indexer = new NetworkCrawler();
-						indexThread = new Thread(indexer, "Crawler");
+						indexThread = new Thread(NetworkCrawler.getInstance(), "Crawler");
 						indexThread.start();
 						//pageContext.forward("admin.jsp");
 						response.sendRedirect("admin.jsp?refresh=30");
@@ -52,15 +50,18 @@
 		
 		<br/><br/>
 		
-		<% if (indexer != null && indexer.getThreads().size() != 0) { %>
-			<table align="center" class="data" width="300px">
-				<tr><th>thread</th><th>ip</th><th>crawled</th></tr>
-				<% for (HostCrawler thread : indexer.getThreads()) { %>
-					<tr>
-						<td><%= thread.getName() %></td>
-						<td><%= (thread.getIp() == null)? "inactive" : thread.getIp() %></td>
-						<td><%= thread.getCrawledHosts().size() %></td>
-					</tr>
-				<% } %>
-			</table>
-		<% } %>
+		<% List<HostCrawler> threadList = NetworkCrawler.getInstance().getThreads(); %>
+		<% synchronized(threadList) { %>
+			<% if (threadList.size() != 0) { %>
+				<table align="center" class="data" width="300px">
+					<tr><th>thread</th><th>ip</th><th>crawled</th></tr>
+					<% for (HostCrawler thread : threadList) { %>
+						<tr>
+							<td><%= thread.getName() %></td>
+							<td><%= (thread.getIp() == null)? "inactive" : thread.getIp() %></td>
+							<td><%= thread.getCrawledHosts().size() %></td>
+						</tr>
+					<% } %>
+				</table>
+			<% } %>
+		<% } %>		
