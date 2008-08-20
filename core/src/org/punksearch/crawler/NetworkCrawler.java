@@ -142,12 +142,12 @@ public class NetworkCrawler implements Runnable {
 				mergeIntoIndex(thread.getName());
 				cleanTempForThread(thread.getName());
 			} catch (InterruptedException e) {
-				__log.warn(thread.getName() + " was interrupted");
+				__log.warn("Interrupted: " + thread.getName());
 			} catch (IOException e) {
 				__log.warn("Temp directory for thread '" + thread.getName()
 				        + "' was not cleaned up. Check permissions");
 			}
-			__log.info(thread.getName() + " finished");
+			__log.info("Finished: " + thread.getName());
 		}
 		if (hosts.size() > 0) {
 			HostStats.dump(PunksearchFs.resolveStatsDirectory(), hosts);
