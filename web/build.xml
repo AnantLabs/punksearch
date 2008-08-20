@@ -4,19 +4,28 @@
 		<format property="dateIso" pattern="yyyy-MM-dd" />
 	</tstamp>
 	<property name="srcDir" location="src" />
+	<property name="webDir" location="WebContent" />
 	<property name="buildDir" location="build" />
 	<property name="docDir" location="doc" />
 
-	<target name="war" depends="build-core,clean,compile" description="Compiles sources and builds the WAR file.">
-		<war destfile="punksearch.war" webxml="WebContent/WEB-INF/web.xml">
+	<target name="war" depends="build-core,clean,compile,prepare" description="Compiles sources and builds the WAR file.">
+		<war destfile="punksearch.war" webxml="${buildDir}/web/WEB-INF/web.xml">
 			<classes dir="${buildDir}/classes" />
-			<fileset dir="WebContent">
+			<fileset dir="${buildDir}/web">
 				<exclude name="WEB-INF/web.xml" />
 				<exclude name="META-INF/context.xml" />
 			</fileset>
 			<lib dir="../core/lib" />
 			<lib file="../core/punksearch-core.jar" />
 		</war>
+	</target>
+
+	<target name="prepare">
+		<copy todir="${buildDir}/web">
+			<fileset dir="${webDir}" />
+		</copy>
+		<delete file="${buildDir}/web/WEB-INF/sun-web.xml" />
+		<replace file="${buildDir}/web/about.jsp" token="%version%" value="${version}" />
 	</target>
 
 	<target name="clean">
