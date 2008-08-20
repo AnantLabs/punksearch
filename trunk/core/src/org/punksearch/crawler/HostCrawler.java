@@ -36,38 +36,29 @@ import org.punksearch.ip.Ip;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class HostCrawler extends Thread {
-	private static Logger      __log             = Logger.getLogger(HostCrawler.class.getName());
+	private static Logger   __log           = Logger.getLogger(HostCrawler.class.getName());
 
-	public static final String DEEP              = "org.punksearch.crawler.deep";
+	private int             maxDeep         = Integer.getInteger(Settings.DEEP, 7);
 
-	public static final String BOOST_CREATE_DATE = "org.punksearch.crawler.boost.createdate";
-	public static final String BOOST_DEEP        = "org.punksearch.crawler.boost.deep";
-	public static final String BOOST_SIZE        = "org.punksearch.crawler.boost.size";
+	private boolean         boostCreateDate = Boolean.parseBoolean(System.getProperty(Settings.BOOST_CREATE_DATE,
+	                                                "true"));
+	private boolean         boostDeep       = Boolean.parseBoolean(System.getProperty(Settings.BOOST_DEEP, "true"));
+	private boolean         boostSize       = Boolean.parseBoolean(System.getProperty(Settings.BOOST_SIZE, "true"));
 
-	public static final String HEADER_USE        = "org.punksearch.crawler.data.header";
-	public static final String HEADER_LENGTH     = "org.punksearch.crawler.data.header.length";
-	public static final String HEADER_THRESHOLD  = "org.punksearch.crawler.data.header.threshold";
+	private boolean         headerUse       = Boolean.parseBoolean(System.getProperty(Settings.HEADER_USE, "true"));
+	private int             headerLength    = Integer.getInteger(Settings.HEADER_LENGTH, 128);
+	private long            headerThreshold = Long.getLong(Settings.HEADER_THRESHOLD, 50000000L);
 
-	private int                maxDeep           = Integer.parseInt(System.getProperty(DEEP, "5"));
+	private Iterator<Ip>    ipIterator;
+	private FileTypes       knownFileTypes;
+	private IndexOperator   indexOperator;
 
-	private boolean            boostCreateDate   = Boolean.parseBoolean(System.getProperty(BOOST_CREATE_DATE, "true"));
-	private boolean            boostDeep         = Boolean.parseBoolean(System.getProperty(BOOST_DEEP, "true"));
-	private boolean            boostSize         = Boolean.parseBoolean(System.getProperty(BOOST_SIZE, "true"));
-
-	private boolean            headerUse         = Boolean.parseBoolean(System.getProperty(HEADER_USE, "true"));
-	private int                headerLength      = Integer.valueOf(System.getProperty(HEADER_LENGTH, "128"));
-	private long               headerThreshold   = Long.valueOf(System.getProperty(HEADER_THRESHOLD, "500000"));
-
-	private Iterator<Ip>       ipIterator;
-	private FileTypes          knownFileTypes;
-	private IndexOperator      indexOperator;
-
-	private Ip                 ip;
-	private ProtocolAdapter    adapter;
-	private boolean            stopRequested     = false;
-	private Set<HostStats>     crawledHosts      = new HashSet<HostStats>();
-	private String             timestamp;
-	private long               docCount;
+	private Ip              ip;
+	private ProtocolAdapter adapter;
+	private boolean         stopRequested   = false;
+	private Set<HostStats>  crawledHosts    = new HashSet<HostStats>();
+	private String          timestamp;
+	private long            docCount;
 
 	public HostCrawler(String name, Iterator<Ip> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
 		super(name);
@@ -126,7 +117,7 @@ public class HostCrawler extends Thread {
 	}
 
 	public String getIp() {
-		return (ip != null)? ip.toString() : null;
+		return (ip != null) ? ip.toString() : null;
 	}
 
 	public void setMaxDeep(int deep) {
