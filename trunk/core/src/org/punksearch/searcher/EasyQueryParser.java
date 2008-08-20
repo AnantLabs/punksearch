@@ -13,6 +13,8 @@ package org.punksearch.searcher;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -27,6 +29,7 @@ import org.punksearch.common.IndexFields;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class EasyQueryParser {
+	private static final Log   __log                = LogFactory.getLog(Searcher.class);
 
 	public static final String CLAUSES_PROPERTY     = "org.punksearch.search.clauses";
 	public static final String TERM_LENGTH_PROPERTY = "org.punksearch.search.termlength";
@@ -49,6 +52,9 @@ public class EasyQueryParser {
 	}
 
 	public Query makeSimpleQuery(String userQuery) {
+		if (__log.isDebugEnabled()) {
+			__log.debug("Query to parse: " + userQuery);
+		}
 		List<String> terms = prepareQueryParameter(userQuery);
 
 		if (terms.size() == 0) {
@@ -76,6 +82,10 @@ public class EasyQueryParser {
 	}
 
 	public Query makeAdvancedQuery(String dir, String file, String ext) {
+		if (__log.isDebugEnabled()) {
+			__log.debug("Query (advanced) to parse: dir(" + dir + ") file(" + file + ") ext(" + ext + ")");
+		}
+
 		BooleanQuery query = new BooleanQuery(false);
 		BooleanQuery.setMaxClauseCount(maxClauseCount);
 
@@ -83,7 +93,10 @@ public class EasyQueryParser {
 		List<String> fileTerms = prepareQueryParameter(file);
 		List<String> extTerms = prepareQueryParameter(ext);
 
-		if (fileTerms.size() != 0 || extTerms.size() != 0) { // search for files
+		if (fileTerms.size() != 0 || extTerms.size() != 0) {
+			if (__log.isDebugEnabled()) {
+				__log.debug("Search for files");
+			}
 			if (fileTerms.size() != 0) {
 				BooleanQuery fileQuery = new BooleanQuery();
 				for (String item : fileTerms) {
@@ -120,14 +133,17 @@ public class EasyQueryParser {
 					dirQuery.add(pathQuery, occurItem);
 				}
 				// it must be at least one positive clause in query to be executed.
-				// so add one if all user clauses are nagative.
+				// so add one if all user clauses are negative.
 				if (dirTerms.size() == negations) {
 					Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, "*"));
 					dirQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 				}
 				query.add(dirQuery, BooleanClause.Occur.MUST);
 			}
-		} else if (dirTerms.size() != 0) { // search for directories only, since file name was not specified
+		} else if (dirTerms.size() != 0) {
+			if (__log.isDebugEnabled()) {
+				__log.debug("Search for directories only, since file name was not specified");
+			}
 			for (String item : dirTerms) {
 				BooleanQuery dirQuery = new BooleanQuery();
 

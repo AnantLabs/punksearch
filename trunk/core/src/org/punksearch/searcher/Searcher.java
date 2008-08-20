@@ -13,8 +13,9 @@ package org.punksearch.searcher;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
@@ -30,7 +31,7 @@ import org.apache.lucene.store.FSDirectory;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class Searcher {
-	private static final Logger __log                = Logger.getLogger(Searcher.class.getName());
+	private static final Log __log                = LogFactory.getLog(Searcher.class);
 
 	private IndexSearcher       indexSearcher;
 
@@ -52,6 +53,7 @@ public class Searcher {
 	}
 
 	public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
+		__log.trace("Search for: " + query);
 
 		checkIndexDirectory();
 
@@ -86,12 +88,14 @@ public class Searcher {
 
 			return new SearcherResult(hits.length(), docs);
 		} catch (IOException e) {
+			__log.error("IOException during search", e);
 			throw new RuntimeException("IOException during search", e);
 		}
 	}
 
 	public SearcherResult search(Query query, Filter filter, Integer limit) {
-
+		__log.trace("Search for: " + query);
+		
 		checkIndexDirectory();
 
 		try {
@@ -107,6 +111,7 @@ public class Searcher {
 			}
 			return new SearcherResult(hits.length(), docs);
 		} catch (IOException e) {
+			__log.error("IOException during search", e);
 			throw new RuntimeException("IOException during search", e);
 		}
 	}
@@ -117,6 +122,7 @@ public class Searcher {
 				init(indexDir);
 			}
 		} catch (CorruptIndexException e1) {
+			__log.error("Index directory corrupted: " + indexDir);
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} catch (IOException e1) {
