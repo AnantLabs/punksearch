@@ -29,4 +29,4 @@ done;
 DEBUG=
 #DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n
 
-java -Xmx1024m -Djava.util.logging.config.file=$PUNKSEARCH_HOME/conf/log.properties -cp $CP org.punksearch.cli.CrawlerMain $1
+java $DEBUG -Xmx1024m -Djava.util.logging.config.file=$PUNKSEARCH_HOME/conf/log.properties -Xbootclasspath/a:$CP -jar $PUNKSEARCH_HOME/lib/punksearch-server.jar $PORT $WAR
