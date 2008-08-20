@@ -7,6 +7,7 @@
   * core: possibility to enable/disable smb and ftp adaptors
   * core: negative values in size statistics chart bug fixed (closes defect 17)
   * gui: grouping using file headers in addition to file extension and size (closes defect)
+  * gui: customizable web gui tabs (shortcuts for searching over file types)
   * cli: crawler.status file is created and updated during crawling
   * crawl: crawling statistics for each crawling session is dumped into PUNKSEARCH_HOME/stats dir
   * crawl: possibility to define max duration of crawling session (in hours, fractional numbers are supported)
