@@ -2,14 +2,21 @@
 <%@ page import="org.punksearch.web.*"%>
 <%@ page import="java.util.*"%>
 
-<% SearchParams params = (SearchParams) session.getAttribute("params"); %>
+<%
+	SearchParams params = (SearchParams) session.getAttribute("params");
+	String defaultTabs = "films,serials,music,clips,pictures";
+	String tabs = System.getProperty("org.punksearch.web.tabs", defaultTabs);
+	tabs = "everything," + tabs + ",advanced";
+	String[] tabsArray = tabs.split(",");
+%>
+<c:set var="tabsArray" value="<%=tabsArray%>" />
 <c:set var="currentTab" value="<%=params.type%>" />
 
 <div id="tabsContainer">
 <table cellspacing="0" id="tabs">
 	<tr>
 		<td style="width: 200px;">&#160;</td>
-		<c:forEach items="${'everything,films,serials,music,clips,pictures,advanced'}" var="tab">
+		<c:forEach items="${tabsArray}" var="tab">
 			<c:choose>
 				<c:when test="${tab == 'advanced'}" >
 					<td class="spacer" style="padding-left: 50px;">&#160;</td>
