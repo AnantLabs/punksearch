@@ -104,7 +104,6 @@ public class FileTypes {
 					System.out.println("Line skipped, wrong count of columns: " + line);
 					continue;
 				}
-				System.out.println(line);
 				FileType type = makeItemType(chunks);
 				map.put(type.getTitle(), type);
 			}
