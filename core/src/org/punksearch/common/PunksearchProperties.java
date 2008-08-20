@@ -10,6 +10,7 @@
  ***************************************************************************/
 package org.punksearch.common;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class PunksearchProperties {
 	public static final String PROPERTIES_FILENAME = "punksearch.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
-		loadFromFile(PunksearchFs.resolve(PROPERTIES_FILENAME));
+		loadFromFile(PunksearchFs.resolve("conf" + File.separator + PROPERTIES_FILENAME));
 	}
 
 	public static void loadFromFile(String path) throws FileNotFoundException {
