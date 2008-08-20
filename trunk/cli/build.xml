@@ -8,8 +8,6 @@
 	<property name="buildDir" location="build" />
 	<property name="distDir" location="dist" />
 
-	<property name="debug" value="on" />
-
 	<path id="run.classpath">
 		<fileset dir="lib">
 			<include name="*.jar" />
