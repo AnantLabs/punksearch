@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.PunksearchFs;
 import org.punksearch.ip.IpIterator;
@@ -40,91 +41,48 @@ import org.punksearch.ip.SynchronizedIpIterator;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class NetworkCrawler implements Runnable {
-	private static Logger       __log             = Logger.getLogger(NetworkCrawler.class.getName());
+	private static Log               __log         = LogFactory.getLog(NetworkCrawler.class);
+
+	private static final NetworkCrawler INSTANCE      = new NetworkCrawler();
+
+	private static final String         THREAD_PREFIX = "HostCrawler";
+
+	private FileTypes                   fileTypes;
+	private String                      indexDirectory;
+	private boolean                     forceUnlock;
+	private int                         threadCount;
+	private float                       daysToKeep;
+	private int                         maxHours;
+	private List<IpRange>               ranges;
+
+	private List<HostCrawler>           threadList    = Collections.synchronizedList(new ArrayList<HostCrawler>());
 
 	/**
-	 * Use this property to customize directory for temporary indexes
+	 * Constructor extracts configuration from system properties. The system property names are defined by static final
+	 * fields of Settings class.
 	 */
-	public static final String  TMP_DIR_PROPERTY  = "org.punksearch.crawler.tmpdir";
-	/**
-	 * Whatever to unlock main and temporary index directories
-	 */
-	public static final String  UNLOCK_PROPERTY   = "org.punksearch.crawler.forceunlock";
-	/**
-	 * Number of threads to use for crawling the network (use values between 1 and 10)
-	 */
-	public static final String  THREADS_PROPERTY  = "org.punksearch.crawler.threads";
-	/**
-	 * The comma separated list of IP ranges or path to the file with IPs.
-	 */
-	public static final String  RANGE_PROPERTY    = "org.punksearch.crawler.range";
-	/**
-	 * Lifetime of old items in the index (may be real number).
-	 */
-	public static final String  KEEPDAYS_PROPERTY = "org.punksearch.crawler.keepdays";
-	/**
-	 * Maximum hours to wait until a crawling thread to finish, then interrupt it.
-	 */
-	public static final String  MAXHOURS_PROPERTY = "org.punksearch.crawler.maxhours";
-
-	private static final String THREAD_PREFIX     = "HostCrawler";
-
-	private FileTypes           fileTypes;
-	private String              indexDirectory;
-	private boolean             forceUnlock;
-	private List<IpRange>       ranges;
-	private int                 threadCount;
-	private float               daysToKeep;
-	private int                 maxHours;
-
-	private List<HostCrawler>   threadList        = new ArrayList<HostCrawler>();
-
-	/**
-	 * The default constructor. Extracts configuration from system properties. The system property names are defined by
-	 * static final fields of this class.
-	 */
-	public NetworkCrawler() {
+	private NetworkCrawler() {
 		this.indexDirectory = PunksearchFs.resolveIndexDirectory();
-		this.forceUnlock = Boolean.valueOf(System.getProperty(UNLOCK_PROPERTY, "false"));
-		this.threadCount = Integer.parseInt(System.getProperty(THREADS_PROPERTY, "5"));
-		this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
+		this.forceUnlock = Boolean.valueOf(System.getProperty(Settings.UNLOCK_PROPERTY, "false"));
+		this.threadCount = Integer.getInteger(Settings.THREADS_PROPERTY, 5);
 		this.fileTypes = FileTypes.readFromDefaultFile();
-		this.daysToKeep = Float.parseFloat(System.getProperty(KEEPDAYS_PROPERTY, "7"));
-		this.maxHours = Integer.parseInt(System.getProperty(MAXHOURS_PROPERTY, "12"));
+		this.daysToKeep = Float.parseFloat(System.getProperty(Settings.KEEPDAYS_PROPERTY, "7"));
+		this.maxHours = Integer.getInteger(Settings.MAXHOURS_PROPERTY, 12);
+		this.ranges = parseRanges(System.getProperty(Settings.RANGE_PROPERTY));
 	}
 
-	/**
-	 * The custom constructor. Must specify all the configuration properties.
-	 * 
-	 * @param indexDir
-	 *            Path to directory where main index should be located.
-	 * @param unlock
-	 *            Whatever to unlock main and temporary index directories.
-	 * @param threads
-	 *            Number of threads to use for crawling the network (use values between 1 and 10).
-	 * @param ranges
-	 *            Comma separated list of IP ranges or path to the file with IPs.
-	 * @param fileTypes
-	 *            Collection of known file types.
-	 * @param days
-	 *            Lifetime of old items in the index.
-	 */
-	public NetworkCrawler(String indexDir, boolean unlock, int threads, String ranges, FileTypes fileTypes, float days) {
-		this.indexDirectory = indexDir;
-		this.forceUnlock = unlock;
-		this.threadCount = threads;
-		this.ranges = parseRanges(ranges);
-		this.fileTypes = fileTypes;
-		this.daysToKeep = days;
-		this.maxHours = 12;
+	public static NetworkCrawler getInstance() {
+		return INSTANCE;
 	}
 
 	/**
 	 * Signals all threads to stop crawling.
 	 */
 	public void stop() {
-		for (HostCrawler thread : threadList) {
-			thread.requestStop();
+		synchronized (threadList) {
+			for (HostCrawler thread : threadList) {
+				thread.requestStop();
+			}
 		}
 	}
 
@@ -140,15 +98,15 @@ public class NetworkCrawler implements Runnable {
 	/**
 	 * Starts the crawling process. Starts all threads, merges temp indexes into main one, clears temp files.
 	 */
-	public void run() {
+	public synchronized void run() {
 
 		if (!prepareAllIndexDirs()) {
-			__log.warning("Can't start crawling. Something wrong with an index directory (check log).");
+			__log.warn("Can't start crawling. Something wrong with an index directory (check log).");
 			return;
 		}
 
 		if (ranges.size() == 0) {
-			__log.warning("Can't start crawling. The list of IPs to crawl is empty.");
+			__log.warn("Can't start crawling. The list of IPs to crawl is empty.");
 			return;
 		}
 
@@ -159,11 +117,13 @@ public class NetworkCrawler implements Runnable {
 		processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
 
 		IpIterator iter = new SynchronizedIpIterator(ranges);
-		threadList.clear();
-		for (int i = 0; i < threadCount; i++) {
-			HostCrawler indexerThread = makeThread(i, iter);
-			indexerThread.start();
-			threadList.add(indexerThread);
+		synchronized (threadList) {
+			threadList.clear();
+			for (int i = 0; i < threadCount; i++) {
+				HostCrawler indexerThread = makeThread(i, iter);
+				indexerThread.start();
+				threadList.add(indexerThread);
+			}
 		}
 
 		List<HostStats> hosts = new ArrayList<HostStats>();
@@ -182,9 +142,9 @@ public class NetworkCrawler implements Runnable {
 				mergeIntoIndex(thread.getName());
 				cleanTempForThread(thread.getName());
 			} catch (InterruptedException e) {
-				__log.warning(thread.getName() + " was interrupted");
+				__log.warn(thread.getName() + " was interrupted");
 			} catch (IOException e) {
-				__log.warning("Temp directory for thread '" + thread.getName()
+				__log.warn("Temp directory for thread '" + thread.getName()
 				        + "' was not cleaned up. Check permissions");
 			}
 			__log.info(thread.getName() + " finished");
@@ -200,18 +160,20 @@ public class NetworkCrawler implements Runnable {
 		long finishTime = new Date().getTime();
 		__log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
 
-		threadList.clear();
+		synchronized (threadList) {
+			threadList.clear();
+		}
 		processTimer.cancel();
 	}
 
 	private boolean prepareAllIndexDirs() {
 		if (!prepareIndex(indexDirectory)) {
-			__log.warning("Can't prepare main index directory (check log).");
+			__log.warn("Can't prepare main index directory (check log).");
 			return false;
 		}
 		for (int i = 0; i < threadCount; i++) {
 			if (!prepareIndex(getThreadDirectory(i))) {
-				__log.warning("Can't prepare directory for crawl thread: " + getThreadDirectory(i));
+				__log.warn("Can't prepare directory for crawl thread: " + getThreadDirectory(i));
 				return false;
 			}
 		}
@@ -219,28 +181,28 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private void removeHostsFromIndex(Set<HostStats> hosts) {
-		__log.fine("Start cleaning target index directory from set of indexed hosts");
+		__log.trace("Start cleaning target index directory from set of indexed hosts");
 		for (HostStats host : hosts) {
 			String hostTerm = host.getProtocol() + "_" + host.getIp();
 			__log.info("Cleaning target index directory from indexed host: " + hostTerm);
 			IndexOperator.deleteByHost(indexDirectory, hostTerm);
 		}
-		__log.fine("Finished cleaning target index directory from set of indexed hosts");
+		__log.trace("Finished cleaning target index directory from set of indexed hosts");
 	}
 
 	private void cleanTargetIndex() {
-		__log.fine("Start cleaning target index directory: " + indexDirectory);
+		__log.trace("Start cleaning target index directory: " + indexDirectory);
 		if (daysToKeep == 0) {
 			IndexOperator.deleteAll(indexDirectory);
-			__log.fine("Target index directory wiped out");
+			__log.trace("Target index directory wiped out");
 		} else {
 
-			__log.fine("Start cleaning target index directory from old items");
+			__log.trace("Start cleaning target index directory from old items");
 			IndexOperator.deleteByAge(indexDirectory, daysToKeep);
-			__log.fine("Finished cleaning target index directory from old items");
+			__log.trace("Finished cleaning target index directory from old items");
 
 		}
-		__log.fine("Target index directory cleaned up.");
+		__log.trace("Target index directory cleaned up.");
 	}
 
 	private void mergeIntoIndex(String threadName) {
@@ -267,7 +229,7 @@ public class NetworkCrawler implements Runnable {
 			if (file.exists()) {
 				result = loadRangesFromFile(file);
 			} else {
-				__log.warning("Can't find IP ranges file: '" + file.getAbsolutePath() + "'");
+				__log.warn("Can't find IP ranges file: '" + file.getAbsolutePath() + "'");
 			}
 		}
 		return result;
@@ -309,7 +271,7 @@ public class NetworkCrawler implements Runnable {
 				}
 			}
 		} catch (IOException e) {
-			__log.warning("Can't load ranges from file: " + file.getAbsolutePath());
+			__log.warn("Can't load ranges from file: " + file.getAbsolutePath());
 		}
 		ArrayList<IpRange> list = new ArrayList<IpRange>(result);
 		Collections.sort(list);
@@ -317,7 +279,7 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private static String getThreadDirectory(int index) {
-		String tempDir = System.getProperty(TMP_DIR_PROPERTY);
+		String tempDir = System.getProperty(Settings.TMP_DIR_PROPERTY);
 		if (tempDir == null || tempDir.length() == 0) {
 			tempDir = System.getProperty("java.io.tmpdir");
 		}
@@ -341,7 +303,7 @@ public class NetworkCrawler implements Runnable {
 			try {
 				IndexOperator.createIndex(dir);
 			} catch (IOException e) {
-				__log.severe("Can't create index directory: '" + dir + "'!");
+				__log.error("Can't create index directory: '" + dir + "'!");
 				return false;
 			}
 		}
