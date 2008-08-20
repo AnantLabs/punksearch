@@ -50,11 +50,10 @@ public class CrawlerMain {
 	}
 
 	public void start() throws InterruptedException {
-		final NetworkCrawler crawler = new NetworkCrawler();
-		Thread crawlerThread = new Thread(crawler);
+		Thread crawlerThread = new Thread(NetworkCrawler.getInstance());
 		crawlerThread.start();
 
-		TimerTask dumpStatus = new StatusDumpTask(crawler);
+		TimerTask dumpStatus = new StatusDumpTask();
 
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(dumpStatus, dumpPeriodSec * 1000, dumpPeriodSec * 1000);
@@ -67,14 +66,8 @@ public class CrawlerMain {
 
 		public static final String STATUS_FILENAME = "crawler.status";
 		
-		private NetworkCrawler crawler;
-
-		public StatusDumpTask(NetworkCrawler crawler) {
-			this.crawler = crawler;
-		}
-
 		public void run() {
-			List<HostCrawler> threads = crawler.getThreads();
+			List<HostCrawler> threads = NetworkCrawler.getInstance().getThreads();
 			String dump = "";
 			for (HostCrawler thread : threads) {
 				boolean stop = thread.isStopRequested();
