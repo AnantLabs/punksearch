@@ -8,8 +8,6 @@
 	<property name="buildDir" location="build" />
 	<property name="docDir" location="doc" />
 
-	<property name="debug" value="off" />
-
 	<path id="classpath">
 		<fileset dir="lib">
 			<include name="*.jar" />
