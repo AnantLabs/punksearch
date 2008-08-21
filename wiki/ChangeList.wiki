@@ -1,8 +1,8 @@
 #summary changelist for application versions
 #labels Featured
 
-= Trunk = 
-  * core: migrated to commons-net for FTP crawling (was edtftpj)
+= 0.9.0 (2008-08-21) = 
+  * core: migrated to commons-net for FTP crawling (was edtftpj) this enables us to build linux packages (like deb)
   * core: harvest headers of files (with size > some predefined value)
   * core: possibility to enable/disable smb and ftp adaptors
   * core: negative values in size statistics chart bug fixed (closes defect 17)
