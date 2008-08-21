@@ -218,6 +218,9 @@ public class SmbAdapter implements ProtocolAdapter {
 			return new Object[0];
 		} catch (SmbException e) {
 			__log.debug("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
+			if (e.getMessage().indexOf("timeout") > 0) {
+				throw new RuntimeException("Timeout occured");
+			}
 			try {
 				smb.listFiles(); // check if we still connected
 				return new Object[0];
