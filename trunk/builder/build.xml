@@ -105,10 +105,13 @@
 		<copydir dest="dist" src="skel" />
 
 		<exec executable="chmod" dir="dist">
-			<arg line="a+x start.sh" />
+			<arg line="a+x bin/start.sh" />
 		</exec>
 		<exec executable="chmod" dir="dist">
-			<arg line="a+x crawler.sh" />
+			<arg line="a+x bin/crawl.sh" />
+		</exec>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x bin/crawl-cron.sh" />
 		</exec>
 
 		<zip destfile="punksearch-${version}-quickstart.zip">
