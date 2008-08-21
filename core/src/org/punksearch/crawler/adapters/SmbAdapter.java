@@ -13,13 +13,14 @@ package org.punksearch.crawler.adapters;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.logging.Logger;
 
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.punksearch.common.OnlineChecker;
 
 /**
@@ -29,7 +30,7 @@ import org.punksearch.common.OnlineChecker;
  */
 public class SmbAdapter implements ProtocolAdapter {
 
-	private static Logger      __log        = Logger.getLogger(SmbAdapter.class.getName());
+	private static Log         __log        = LogFactory.getLog(SmbAdapter.class);
 
 	public static final String SMB_DOMAIN   = "org.punksearch.crawler.smb.domain";
 	public static final String SMB_USER     = "org.punksearch.crawler.smb.user";
@@ -56,10 +57,10 @@ public class SmbAdapter implements ProtocolAdapter {
 				return null;
 			}
 		} catch (SmbAuthException e) {
-			__log.fine("Can't read file header (restricted access): " + file.getServer() + path + getName(item));
+			__log.debug("Can't read file header (restricted access): " + file.getServer() + path + getName(item));
 			return null;
 		} catch (IOException e) {
-			__log.fine("Can't read file header (i/o error): " + file.getServer() + path + getName(item));
+			__log.debug("Can't read file header (i/o error): " + file.getServer() + path + getName(item));
 			return null;
 		}
 	}
@@ -161,18 +162,20 @@ public class SmbAdapter implements ProtocolAdapter {
 	}
 
 	public boolean connect(String ip) {
+		__log.trace("Check if server has active smb: " + ip);
 		if (!OnlineChecker.isActiveSmb(ip)) {
 			return false;
 		}
 		try {
+			__log.trace("Connecting to server: " + ip);
 			smb = (getSmbAuth() == null) ? new SmbFile("smb://" + ip + "/") : new SmbFile("smb://" + ip + "/",
 			        getSmbAuth());
 			return true;
 		} catch (RuntimeException e) {
-			__log.info("smb: Exception occured: " + e.getMessage() + " during indexing host " + ip);
+			__log.info("Exception (" + e.getMessage() + ") during connecting the server " + ip);
 			return false;
 		} catch (MalformedURLException e) {
-			__log.info("smb: MalformedURLException occured: " + e.getMessage() + " during indexing host " + ip);
+			__log.info("MalformedURLException (" + e.getMessage() + ") during connecting the server " + ip);
 			return false;
 		} finally {
 			// TODO: disconnect?
@@ -194,10 +197,10 @@ public class SmbAdapter implements ProtocolAdapter {
 		try {
 			return ((SmbFile) dir).list();
 		} catch (SmbAuthException e) {
-			__log.fine("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
+			__log.debug("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
 			return new String[0];
 		} catch (SmbException e) {
-			__log.fine("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
+			__log.debug("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
 			try {
 				smb.list(); // check if we still connected
 				return new String[0];
@@ -211,10 +214,10 @@ public class SmbAdapter implements ProtocolAdapter {
 		try {
 			return ((SmbFile) dir).listFiles();
 		} catch (SmbAuthException e) {
-			__log.fine("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
+			__log.debug("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
 			return new Object[0];
 		} catch (SmbException e) {
-			__log.fine("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
+			__log.debug("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
 			try {
 				smb.listFiles(); // check if we still connected
 				return new Object[0];

@@ -14,8 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.punksearch.common.OnlineChecker;
@@ -27,20 +28,22 @@ import org.punksearch.common.OnlineChecker;
  */
 public class FtpAdapter implements ProtocolAdapter {
 
-	private static Logger __log = Logger.getLogger(FtpAdapter.class.getName());
+	private static Log __log = LogFactory.getLog(FtpAdapter.class);
 
-	private FTPClient     ftp   = new FTPClient();
+	private FTPClient  ftp   = new FTPClient();
 
-	private String        rootPath;
+	private String     rootPath;
 
 	public boolean connect(String ip) {
 		disconnect();
 
+		__log.trace("Check if server has active ftp: " + ip);
 		if (!OnlineChecker.isActiveFtp(ip)) {
 			return false;
 		}
 
 		try {
+			__log.trace("Connecting to server: " + ip);
 			setupFtpClient(ip);
 			ftp.connect(ip);
 			ftp.login(getUser(), getPassword());
@@ -48,7 +51,7 @@ public class FtpAdapter implements ProtocolAdapter {
 			setRootPath("/");
 			return true;
 		} catch (Exception e) {
-			__log.info("ftp: Exception (" + e.getMessage() + ") during connecting the server: " + ip);
+			__log.warn("Exception (" + e.getMessage() + ") during connecting the server: " + ip);
 			disconnect();
 			return false;
 		}
@@ -57,10 +60,11 @@ public class FtpAdapter implements ProtocolAdapter {
 	public void disconnect() {
 		try {
 			if (ftp.isConnected()) {
+				__log.trace("Disconnectiong from server: " + ftp.getRemoteAddress().getHostAddress());
 				ftp.disconnect();
 			}
 		} catch (Exception e) {
-			__log.info("ftp: exception during disconnect " + e.getMessage());
+			__log.warn("Exception (" + e.getMessage() + ") during disconnecting a server");
 			ftp = new FTPClient();
 		}
 	}
@@ -80,7 +84,7 @@ public class FtpAdapter implements ProtocolAdapter {
 			if (file.isFile()) {
 				InputStream is = ftp.retrieveFileStream(path + file.getName());
 				if (is == null) {
-					__log.fine("Can't read header for the file (" + ftp.getReplyCode() + "): " + path + getName(item));
+					__log.debug("Can't read header for the file (" + ftp.getReplyCode() + "): " + path + getName(item));
 					return null;
 				}
 				byte[] buf = new byte[length];
@@ -92,7 +96,7 @@ public class FtpAdapter implements ProtocolAdapter {
 				return null;
 			}
 		} catch (IOException e) {
-			__log.fine("Can't read header for the file (i/o error): " + path + getName(item));
+			__log.debug("Can't read header for the file (i/o error): " + path + getName(item));
 			return null;
 		}
 	}
@@ -114,7 +118,7 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	public Object getRootDir() {
 		if (ftp == null || !ftp.isConnected()) {
-			__log.warning("Can't get root dir since not connected to any ftp host");
+			__log.error("Can't get root dir since not connected to any ftp host");
 			throw new IllegalStateException("Can't get root dir since not connected to any ftp host");
 		}
 		return rootPath;
@@ -139,7 +143,7 @@ public class FtpAdapter implements ProtocolAdapter {
 	public boolean isLink(Object item) {
 		return ((FTPFile) item).isSymbolicLink();
 	}
-	
+
 	public String[] list(Object dir, String path) {
 		if (dir instanceof String) {
 			return list((String) dir);
@@ -153,10 +157,10 @@ public class FtpAdapter implements ProtocolAdapter {
 			return ftp.listNames(path);
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
-			__log.warning("I/O Exception during listing of dir: " + e.getMessage());
+			__log.warn("I/O Exception during listing of dir: " + e.getMessage());
 			throw new RuntimeException(e);
 		} catch (Exception e) {
-			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
+			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
 			return new String[0];
 		}
 	}
@@ -174,10 +178,10 @@ public class FtpAdapter implements ProtocolAdapter {
 			return ftp.listFiles(path);
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
-			__log.warning("I/O Exception during listing of dir: " + e.getMessage());
+			__log.warn("I/O Exception during listing of dir: " + e.getMessage());
 			throw new RuntimeException(e);
 		} catch (Exception e) {
-			__log.info("ftp: Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
+			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
 			return new FTPFile[0];
 		}
 	}
