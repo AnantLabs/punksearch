@@ -25,7 +25,7 @@ public class FilterFactory {
 			throw new IllegalArgumentException("min > max");
 		}
 
-		boolean includeLower = true; // lower bound is inclusive
+		boolean includeLower = (min != null); // lower bound is inclusive if not null
 		boolean includeUpper = false; // upper bound is exclusive
 
 		NumberRangeFilter<Long> filter = new NumberRangeFilter<Long>(fieldName, min, max, includeLower, includeUpper) {
