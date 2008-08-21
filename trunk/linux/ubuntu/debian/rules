@@ -1,0 +1,72 @@
+#!/usr/bin/make -f
+
+# TODO:
+# - docs
+# - cli
+
+package = punksearch
+
+clean:
+	rm -rf debian/punksearch
+	rm -rf war
+
+unpackwar:
+	mkdir war
+	unzip punksearch.war -d war/
+	
+patchconf:
+	sed -i 's_opt/punksearch_usr/share/punksearch_g' conf/punksearch.xml
+	sed -i 's_punksearch.war_web_g' conf/punksearch.xml
+
+	sed -i 's_=index_=/var/lib/punksearch/index_g' conf/punksearch.properties
+
+	
+build:
+	
+binary-indep: patchconf unpackwar
+	dh_installdirs -p punksearch etc/punksearch var/lib/punksearch/index usr/share/punksearch usr/lib/punksearch
+	
+	# etc/punksearch
+	cp conf/punksearch.properties debian/punksearch/etc/punksearch/
+	cp conf/punksearch.xml        debian/punksearch/etc/punksearch/
+	cp conf/filetypes.conf        debian/punksearch/etc/punksearch/
+	cp war/WEB-INF/web.xml        debian/punksearch/etc/punksearch/
+	cp debian/tomcat.policy       debian/punksearch/etc/punksearch/
+	
+	# usr/lib/punksearch
+	cp lib/punksearch-core.jar lib/punksearch-cli.jar debian/punksearch/usr/lib/punksearch/
+	
+	# usr/share/punksearch
+	rm war/WEB-INF/web.xml
+	
+	mkdir tmp
+	cp war/WEB-INF/lib/jstl.jar war/WEB-INF/lib/standard.jar tmp
+	rm war/WEB-INF/lib/*.jar
+	mv tmp/*.jar war/WEB-INF/lib/
+	
+	cp -r war debian/punksearch/usr/share/punksearch/web
+	
+	# var/lib/punksearch
+	touch debian/punksearch/var/lib/punksearch/index/dummy
+	
+	# cli
+	mkdir debian/punksearch/usr/share/punksearch/bin
+	cp bin/crawl.sh      debian/punksearch/usr/share/punksearch/bin/
+	cp bin/crawl-cron.sh debian/punksearch/usr/share/punksearch/bin/
+	chmod a+x debian/punksearch/usr/share/punksearch/bin/*.sh
+	
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_installdebconf
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-arch:
+
+binary: binary-indep binary-arch
+
+.PHONY: binary clean
+

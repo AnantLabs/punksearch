@@ -1,0 +1,21 @@
+PUNKSearch for Debian
+------------------
+
+The directory structure of the Debian policy compliant installation
+is as follows:
+
+/var/lib/punksearch contains index directory and crawl history.
+
+/usr/lib/punksearch contains private jars
+
+/usr/share/punksearch/web contains the web application.
+
+/etc/punksearch contains all configuration files.
+
+/etc/tomcat5.5/policy.d/05punksearch.policy is a symbolic link to
+/etc/punksearch/tomcat.policy
+
+For more information see http://code.google.com/p/punkasearch/
+
+
+Yury Soldak <ysoldak@gmail.com>, Sun, 18 May 2008 19:26:34 +0400
