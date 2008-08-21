@@ -27,6 +27,6 @@ done;
 #echo $CP
 
 DEBUG=
-#DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n
+#DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n"
 
 java $DEBUG -Xmx1024m -Dorg.punksearch.home=$PUNKSEARCH_HOME -cp $CP org.punksearch.cli.CrawlerMain $1

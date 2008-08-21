@@ -26,7 +26,10 @@ done;
 
 #echo $CP
 
+PORT=8180
+WAR=$PUNKSEARCH_HOME/punksearch.war
+
 DEBUG=
-#DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n
+#DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n"
 
 java $DEBUG -Xmx1024m -Dorg.punksearch.home=$PUNKSEARCH_HOME -Xbootclasspath/a:$CP -jar $PUNKSEARCH_HOME/lib/punksearch-server.jar $PORT $WAR
