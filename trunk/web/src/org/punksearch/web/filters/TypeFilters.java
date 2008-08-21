@@ -51,12 +51,33 @@ public class TypeFilters {
 		for (String key : types.list()) {
 			filters.put(key, create(key));
 		}
-		Set<String> dirExts = new HashSet<String>(1);
-		dirExts.add(IndexFields.DIRECTORY_EXTENSION);
-		filters.put(DIRECTORY_KEY, create(null, null, dirExts));
+		filters.put(DIRECTORY_KEY, createByItemType(null, null, IndexFields.TYPE_DIR));
 	}
 
-	private static Filter create(Long min, Long max, Set<String> extensions) {
+	/**
+	 * 
+	 * @param min
+	 * @param max
+	 * @param itemType
+	 *            "DIR" or "FILE"
+	 * @return
+	 */
+	private static Filter createByItemType(Long min, Long max, String itemType) {
+		CompositeFilter filter = new CompositeFilter();
+
+		if (min != null || max != null) {
+			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
+			filter.add(sizeFilter);
+		}
+
+		Query typeQuery = new TermQuery(new Term(IndexFields.TYPE, itemType));
+		QueryWrapperFilter typeFilter = new QueryWrapperFilter(typeQuery);
+		filter.add(typeFilter);
+
+		return new CachingWrapperFilter(filter);
+	}
+
+	private static Filter createByExt(Long min, Long max, Set<String> extensions) {
 		CompositeFilter filter = new CompositeFilter();
 
 		if (min != null || max != null) {
@@ -92,7 +113,7 @@ public class TypeFilters {
 			Long min = type.getMinBytes();
 			Long max = type.getMaxBytes();
 			Set<String> ext = type.getExtensions();
-			return create(min, max, ext);
+			return createByExt(min, max, ext);
 		} else {
 			throw new IllegalArgumentException("File type not found: " + typeName);
 		}
