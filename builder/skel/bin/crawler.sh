@@ -19,7 +19,7 @@ PRGDIR=`dirname "$PRG"`
 # Only set PUNKSEARCH_HOME if not already set
 [ -z "$PUNKSEARCH_HOME" ] && PUNKSEARCH_HOME=`cd "$PRGDIR/.." ; pwd`
 
-CP=.
+CP=.:$PUNKSEARCH_HOME/conf
 for file in $PUNKSEARCH_HOME/lib/*.jar; do
 	CP=$CP:$file
 done;
@@ -29,4 +29,4 @@ done;
 DEBUG=
 #DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,address=5005,suspend=n
 
-java -Xmx1024m -Djava.util.logging.config.file=$PUNKSEARCH_HOME/conf/log.properties -cp $CP org.punksearch.cli.CrawlerMain $1
+java $DEBUG -Xmx1024m -Dorg.punksearch.home=$PUNKSEARCH_HOME -cp $CP org.punksearch.cli.CrawlerMain $1

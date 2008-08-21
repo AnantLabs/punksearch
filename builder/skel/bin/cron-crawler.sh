@@ -39,7 +39,7 @@ esac
 
 # Crawl the network
 cd $PUNKSEARCH_HOME
-./bin/crawler.sh $RANGE > logs/cron-crawl.log 2>&1
+./bin/crawler.sh $RANGE > logs/punksearch-cron-stdout.log 2>&1
 
 # Fix permissions, so tomcat can r/w data
 chown -R $OWNER logs
