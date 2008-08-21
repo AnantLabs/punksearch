@@ -41,7 +41,7 @@ import org.punksearch.ip.SynchronizedIpIterator;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class NetworkCrawler implements Runnable {
-	private static Log               __log         = LogFactory.getLog(NetworkCrawler.class);
+	private static Log                  __log         = LogFactory.getLog(NetworkCrawler.class);
 
 	private static final NetworkCrawler INSTANCE      = new NetworkCrawler();
 
@@ -143,9 +143,6 @@ public class NetworkCrawler implements Runnable {
 				cleanTempForThread(thread.getName());
 			} catch (InterruptedException e) {
 				__log.warn("Interrupted: " + thread.getName());
-			} catch (IOException e) {
-				__log.warn("Temp directory for thread '" + thread.getName()
-				        + "' was not cleaned up. Check permissions");
 			}
 			__log.info("Finished: " + thread.getName());
 		}
@@ -184,7 +181,7 @@ public class NetworkCrawler implements Runnable {
 		__log.trace("Start cleaning target index directory from set of indexed hosts");
 		for (HostStats host : hosts) {
 			String hostTerm = host.getProtocol() + "_" + host.getIp();
-			__log.info("Cleaning target index directory from indexed host: " + hostTerm);
+			__log.debug("Cleaning target index directory from indexed host: " + hostTerm.replace("_", "://"));
 			IndexOperator.deleteByHost(indexDirectory, hostTerm);
 		}
 		__log.trace("Finished cleaning target index directory from set of indexed hosts");
@@ -293,9 +290,13 @@ public class NetworkCrawler implements Runnable {
 		return new HostCrawler(THREAD_PREFIX + index, iter, fileTypes, getThreadDirectory(index));
 	}
 
-	private static void cleanTempForThread(String threadName) throws IOException {
+	private static void cleanTempForThread(String threadName) {
 		int index = Integer.valueOf(threadName.substring(THREAD_PREFIX.length()));
-		FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
+		try {
+			FileUtils.deleteDirectory(new File(getThreadDirectory(index)));
+		} catch (IOException e) {
+			__log.warn("Temp directory '" + getThreadDirectory(index) + "' was not cleaned up. Check permissions");
+		}
 	}
 
 	private boolean prepareIndex(String dir) {

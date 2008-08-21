@@ -94,19 +94,17 @@ public class HostCrawler extends Thread {
 		try {
 			connected = adapter.connect(ip.toString());
 			if (connected) {
-				__log.info("Start crawling " + curHost());
+				__log.info("Start crawling " + currentHostUrl());
 				long size = crawlDirectory(adapter.getRootDir(), "", 0);
 				if (size > 0) {
-					__log.info("Stop crawling " + curHost() + ", crawled " + size + " bytes");
+					__log.info("Stop crawling " + currentHostUrl() + ", crawled " + size + " bytes");
 					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size, docCount));
 				} else {
-					__log.info("Stop crawling " + curHost() + ", crawled 0 bytes (ignored)");
+					__log.info("Stop crawling " + currentHostUrl() + ", crawled 0 bytes (ignored)");
 				}
 			}
-		} catch (IllegalArgumentException e) {
-			__log.warn("Illegal argument exception: " + e.getMessage());
 		} catch (RuntimeException e) {
-			__log.warn("Crawling of a host " + curHost() + " was cancelled due to: " + e.getMessage());
+			__log.warn("Crawling of a host " + currentHostUrl() + " was cancelled due to: " + e.getMessage());
 			// delete files of failed host from temp index
 			indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
 		} finally {
@@ -140,7 +138,7 @@ public class HostCrawler extends Thread {
 	        float boost) {
 		docCount++;
 		Document document = new Document();
-		document.add(new Field(IndexFields.HOST, curHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -154,10 +152,14 @@ public class HostCrawler extends Thread {
 		return document;
 	}
 
-	private String curHost() {
+	private String currentHost() {
 		return adapter.getProtocol() + "_" + getIp();
 	}
 
+	private String currentHostUrl() {
+		return adapter.getProtocol() + "://" + getIp();
+	}
+	
 	private Document makeDirDocument(Object dir, String path, long dirSize) {
 		String dirName = adapter.getName(dir);
 		String dirExtension = IndexFields.DIRECTORY_EXTENSION;
@@ -300,7 +302,7 @@ public class HostCrawler extends Thread {
 			}
 		}
 		if (badFileFound && __log.isTraceEnabled()) {
-			__log.trace("Ignored parent dir of: " + curHost() + path);
+			__log.trace("Ignored parent dir of: " + currentHostUrl() + path);
 		}
 		return !badFileFound;
 	}
