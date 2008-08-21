@@ -30,6 +30,7 @@ binary-indep: patchconf unpackwar
 	cp conf/punksearch.properties debian/punksearch/etc/punksearch/
 	cp conf/punksearch.xml        debian/punksearch/etc/punksearch/
 	cp conf/filetypes.conf        debian/punksearch/etc/punksearch/
+	cp conf/log4j.properties      debian/punksearch/etc/punksearch/
 	cp war/WEB-INF/web.xml        debian/punksearch/etc/punksearch/
 	cp debian/tomcat.policy       debian/punksearch/etc/punksearch/
 	
