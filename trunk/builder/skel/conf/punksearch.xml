@@ -18,6 +18,6 @@
     <Parameter name="admin_password" value="123_456" override="false"/>
     
     <!-- apache-style access logging to parse log files with tools like awstats -->
-    <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  prefix="punksearch_access." suffix=".log" pattern="combined" resolveHosts="false" rotatable="false"/>
+    <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  prefix="punksearch-access" suffix=".log" pattern="combined" resolveHosts="false" rotatable="false"/>
     
 </Context>
