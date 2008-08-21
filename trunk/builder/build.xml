@@ -50,9 +50,7 @@
 
 		<copy todir="dist-war">
 			<fileset dir="skel">
-				<include name="punksearch.properties" />
-				<include name="filetypes.conf" />
-				<include name="punksearch.xml" />
+				<include name="conf/*.*" />
 				<include name="docs/*.*" />
 			</fileset>
 		</copy>
