@@ -115,8 +115,8 @@ public class EasyQueryParser {
 				}
 				query.add(extQuery, BooleanClause.Occur.MUST);
 			} else {
-				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
-				query.add(extensionQuery, BooleanClause.Occur.MUST_NOT);
+				Query typeQuery = new TermQuery(new Term(IndexFields.TYPE, IndexFields.TYPE_DIR));
+				query.add(typeQuery, BooleanClause.Occur.MUST_NOT);
 			}
 
 			// restrict files to occur in specified directories only
@@ -152,8 +152,8 @@ public class EasyQueryParser {
 				Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
 				dirQuery.add(nameQuery, BooleanClause.Occur.MUST);
 
-				Query extensionQuery = new TermQuery(new Term(IndexFields.EXTENSION, IndexFields.DIRECTORY_EXTENSION));
-				dirQuery.add(extensionQuery, BooleanClause.Occur.MUST);
+				Query typeQuery = new TermQuery(new Term(IndexFields.TYPE, IndexFields.TYPE_DIR));
+				dirQuery.add(typeQuery, BooleanClause.Occur.MUST);
 
 				query.add(dirQuery, occurItem);
 			}

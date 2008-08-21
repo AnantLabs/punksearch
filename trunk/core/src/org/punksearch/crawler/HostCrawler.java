@@ -134,8 +134,8 @@ public class HostCrawler extends Thread {
 		this.knownFileTypes = fileTypes;
 	}
 
-	protected Document makeDocument(String name, String ext, String size, String path, String date, byte[] header,
-	        float boost) {
+	protected Document makeDocument(String name, String ext, String size, String path, String date, String type,
+	        byte[] header, float boost) {
 		docCount++;
 		Document document = new Document();
 		document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -145,6 +145,7 @@ public class HostCrawler extends Thread {
 		document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.TYPE, type, Field.Store.NO, Field.Index.UN_TOKENIZED));
 		if (header != null) {
 			document.add(new Field(IndexFields.HEADER, header, Field.Store.YES));
 		}
@@ -159,10 +160,10 @@ public class HostCrawler extends Thread {
 	private String currentHostUrl() {
 		return adapter.getProtocol() + "://" + getIp();
 	}
-	
+
 	private Document makeDirDocument(Object dir, String path, long dirSize) {
 		String dirName = adapter.getName(dir);
-		String dirExtension = IndexFields.DIRECTORY_EXTENSION;
+		// String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 		String dirSizeStr = Long.toString(dirSize);
 		String dirPath = path; // adapter.getPath(dir);
 		String lastModified = Long.toString(adapter.getModificationTime(dir));
@@ -183,7 +184,7 @@ public class HostCrawler extends Thread {
 			boost *= dirSize / 1000.0f;
 		}
 
-		return makeDocument(dirName, dirExtension, dirSizeStr, dirPath, lastModified, null, boost);
+		return makeDocument(dirName, "", dirSizeStr, dirPath, lastModified, IndexFields.TYPE_DIR, null, boost);
 	}
 
 	private Document makeFileDocument(Object file, String path) {
@@ -222,7 +223,7 @@ public class HostCrawler extends Thread {
 			boost *= ageBoostMultiplier;
 		}
 
-		return makeDocument(name, ext, size, path, lastModified, header, boost);
+		return makeDocument(name, ext, size, path, lastModified, IndexFields.TYPE_FILE, header, boost);
 	}
 
 	private byte[] extractHeader(Object item, String path, long size) {
