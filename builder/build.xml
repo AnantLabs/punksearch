@@ -103,6 +103,8 @@
 		</copy>
 
 		<copydir dest="dist" src="skel" />
+		<mkdir dir="dist/stats" />
+		<mkdir dir="dist/logs" />
 
 		<exec executable="chmod" dir="dist">
 			<arg line="a+x bin/start.sh" />
