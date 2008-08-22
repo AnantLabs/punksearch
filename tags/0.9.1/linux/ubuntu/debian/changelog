@@ -1,0 +1,13 @@
+punksearch (0.9.1-2) unstable; urgency=low
+
+  * Added missed dependency libjcifs-java
+  * Corrected some symlinks
+
+ -- Yury Soldak <ysoldak@gmail.com>  Sun, 23 August 2008 01:36:00 +0400
+
+punksearch (0.9.1-1) unstable; urgency=low
+
+  * Initially packaged
+
+ -- Yury Soldak <ysoldak@gmail.com>  Sun, 22 August 2008 19:26:34 +0400
+

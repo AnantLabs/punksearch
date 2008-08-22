@@ -1,0 +1,11 @@
+grant codeBase "file:/usr/share/punksearch/web/-" {
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write";
+  permission java.util.PropertyPermission "java.io.tmpdir", "read";
+  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.io.FilePermission "/etc/punksearch/-", "read";
+  permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
+  permission java.io.FilePermission "/var/lib/punksearch", "read,write";
+  permission java.io.FilePermission "/var/lib/punksearch/-", "read,write";
+  permission java.io.FilePermission "/usr/share/punksearch/-", "read";
+  permission java.io.FilePermission "/var/lib/tomcat5.5/webapps/punksearch/-", "read";
+};

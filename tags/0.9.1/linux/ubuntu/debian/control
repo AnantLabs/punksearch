@@ -1,0 +1,18 @@
+Source: punksearch
+Section: web
+Priority: optional
+Maintainer: Yury Soldak <ysoldak@gmail.com>
+Build-Depends-Indep: wget, unzip, tar
+Build-Depends: dpatch, debhelper (>> 4.1.16)
+Standards-Version: 3.7.2
+
+Package: punksearch
+Architecture: all
+Section: web
+Priority: optional
+Depends: tomcat5.5, debconf | debconf-2.0, liblucene2-java, libcommons-io-java, libcommons-logging-java, libcommons-net-java, libjcommon-java, libjfreechart-java, liblog4j1.2-java, libjcifs-java
+Description: LAN search application with web frontend written in Java
+ Indexes SMB and FTP shares.
+ PUNKSearch to be run in a Java servlet container (eg. Tomcat). 
+ .
+  Homepage: http://code.google.com/p/punksearch/
