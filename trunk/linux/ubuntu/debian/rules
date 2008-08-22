@@ -24,13 +24,14 @@ patchconf:
 build:
 	
 binary-indep: patchconf unpackwar
-	dh_installdirs -p punksearch etc/punksearch var/lib/punksearch/index usr/share/punksearch usr/lib/punksearch
+	dh_installdirs -p punksearch etc/punksearch var/lib/punksearch/index var/lib/punksearch/stats usr/share/punksearch usr/lib/punksearch var/log/punksearch
 	
 	# etc/punksearch
-	cp conf/punksearch.properties debian/punksearch/etc/punksearch/
-	cp conf/punksearch.xml        debian/punksearch/etc/punksearch/
-	cp conf/filetypes.conf        debian/punksearch/etc/punksearch/
-	cp conf/log4j.properties      debian/punksearch/etc/punksearch/
+	#cp conf/punksearch.properties debian/punksearch/etc/punksearch/
+	#cp conf/punksearch.xml        debian/punksearch/etc/punksearch/
+	#cp conf/filetypes.conf        debian/punksearch/etc/punksearch/
+	#cp conf/log4j.properties      debian/punksearch/etc/punksearch/
+	cp conf/*                     debian/punksearch/etc/punksearch/
 	cp war/WEB-INF/web.xml        debian/punksearch/etc/punksearch/
 	cp debian/tomcat.policy       debian/punksearch/etc/punksearch/
 	
@@ -49,6 +50,7 @@ binary-indep: patchconf unpackwar
 	
 	# var/lib/punksearch
 	touch debian/punksearch/var/lib/punksearch/index/dummy
+	touch debian/punksearch/var/lib/punksearch/stats/dummy
 	
 	# cli
 	mkdir debian/punksearch/usr/share/punksearch/bin
