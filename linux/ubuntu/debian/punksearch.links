@@ -3,11 +3,7 @@ var/log/punksearch       usr/share/punksearch/logs
 var/lib/punksearch/stats usr/share/punksearch/stats
 var/lib/punksearch/index usr/share/punksearch/index
 
-etc/punksearch/web.xml usr/share/punksearch/web/WEB-INF/web.xml
-
-etc/punksearch/punksearch.xml etc/tomcat5.5/Catalina/localhost/punksearch.xml
-etc/punksearch/tomcat.policy etc/tomcat5.5/policy.d/05punksearch.policy
-
+etc/punksearch/web.xml                 usr/share/punksearch/web/WEB-INF/web.xml
 usr/lib/punksearch/punksearch-core.jar usr/share/punksearch/web/WEB-INF/lib/punksearch-core.jar
 
 usr/lib/punksearch/punksearch-core.jar usr/share/punksearch/lib/punksearch-core.jar
@@ -28,3 +24,6 @@ usr/share/java/commons-net.jar     usr/share/punksearch/lib/commons-net.jar
 usr/share/java/commons-logging.jar usr/share/punksearch/lib/commons-logging.jar
 usr/share/java/log4j-1.2.jar       usr/share/punksearch/lib/log4j-1.2.jar
 
+
+etc/punksearch/tomcat.policy  etc/tomcat5.5/policy.d/05punksearch.policy
+etc/punksearch/punksearch.xml usr/share/tomcat5.5/conf/Catalina/localhost/punksearch.xml
