@@ -1,6 +1,7 @@
-etc/punksearch/punksearch.properties usr/share/punksearch/conf/punksearch.properties
-etc/punksearch/filetypes.conf        usr/share/punksearch/conf/filetypes.conf
-etc/punksearch/log4j.properties      usr/share/punksearch/conf/log4j.properties
+etc/punksearch           usr/share/punksearch/conf
+var/log/punksearch       usr/share/punksearch/logs
+var/lib/punksearch/stats usr/share/punksearch/stats
+var/lib/punksearch/index usr/share/punksearch/index
 
 etc/punksearch/web.xml usr/share/punksearch/web/WEB-INF/web.xml
 
