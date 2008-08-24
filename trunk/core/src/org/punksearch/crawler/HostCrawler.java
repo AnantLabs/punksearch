@@ -103,7 +103,7 @@ public class HostCrawler extends Thread {
 					__log.info("Stop crawling " + currentHostUrl() + ", crawled 0 bytes (ignored)");
 				}
 			}
-		} catch (RuntimeException e) {
+		} catch (Throwable e) {
 			__log.warn("Crawling of a host " + currentHostUrl() + " was cancelled due to: " + e.getMessage());
 			// delete files of failed host from temp index
 			indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
