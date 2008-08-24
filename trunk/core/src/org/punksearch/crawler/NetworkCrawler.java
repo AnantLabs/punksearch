@@ -147,8 +147,9 @@ public class NetworkCrawler implements Runnable {
 			__log.info("Finished: " + thread.getName());
 		}
 		if (hosts.size() > 0) {
-			HostStats.dump(PunksearchFs.resolveStatsDirectory(), hosts);
-			HostStats.merge(PunksearchFs.resolveStatsDirectory(), PunksearchFs.resolve("hosts.csv"));
+			String statsDir = PunksearchFs.resolveStatsDirectory();
+			HostStats.dump(statsDir, hosts);
+			HostStats.merge(statsDir, PunksearchFs.resolve(statsDir + File.separator + "hosts.csv"));
 		}
 
 		// should always optimize, since some old items could have been deleted and no one new host crawled.
