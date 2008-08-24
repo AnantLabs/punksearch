@@ -10,16 +10,9 @@
  ***************************************************************************/
 package org.punksearch.cli;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import org.apache.commons.io.FileUtils;
 import org.punksearch.common.PunksearchProperties;
-import org.punksearch.crawler.HostCrawler;
 import org.punksearch.crawler.NetworkCrawler;
 
 /**
@@ -28,10 +21,6 @@ import org.punksearch.crawler.NetworkCrawler;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class CrawlerMain {
-
-	public static String DUMP_STATUS_PERIOD = "org.punksearch.cli.dump.status.period";
-
-	private static long  dumpPeriodSec      = Long.getLong(DUMP_STATUS_PERIOD, 10L);
 
 	public static void main(String[] args) throws InterruptedException {
 		try {
@@ -51,47 +40,7 @@ public class CrawlerMain {
 	public void start() throws InterruptedException {
 		Thread crawlerThread = new Thread(NetworkCrawler.getInstance());
 		crawlerThread.start();
-
-		TimerTask dumpStatus = new StatusDumpTask();
-
-		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(dumpStatus, dumpPeriodSec * 1000, dumpPeriodSec * 1000);
-
 		crawlerThread.join();
-		timer.cancel();
 	}
 
-	private class StatusDumpTask extends TimerTask {
-
-		public static final String STATUS_FILENAME = "punksearch-crawl.status";
-		
-		public void run() {
-			List<HostCrawler> threads = NetworkCrawler.getInstance().getThreads();
-			String dump = "";
-			for (HostCrawler thread : threads) {
-				boolean stop = thread.isStopRequested();
-				String status = "unknown";
-				if (stop) {
-					if (thread.getIp() != null) {
-						status = "stopping";
-					} else {
-						status = "stopped manually";
-					}
-				} else {
-					if (thread.getIp() != null) {
-						status = "crawling " + thread.getIp();
-					} else {
-						status = "finished successfully";
-					}
-				}
-				dump += thread.getName() + " : " + status + " : " + thread.getCrawledHosts().size() + "\n";
-			}
-			try {
-				String path = System.getProperty("java.io.tmpdir") + File.separator + STATUS_FILENAME;
-				FileUtils.writeStringToFile(new File(path), dump);
-			} catch (IOException e) {
-				System.err.println("Can't write crawler status");
-			}
-		}
-	}
 }
