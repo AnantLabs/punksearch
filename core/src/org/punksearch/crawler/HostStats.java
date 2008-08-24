@@ -218,7 +218,7 @@ public class HostStats implements Comparable<HostStats> {
 		try {
 			FileUtils.writeLines(dumpFile, hostStats);
 		} catch (IOException e) {
-			__log.warning("Can't dump host stats into (check permissions and free space): " + dirPath + fileName);
+			__log.warning("Can't dump host stats into (check permissions and free space): " + dirPath + File.separator + fileName);
 		}
 	}
 
