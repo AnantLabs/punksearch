@@ -56,19 +56,9 @@ public class NetworkCrawler implements Runnable {
 	private List<IpRange>               ranges;
 
 	private List<HostCrawler>           threadList    = Collections.synchronizedList(new ArrayList<HostCrawler>());
+	private Set<Timer>                  timers        = new HashSet<Timer>();
 
-	/**
-	 * Constructor extracts configuration from system properties. The system property names are defined by static final
-	 * fields of Settings class.
-	 */
 	private NetworkCrawler() {
-		this.indexDirectory = PunksearchFs.resolveIndexDirectory();
-		this.forceUnlock = Boolean.valueOf(System.getProperty(Settings.UNLOCK_PROPERTY, "false"));
-		this.threadCount = Integer.getInteger(Settings.THREADS_PROPERTY, 5);
-		this.fileTypes = FileTypes.readFromDefaultFile();
-		this.daysToKeep = Float.parseFloat(System.getProperty(Settings.KEEPDAYS_PROPERTY, "7"));
-		this.maxHours = Integer.getInteger(Settings.MAXHOURS_PROPERTY, 12);
-		this.ranges = parseRanges(System.getProperty(Settings.RANGE_PROPERTY));
 	}
 
 	public static NetworkCrawler getInstance() {
@@ -99,6 +89,7 @@ public class NetworkCrawler implements Runnable {
 	 * Starts the crawling process. Starts all threads, merges temp indexes into main one, clears temp files.
 	 */
 	public synchronized void run() {
+		readProperties();
 
 		if (!prepareAllIndexDirs()) {
 			__log.warn("Can't start crawling. Something wrong with an index directory (check log).");
@@ -113,8 +104,7 @@ public class NetworkCrawler implements Runnable {
 		long startTime = new Date().getTime();
 		__log.info("Crawl process started");
 
-		Timer processTimer = new Timer();
-		processTimer.schedule(new MaxRunWatchDog(this), maxHours * 3600 * 1000L);
+		startTimers();
 
 		IpIterator iter = new SynchronizedIpIterator(ranges);
 		synchronized (threadList) {
@@ -161,7 +151,41 @@ public class NetworkCrawler implements Runnable {
 		synchronized (threadList) {
 			threadList.clear();
 		}
-		processTimer.cancel();
+		cancelTimers();
+	}
+
+	/**
+	 * Extracts configuration from system properties.
+	 * 
+	 * The system property names are defined by static final fields of Settings class.
+	 */
+	private void readProperties() {
+		this.indexDirectory = PunksearchFs.resolveIndexDirectory();
+		this.forceUnlock = Boolean.valueOf(System.getProperty(Settings.UNLOCK_PROPERTY, "false"));
+		this.threadCount = Integer.getInteger(Settings.THREADS_PROPERTY, 5);
+		this.fileTypes = FileTypes.readFromDefaultFile();
+		this.daysToKeep = Float.parseFloat(System.getProperty(Settings.KEEPDAYS_PROPERTY, "7"));
+		this.maxHours = Integer.getInteger(Settings.MAXHOURS_PROPERTY, 12);
+		this.ranges = parseRanges(System.getProperty(Settings.RANGE_PROPERTY));
+	}
+
+	private void startTimers() {
+		Timer processTimer = new Timer();
+		processTimer.schedule(new MaxRunWatchDog(), maxHours * 3600 * 1000L);
+
+		Timer statusDumpTimer = new Timer();
+		long dumpPeriod = Long.getLong(Settings.DUMP_STATUS_PERIOD, 10L) * 1000;
+		statusDumpTimer.scheduleAtFixedRate(new ThreadStatusDump(), dumpPeriod, dumpPeriod);
+		
+		timers.add(processTimer);
+		timers.add(statusDumpTimer);
+	}
+
+	private void cancelTimers() {
+		for (Timer timer : timers) {
+			timer.cancel();
+		}
+		timers.clear();
 	}
 
 	private boolean prepareAllIndexDirs() {
@@ -314,7 +338,7 @@ public class NetworkCrawler implements Runnable {
 			if (forceUnlock) {
 				IndexOperator.unlock(dir);
 			} else {
-				__log.info("Index directory is locked: '" + dir + "' "
+				__log.warn("Index directory is locked: '" + dir + "' "
 				        + "Consider to set \"*.crawler.forceunlock=true\" in punksearch.properties");
 				return false;
 			}
@@ -324,15 +348,44 @@ public class NetworkCrawler implements Runnable {
 	}
 
 	private class MaxRunWatchDog extends TimerTask {
-
-		private NetworkCrawler crawler;
-
-		public MaxRunWatchDog(NetworkCrawler crawler) {
-			this.crawler = crawler;
-		}
-
 		public void run() {
-			crawler.stop();
+			__log.info("Stopping crawling due to time limit");
+			NetworkCrawler.getInstance().stop();
 		}
 	}
+
+	private class ThreadStatusDump extends TimerTask {
+
+		public static final String STATUS_FILENAME = "punksearch-crawl.status";
+
+		public void run() {
+			List<HostCrawler> threads = NetworkCrawler.getInstance().getThreads();
+			String dump = "";
+			for (HostCrawler thread : threads) {
+				boolean stop = thread.isStopRequested();
+				String status = "unknown";
+				if (stop) {
+					if (thread.getIp() != null) {
+						status = "stopping";
+					} else {
+						status = "stopped manually";
+					}
+				} else {
+					if (thread.getIp() != null) {
+						status = "crawling " + thread.getIp();
+					} else {
+						status = "finished successfully";
+					}
+				}
+				dump += thread.getName() + " : " + status + " : " + thread.getCrawledHosts().size() + "\n";
+			}
+			String path = System.getProperty("java.io.tmpdir") + File.separator + STATUS_FILENAME;
+			try {
+				FileUtils.writeStringToFile(new File(path), dump);
+			} catch (IOException e) {
+				__log.warn("Can't write crawler status to file: " + path);
+			}
+		}
+	}
+
 }
