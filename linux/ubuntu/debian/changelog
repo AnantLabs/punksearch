@@ -1,3 +1,10 @@
+punksearch (0.9.1-3) unstable; urgency=low
+
+  * Added missed dependency liboro-java
+  * Corrected some symlinks
+
+ -- Yury Soldak <ysoldak@gmail.com>  Sun, 25 August 2008 00:51:00 +0400
+
 punksearch (0.9.1-2) unstable; urgency=low
 
   * Added missed dependency libjcifs-java
