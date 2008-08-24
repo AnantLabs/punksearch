@@ -18,7 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.io.FileUtils;
-import org.punksearch.common.PunksearchFs;
 import org.punksearch.common.PunksearchProperties;
 import org.punksearch.crawler.HostCrawler;
 import org.punksearch.crawler.NetworkCrawler;
@@ -64,7 +63,7 @@ public class CrawlerMain {
 
 	private class StatusDumpTask extends TimerTask {
 
-		public static final String STATUS_FILENAME = "crawler.status";
+		public static final String STATUS_FILENAME = "punksearch-crawl.status";
 		
 		public void run() {
 			List<HostCrawler> threads = NetworkCrawler.getInstance().getThreads();
@@ -88,7 +87,7 @@ public class CrawlerMain {
 				dump += thread.getName() + " : " + status + " : " + thread.getCrawledHosts().size() + "\n";
 			}
 			try {
-				String path = PunksearchFs.resolve(STATUS_FILENAME);
+				String path = System.getProperty("java.io.tmpdir") + File.separator + STATUS_FILENAME;
 				FileUtils.writeStringToFile(new File(path), dump);
 			} catch (IOException e) {
 				System.err.println("Can't write crawler status");
