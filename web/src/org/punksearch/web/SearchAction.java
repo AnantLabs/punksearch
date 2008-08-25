@@ -19,8 +19,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
@@ -40,7 +41,7 @@ public class SearchAction {
 
 	private static final int MAX_DOCS         = 10000;
 
-	private static Logger    __log            = Logger.getLogger(SearchParams.class.getName());
+	private static Log    __log            = LogFactory.getLog(SearchParams.class);
 
 	private SearchParams     params;
 	// private SearcherConfig config = SearcherConfig.getInstance();
