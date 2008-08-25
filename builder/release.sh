@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.9.2
+VERSION=$1
 TARGET_JVM=1.5
 DEBUG=on
 
