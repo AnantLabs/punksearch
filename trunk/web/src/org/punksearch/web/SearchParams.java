@@ -14,15 +14,17 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class SearchParams {
-	private static Logger       __log       = Logger.getLogger(SearchParams.class.getName());
+	private static Log       __log       = LogFactory.getLog(SearchParams.class);
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
@@ -96,7 +98,7 @@ public class SearchParams {
 		try {
 			paramValue = new String(paramValue.getBytes("ISO-8859-1"), "UTF-8");
 		} catch (UnsupportedEncodingException uee) {
-			__log.warning(uee.getMessage());
+			__log.warn(uee.getMessage());
 		}
 
 		return paramValue;
