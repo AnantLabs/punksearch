@@ -8,7 +8,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/jcifs-1.2.18.jar"/>
 	<classpathentry kind="lib" path="lib/commons-net-1.4.1.jar" sourcepath="/Distr/Development/commons/commons-net-1.4.1-src/src/java"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="output" path="eclipse-build"/>
 </classpath>
