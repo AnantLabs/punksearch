@@ -1,11 +1,35 @@
 grant codeBase "file:/usr/share/punksearch/web/-" {
-  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write";
-  permission java.util.PropertyPermission "java.io.tmpdir", "read";
-  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.util.PropertyPermission "org.punksearch.*", "read,write";
+  permission java.util.PropertyPermission "org.apache.lucene.*", "read";
+  permission java.util.PropertyPermission "jcifs.*", "read,write";
+  permission java.util.PropertyPermission "java.*", "read";
+  // for System.getProperties() in admin's config.jsp
+  permission java.util.PropertyPermission "*", "read,write";
   permission java.io.FilePermission "/etc/punksearch/-", "read";
-  permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
-  permission java.io.FilePermission "/var/lib/punksearch", "read,write";
-  permission java.io.FilePermission "/var/lib/punksearch/-", "read,write";
+  permission java.io.FilePermission "/usr/lib/punksearch/-", "read";
   permission java.io.FilePermission "/usr/share/punksearch/-", "read";
-  permission java.io.FilePermission "/var/lib/tomcat5.5/webapps/punksearch/-", "read";
+  permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
+  permission java.io.FilePermission "/var/log/punksearch/-", "read,write";
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write";
+	permission java.io.FilePermission "/var/lib/punksearch/-", "read,write,delete";
+  permission java.io.FilePermission "/usr/share/java/-", "read";
+  permission java.net.SocketPermission "*:*", "connect,resolve";
+};
+grant codeBase "file:/usr/lib/punksearch/-" {
+  permission java.util.PropertyPermission "org.punksearch.*", "read,write";
+  permission java.util.PropertyPermission "org.apache.lucene.*", "read";
+  permission java.util.PropertyPermission "jcifs.*", "read,write";
+  permission java.util.PropertyPermission "java.*", "read";
+  permission java.io.FilePermission "/etc/punksearch/-", "read";
+  permission java.io.FilePermission "/usr/lib/punksearch/-", "read";
+  permission java.io.FilePermission "/usr/share/punksearch/-", "read";
+  permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
+  permission java.io.FilePermission "/var/log/punksearch/-", "read,write";
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write";
+	permission java.io.FilePermission "/var/lib/punksearch/-", "read,write,delete";
+  permission java.io.FilePermission "/usr/share/java/-", "read";
+  permission java.net.SocketPermission "*:*", "connect,resolve";
+};
+grant codeBase "file:${catalina.home}/bin/tomcat-juli.jar" {
+	permission java.io.FilePermission "/usr/share/punksearch/web/WEB-INF/classes/logging.properties", "read";
 };
