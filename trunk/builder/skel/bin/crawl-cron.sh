@@ -24,7 +24,7 @@ PRGDIR=`dirname "$PRG"`
 
 # Determine the range of IPs to crawl (depends on day of week and if "hosts.csv" present)
 DAY_OF_WEEK=$FULL_SCAN_DAY
-[ -f $PUNKSEARCH_HOME/hosts.csv] && DAY_OF_WEEK=`date +"%u"`
+[ -f $PUNKSEARCH_HOME/stats/hosts.csv] && DAY_OF_WEEK=`date +"%u"`
 
 case $DAY_OF_WEEK in
 $FULL_SCAN_DAY)
@@ -33,7 +33,7 @@ $FULL_SCAN_DAY)
 ;;
 *)
         echo "Start update of known hosts"
-        RANGE="hosts.csv"
+        RANGE="stats/hosts.csv"
 ;;
 esac
 
