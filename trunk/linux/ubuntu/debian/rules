@@ -24,7 +24,7 @@ patchconf:
 build:
 	
 binary-indep: patchconf unpackwar
-	dh_installdirs -p punksearch etc/punksearch var/lib/punksearch/index var/lib/punksearch/stats usr/share/punksearch usr/lib/punksearch var/log/punksearch
+	dh_installdirs -p punksearch etc/punksearch var/lib/punksearch/index var/lib/punksearch/stats usr/share/punksearch usr/lib/punksearch var/log/punksearch usr/share/doc/punksearch
 	
 	# etc/punksearch
 	#cp conf/punksearch.properties debian/punksearch/etc/punksearch/
@@ -59,6 +59,7 @@ binary-indep: patchconf unpackwar
 	chmod a+x debian/punksearch/usr/share/punksearch/bin/*.sh
 	
 	dh_link
+	dh_installdocs
 	dh_compress
 	dh_fixperms
 	dh_installdeb
