@@ -19,9 +19,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.punksearch.ip.Ip;
 
 /**
@@ -33,7 +34,7 @@ import org.punksearch.ip.Ip;
  * 
  */
 public class HostStats implements Comparable<HostStats> {
-	private static Logger      __log       = Logger.getLogger(HostStats.class.getName());
+	private static Log      __log       = LogFactory.getLog(HostStats.class);
 
 	public static final String DUMP_PREFIX = "hosts-";
 	public static final String DUMP_SUFFIX = ".csv";
@@ -159,7 +160,7 @@ public class HostStats implements Comparable<HostStats> {
 			try {
 				FileUtils.writeLines(new File(outFilePath), result);
 			} catch (IOException e) {
-				__log.warning("Can't dump host stats into file (check permissions and free space): " + outFilePath);
+				__log.warn("Can't dump host stats into file (check permissions and free space): " + outFilePath);
 			}
 		}
 	}
@@ -187,7 +188,7 @@ public class HostStats implements Comparable<HostStats> {
 				result.add(hs);
 			}
 		} catch (IOException e) {
-			__log.warning("Can't read host stats from file (check permissions): " + hostsFilePath);
+			__log.warn("Can't read host stats from file (check permissions): " + hostsFilePath);
 		}
 		return result;
 	}
@@ -208,7 +209,7 @@ public class HostStats implements Comparable<HostStats> {
 
 		File dir = new File(dirPath);
 		if (!dir.exists() && !dir.mkdir()) {
-			__log.warning("Can't make directory (check permissions and free space): " + dirPath);
+			__log.warn("Can't make directory (check permissions and free space): " + dirPath);
 			return;
 		}
 
@@ -218,7 +219,7 @@ public class HostStats implements Comparable<HostStats> {
 		try {
 			FileUtils.writeLines(dumpFile, hostStats);
 		} catch (IOException e) {
-			__log.warning("Can't dump host stats into (check permissions and free space): " + dirPath + File.separator + fileName);
+			__log.warn("Can't dump host stats into (check permissions and free space): " + dirPath + File.separator + fileName);
 		}
 	}
 
