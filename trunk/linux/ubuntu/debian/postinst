@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# fix permissions to enable tomcat5.5 read/write index and stats
+chown -R tomcat55 /var/lib/punksearch
+
