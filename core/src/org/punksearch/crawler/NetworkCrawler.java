@@ -278,7 +278,8 @@ public class NetworkCrawler implements Runnable {
 	 *            Either absolute or relative (to punksearch home) path to the file
 	 * @return list of IpRanage objects
 	 */
-	private static List<IpRange> loadRangesFromFile(File file) {
+	@SuppressWarnings("unchecked")
+    private static List<IpRange> loadRangesFromFile(File file) {
 		Set<IpRange> result = new HashSet<IpRange>();
 		try {
 			List<String> lines = FileUtils.readLines(file);
