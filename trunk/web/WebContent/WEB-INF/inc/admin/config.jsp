@@ -1,6 +1,8 @@
 <%@page import="org.punksearch.common.PunksearchProperties"%>
 <%@page import="org.punksearch.common.FileTypes"%>
 <%@page import="org.punksearch.web.filters.TypeFilters"%>
+<%@page import="org.punksearch.web.Properties"%>
+<%@page import="java.util.Map"%>
 <div id="config">
 
 	<h2>Current Config</h2>
@@ -8,12 +10,11 @@
 	<h3>system properties</h3>
 	<table align="center" class="data">
 	<%
-		for (Object key : System.getProperties().keySet()) {
-			if (key.toString().startsWith("org.punksearch")) {
+		Map<String, String> properties = Properties.getPunksearchProperties();
+		for (String key : properties.keySet()) {
 	%>
-	<tr><th><%= key.toString() %></th><td><%= System.getProperty(key.toString()) %></td></tr>	
+	<tr><th><%= key.toString() %></th><td><%= properties.get(key.toString()) %></td></tr>	
 	<%			
-			}
 		}
 	%>
 	</table>

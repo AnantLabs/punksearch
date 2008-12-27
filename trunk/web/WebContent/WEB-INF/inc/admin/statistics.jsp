@@ -100,7 +100,6 @@
 				<td>
 					<table id="size_table" class="data" cellspacing="1" style="background-color: gray; width: 100%;">
 						<tr><th width="30%">type</th><th width="30%">%</th><th width="30%">size in bytes</th></tr>
-						<tr><td>directory</td><td align="right" >0.00%</td><td align="right" >0</td></tr>
 						<%
 						long sumSize = 0;
 						for (String key : sizeValues.keySet()) {
