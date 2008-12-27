@@ -1,0 +1,24 @@
+<project name="punksearch-builder-javadoc" default="javadoc">
+
+	<property name="doc.dir" location="docs" />
+	
+	<path id="classpath">
+		<fileset dir="lib" includes="*.jar" />
+		<fileset dir="../core/lib" includes="*.jar" />
+		<fileset dir="../server/lib" includes="*.jar" />
+		<fileset dir="../web/lib" includes="*.jar" />
+		<fileset dir="../web/WebContent/WEB-INF/lib" includes="*.jar" />
+	</path>
+
+	<target name="javadoc" description="Create Javadocs">
+		<mkdir dir="${doc.dir}/api/" />
+		<javadoc destdir="${doc.dir}/api/" >
+			<fileset dir="../cli/src" includes="**/*.java" />
+			<fileset dir="../core/src" includes="**/*.java" />
+			<fileset dir="../server/src" includes="**/*.java" />
+			<fileset dir="../web/src" includes="**/*.java" />
+			<classpath refid="classpath" />
+		</javadoc>
+	</target>
+
+</project>

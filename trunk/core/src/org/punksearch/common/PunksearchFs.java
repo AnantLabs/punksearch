@@ -42,8 +42,8 @@ public class PunksearchFs {
 	/**
 	 * Leaves absolute paths as is and resolves relative paths using punksearch's home directory as root.
 	 * 
-	 * @param path
-	 * @return
+	 * @param path Path to resolve, absolute of relative
+	 * @return Resolved absolute path
 	 */
 	public static String resolve(String path) {
 		if (isAbsolutePath(path)) {
