@@ -23,8 +23,8 @@ import org.apache.commons.net.ftp.FTPFile;
 public class FtpAdapterTest extends TestCase {
 
 	private static String ip       = "127.0.0.1";
-	private static String login    = "sky";
-	private static String password = "mabzog97ms";
+	private static String login    = null;
+	private static String password = null;
 
 	public static enum MODE {
 		active, passive

@@ -62,7 +62,6 @@ public class IpIteratorTest extends TestCase
 		List<IpRange> ranges = new ArrayList<IpRange>();
 		ranges.add(new IpRange("1.2.3.255-1.2.4.10"));
 		IpIterator it = new IpIterator(ranges);
-		Ip ip = it.next();
 		try {
 			it.remove();
 			fail("Should fail since remove() is not supported");
