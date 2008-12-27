@@ -21,7 +21,7 @@ import jcifs.smb.SmbFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.punksearch.common.OnlineChecker;
+import org.punksearch.online.OnlineStatuses;
 
 /**
  * Adapter for crawling SMB hosts. Uses jCIFS library.
@@ -44,7 +44,7 @@ public class SmbAdapter implements ProtocolAdapter {
 		System.setProperty("jcifs.smb.client.soTimeout", System.getProperty(SMB_TIMEOUT, "3000"));
 	}
 
-	public byte[] header(Object item, String path, int length) {
+	public byte[] header(Object item, int length) {
 		SmbFile file = (SmbFile) item;
 		try {
 			if (file.isFile()) {
@@ -57,19 +57,14 @@ public class SmbAdapter implements ProtocolAdapter {
 				return null;
 			}
 		} catch (SmbAuthException e) {
-			__log.debug("Can't read file header (restricted access): " + file.getServer() + path + getName(item));
+			__log.debug("Can't read file header (restricted access): " + file.getServer() + getFullPath(item));
 			return null;
 		} catch (IOException e) {
-			__log.debug("Can't read file header (i/o error): " + file.getServer() + path + getName(item));
+			__log.debug("Can't read file header (i/o error): " + file.getServer() + getFullPath(item));
 			return null;
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#getModificationTime(java.lang.Object)
-	 */
 	public long getModificationTime(Object item) {
 		try {
 			return ((SmbFile) item).lastModified();
@@ -78,11 +73,6 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#getName(java.lang.Object)
-	 */
 	public String getName(Object item) {
 		SmbFile res = (SmbFile) item;
 		if (res.getName().startsWith(res.getServer())) {
@@ -91,20 +81,26 @@ public class SmbAdapter implements ProtocolAdapter {
 		return (!res.getName().endsWith("/")) ? res.getName() : res.getName().substring(0, res.getName().length() - 1);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#getProtocol()
-	 */
+	public String getPath(Object item) {
+		SmbFile res = (SmbFile) item;
+		String rawPath = res.getPath();
+		return rawPath.substring(rawPath.indexOf("/", 7), rawPath.lastIndexOf(getName(item))); // skip "smb://<ip>" and strip name
+	}
+
+	public String getFullPath(Object item) {
+		SmbFile res = (SmbFile) item;
+		String rawPath = res.getPath();
+		String result = rawPath.substring(rawPath.indexOf("/", 7));
+		if (result.endsWith("/")) {
+			result = result.substring(0, result.length() - 1);
+		}
+		return result;
+	}
+
 	public String getProtocol() {
 		return "smb";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#getSize(java.lang.Object)
-	 */
 	public long getSize(Object item) {
 		try {
 			return ((SmbFile) item).length();
@@ -113,11 +109,6 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#isDirectory(java.lang.Object)
-	 */
 	public boolean isDirectory(Object item) {
 		try {
 			return ((SmbFile) item).isDirectory();
@@ -126,11 +117,6 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#isFile(java.lang.Object)
-	 */
 	public boolean isFile(Object item) {
 		try {
 			return ((SmbFile) item).isFile();
@@ -139,11 +125,6 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#isHidden(java.lang.Object)
-	 */
 	public boolean isHidden(Object item) {
 		try {
 			return ((SmbFile) item).isHidden();
@@ -152,24 +133,18 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.punksearch.crawler.ProtocolAdapter#isLink(java.lang.Object)
-	 */
 	public boolean isLink(Object item) {
 		return false;
 	}
 
 	public boolean connect(String ip) {
 		__log.trace("Check if server has active smb: " + ip);
-		if (!OnlineChecker.isActiveSmb(ip)) {
+		if (!OnlineStatuses.getInstance().isOnline("smb://" + ip)) {
 			return false;
 		}
 		try {
 			__log.trace("Connecting to server: " + ip);
-			smb = (getSmbAuth() == null) ? new SmbFile("smb://" + ip + "/") : new SmbFile("smb://" + ip + "/",
-			        getSmbAuth());
+			smb = (getSmbAuth() == null) ? new SmbFile("smb://" + ip + "/") : new SmbFile("smb://" + ip + "/", getSmbAuth());
 			return true;
 		} catch (RuntimeException e) {
 			__log.info("Exception (" + e.getMessage() + ") during connecting the server " + ip);
@@ -193,7 +168,7 @@ public class SmbAdapter implements ProtocolAdapter {
 		return smb;
 	}
 
-	public String[] list(Object dir, String path) {
+	public String[] list(Object dir) {
 		try {
 			return ((SmbFile) dir).list();
 		} catch (SmbAuthException e) {
@@ -210,7 +185,7 @@ public class SmbAdapter implements ProtocolAdapter {
 		}
 	}
 
-	public Object[] listFiles(Object dir, String path) {
+	public Object[] listFiles(Object dir) {
 		try {
 			return ((SmbFile) dir).listFiles();
 		} catch (SmbAuthException e) {

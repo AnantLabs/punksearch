@@ -34,7 +34,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.analysis.FilenameAnalyzer;
-import org.punksearch.crawler.analysis.LowerCaseAnalyzer;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 
@@ -297,7 +296,6 @@ public class IndexOperator {
 		FilenameAnalyzer analyzer = new FilenameAnalyzer();
 		paw.addAnalyzer(IndexFields.NAME, analyzer);
 		paw.addAnalyzer(IndexFields.PATH, analyzer);
-		paw.addAnalyzer(IndexFields.EXTENSION, new LowerCaseAnalyzer());
 		return paw;
 	}
 

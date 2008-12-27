@@ -44,10 +44,14 @@ public interface ProtocolAdapter {
 
 	public Object getRootDir();
 
-	public String[] list(Object dir, String path);
+	public String getPath(Object item);
 
-	public Object[] listFiles(Object dir, String path);
+	public String getFullPath(Object item);
 
-	public byte[] header(Object item, String path, int length);
+	public String[] list(Object dir);
+
+	public Object[] listFiles(Object dir);
+
+	public byte[] header(Object item, int length);
 
 }
