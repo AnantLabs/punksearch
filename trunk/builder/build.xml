@@ -1,5 +1,7 @@
 <project name="punksearch-builder" default="dist">
 
+	<property file="build.properties" />
+	
 	<property name="doc.dir" location="docs" />
 
 	<import file="javadoc.xml" />
