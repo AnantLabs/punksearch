@@ -76,7 +76,7 @@ public class IpRange implements Comparable<IpRange> {
 	 * 
 	 * @param candidate
 	 *            String to check
-	 * @return
+	 * @return true if string defines an IP range
 	 */
 	public static boolean isIpRange(String candidate) {
 		String[] parts = candidate.split("-");
