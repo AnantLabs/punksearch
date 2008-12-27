@@ -12,6 +12,7 @@ package org.punksearch.crawler.adapters;
 
 import org.punksearch.crawler.adapters.SmbAdapter;
 
+import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
@@ -23,26 +24,23 @@ import junit.framework.TestCase;
 public class SmbAdapterTest extends TestCase {
 
 	private static String ip = "10.20.111.107";
+	private static String user = null;
+	private static String pwd = null;
 
 	private SmbFile       root;
 
 	private SmbAdapter    adapter;
 
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#setUp()
-	 */
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		root = new SmbFile("smb://" + ip + "/");
+		NtlmPasswordAuthentication auth = (user != null)? new NtlmPasswordAuthentication("", user, pwd) : null;
+		
+		root = new SmbFile("smb://" + ip + "/", auth);
 
 		adapter = new SmbAdapter();
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#getFullPath(java.lang.Object)}.
-	 */
-	/*
 	public void testGetFullPath() {
 		SmbFile file = getSomeFile();
 		String expected = file.getPath().substring(root.getPath().length() - 1);
@@ -52,22 +50,12 @@ public class SmbAdapterTest extends TestCase {
 		String expected2 = dir.getPath().substring(root.getPath().length() - 1, dir.getPath().length() - 1);
 		assertEquals(expected2, adapter.getFullPath(dir));
 	}
-	*/
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getModificationTime(java.lang.Object)}.
-	 * 
-	 * @throws SmbException
-	 * @throws SmbException
-	 */
-	public void testGetModificationTime() throws SmbException {
+	public void testGetModificationTime() throws Exception {
 		SmbFile file = getSomeFile();
 		assertEquals(file.lastModified(), adapter.getModificationTime(file));
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getName(java.lang.Object)}.
-	 */
 	public void testGetName() {
 		SmbFile file = getSomeFile();
 		String fileName = adapter.getName(file);
@@ -82,10 +70,6 @@ public class SmbAdapterTest extends TestCase {
 		assertEquals(dir.getName().substring(0, dir.getName().length() - 1), dirName);
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.SmbAdapter#getPath(java.lang.Object)}.
-	 */
-	/*
 	public void testGetPath() {
 		SmbFile file = getSomeFile();
 		String path = adapter.getPath(file);
@@ -104,21 +88,12 @@ public class SmbAdapterTest extends TestCase {
 		expectedPath2 = expectedPath2.substring(0, expectedPath2.length() - 1 - adapter.getName(dir).length());
 		assertEquals(expectedPath2, path2);
 	}
-	*/
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#getSize(java.lang.Object)}.
-	 * @throws SmbException 
-	 */
 	public void testGetSize() throws SmbException {
 		SmbFile file = getSomeFile();
 		assertEquals(file.length(), adapter.getSize(file));
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isDirectory(java.lang.Object)}.
-	 * @throws SmbException 
-	 */
 	public void testIsDirectory() throws SmbException {
 		SmbFile file = getSomeFile();
 		assertEquals(file.isDirectory(), adapter.isDirectory(file));
@@ -126,10 +101,6 @@ public class SmbAdapterTest extends TestCase {
 		assertEquals(dir.isDirectory(), adapter.isDirectory(dir));
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isFile(java.lang.Object)}.
-	 * @throws SmbException 
-	 */
 	public void testIsFile() throws SmbException {
 		SmbFile file = getSomeFile();
 		assertEquals(file.isFile(), adapter.isFile(file));
@@ -137,18 +108,11 @@ public class SmbAdapterTest extends TestCase {
 		assertEquals(dir.isFile(), adapter.isFile(dir));
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isHidden(java.lang.Object)}.
-	 * @throws SmbException 
-	 */
 	public void testIsHidden() throws SmbException {
 		SmbFile file = getSomeFile();
 		assertEquals(file.isHidden(), adapter.isHidden(file));
 	}
 
-	/**
-	 * Test method for {@link org.punksearch.crawler.adapters.SmbAdapter#isLink(java.lang.Object)}.
-	 */
 	public void testIsLink() {
 		SmbFile file = getSomeFile();
 		assertEquals(false, adapter.isLink(file));

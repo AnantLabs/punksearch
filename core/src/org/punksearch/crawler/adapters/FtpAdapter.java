@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.punksearch.common.OnlineChecker;
+import org.punksearch.online.OnlineStatuses;
 
 /**
  * Adapter for crawling FTP hosts. Uses commons-net library.
@@ -38,7 +38,7 @@ public class FtpAdapter implements ProtocolAdapter {
 		disconnect();
 
 		__log.trace("Check if server has active ftp: " + ip);
-		if (!OnlineChecker.isActiveFtp(ip)) {
+		if (!OnlineStatuses.getInstance().isOnline("ftp://" + ip)) {
 			return false;
 		}
 
@@ -48,7 +48,7 @@ public class FtpAdapter implements ProtocolAdapter {
 			ftp.connect(ip);
 			ftp.login(getUser(), getPassword());
 			ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
-			setRootPath("/");
+			setRootPath(ftp.printWorkingDirectory());
 			return true;
 		} catch (Exception e) {
 			__log.warn("Exception (" + e.getMessage() + ") during connecting the server: " + ip);
@@ -71,20 +71,19 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	/**
 	 * test-friendly method
-	 * 
-	 * @param path
 	 */
 	protected void setRootPath(String path) {
 		rootPath = path;
 	}
-
-	public byte[] header(Object item, String path, int length) {
-		FTPFile file = (FTPFile) item;
+	
+	public byte[] header(Object item, int length) {
+		FtpItem file = (FtpItem) item;
 		try {
 			if (file.isFile()) {
-				InputStream is = ftp.retrieveFileStream(path + file.getName());
+				String filePath = file.getPath();//path + file.getName();
+				InputStream is = ftp.retrieveFileStream(filePath);
 				if (is == null) {
-					__log.debug("Can't read header for the file (" + ftp.getReplyCode() + "): " + path + getName(item));
+					__log.debug("Can't read header for the file (" + ftp.getReplyCode() + "): " + filePath);
 					return null;
 				}
 				byte[] buf = new byte[length];
@@ -96,20 +95,25 @@ public class FtpAdapter implements ProtocolAdapter {
 				return null;
 			}
 		} catch (IOException e) {
-			__log.debug("Can't read header for the file (i/o error): " + path + getName(item));
+			__log.debug("Can't read header for the file (i/o error): " + getFullPath(item));
 			return null;
 		}
 	}
 
 	public long getModificationTime(Object item) {
-		return ((FTPFile) item).getTimestamp().getTime().getTime();
+		return ((FtpItem) item).getModificationTime();
 	}
 
 	public String getName(Object item) {
-		if (item instanceof String) {
-			return (String) item;
-		}
-		return ((FTPFile) item).getName();
+		return ((FtpItem) item).getName();
+	}
+
+	public String getPath(Object item) {
+		return ((FtpItem) item).getPath();
+	}
+	
+	public String getFullPath(Object item) {
+		return ((FtpItem) item).getFullPath();
 	}
 
 	public String getProtocol() {
@@ -121,19 +125,20 @@ public class FtpAdapter implements ProtocolAdapter {
 			__log.error("Can't get root dir since not connected to any ftp host");
 			throw new IllegalStateException("Can't get root dir since not connected to any ftp host");
 		}
-		return rootPath;
+		return new FtpItem(null, "");
 	}
-
+	
 	public long getSize(Object item) {
-		return ((FTPFile) item).getSize();
+		return ((FtpItem) item).getSize();
 	}
 
 	public boolean isDirectory(Object item) {
-		return ((FTPFile) item).isDirectory();
+		return ((FtpItem) item).isDirectory();
 	}
 
 	public boolean isFile(Object item) {
-		return (!((FTPFile) item).isDirectory() && !((FTPFile) item).isSymbolicLink());
+		//return (!((FtpItem) item).isDirectory() && !((FtpItem) item).isLink());
+		return ((FtpItem) item).isFile();
 	}
 
 	public boolean isHidden(Object item) {
@@ -141,18 +146,20 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	public boolean isLink(Object item) {
-		return ((FTPFile) item).isSymbolicLink();
+		return ((FtpItem) item).isLink();
 	}
 
-	public String[] list(Object dir, String path) {
-		if (dir instanceof String) {
-			return list((String) dir);
-		} else {
-			return list(path + getName(dir) + "/");
-		}
+	public String[] list(Object dir) {
+		FtpItem item = (FtpItem) dir;
+		return doList(rootPath + item.getFullPath());
+//		if (dir instanceof String) {
+//			return list((String) dir);
+//		} else {
+//			return list(path + getName(dir) + "/");
+//		}
 	}
 
-	private String[] list(String path) {
+	private String[] doList(String path) {
 		try {
 			return ftp.listNames(path);
 		} catch (IOException e) {
@@ -165,15 +172,22 @@ public class FtpAdapter implements ProtocolAdapter {
 		}
 	}
 
-	public Object[] listFiles(Object dir, String path) {
-		if (dir instanceof String) {
-			return listFiles((String) dir);
-		} else {
-			return listFiles(path + getName(dir) + "/");
+	public Object[] listFiles(Object dir) {
+		FtpItem item = (FtpItem) dir;
+		FTPFile[] files = doListFiles(rootPath + item.getFullPath());
+		FtpItem[] result = new FtpItem[files.length];
+		for (int i = 0; i < files.length; i++) {
+			result[i] = new FtpItem(files[i], item.getFullPath() + "/" + files[i].getName());
 		}
+		return result;
+//		if (dir instanceof String) {
+//			return listFiles((String) dir);
+//		} else {
+//			return listFiles(path + getName(dir) + "/");
+//		}
 	}
 
-	private Object[] listFiles(String path) {
+	private FTPFile[] doListFiles(String path) {
 		try {
 			return ftp.listFiles(path);
 		} catch (IOException e) {
@@ -252,4 +266,79 @@ public class FtpAdapter implements ProtocolAdapter {
 		return (passwd.length() == 0) ? "some@email.com" : passwd;
 	}
 
+}
+
+
+class FtpItem {
+
+	private FTPFile file;
+	private String fullpath;
+	
+	FtpItem(FTPFile file, String fullpath) {
+		this.file = file;
+		this.fullpath = fullpath;
+	}
+	
+	// last part of path
+	String getName() {
+		if (file != null) {
+			return file.getName();
+		} else {
+			return "";
+		}
+	}
+	
+	// full absolute path w/o last part (name)
+	String getPath() {
+		if (fullpath.length() > 1) { // "/a" -> "/", "/a/b/c" -> "/a/b/"
+			return fullpath.substring(0, fullpath.lastIndexOf("/")+1);
+		} else {
+			return "";
+		}
+	}
+	
+	// full absolute path w/o trailing "/" 
+	String getFullPath() {
+		return fullpath;
+	}
+	
+	long getModificationTime() {
+		if (file != null) {
+			return file.getTimestamp().getTime().getTime();
+		}
+		return 0;
+	}
+	
+	boolean isDirectory() {
+		if (file != null) {
+			return file.isDirectory();
+		}
+		return true;
+	}
+
+	boolean isFile() {
+		if (file != null) {
+			return file.isFile();
+		}
+		return false;
+	}
+	
+	boolean isLink() {
+		if (file != null) {
+			return file.isSymbolicLink();
+		} else {
+			return false;
+		}
+	}
+	
+	boolean isHidden() {
+		return false;
+	}
+	
+	long getSize() {
+		if (file != null) {
+			return file.getSize();
+		}
+		return 0L;
+	}
 }

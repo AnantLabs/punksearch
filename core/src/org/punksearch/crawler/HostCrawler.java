@@ -95,7 +95,7 @@ public class HostCrawler extends Thread {
 			connected = adapter.connect(ip.toString());
 			if (connected) {
 				__log.info("Start crawling " + currentHostUrl());
-				long size = crawlDirectory(adapter.getRootDir(), "", 0);
+				long size = crawlDirectory(adapter.getRootDir(), 0);
 				if (size > 0) {
 					__log.info("Stop crawling " + currentHostUrl() + ", crawled " + size + " bytes");
 					crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size, docCount));
@@ -104,6 +104,7 @@ public class HostCrawler extends Thread {
 				}
 			}
 		} catch (Throwable e) {
+			e.printStackTrace();
 			__log.warn("Crawling of a host " + currentHostUrl() + " was cancelled due to: " + e.getMessage());
 			// delete files of failed host from temp index
 			indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
@@ -140,7 +141,7 @@ public class HostCrawler extends Thread {
 		Document document = new Document();
 		document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
-		document.add(new Field(IndexFields.EXTENSION, ext, Field.Store.YES, Field.Index.UN_TOKENIZED));
+		document.add(new Field(IndexFields.EXTENSION, ext.toLowerCase(), Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
 		document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
 		document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -161,11 +162,11 @@ public class HostCrawler extends Thread {
 		return adapter.getProtocol() + "://" + getIp();
 	}
 
-	private Document makeDirDocument(Object dir, String path, long dirSize) {
+	private Document makeDirDocument(Object dir, long dirSize) {
 		String dirName = adapter.getName(dir);
 		// String dirExtension = IndexFields.DIRECTORY_EXTENSION;
 		String dirSizeStr = Long.toString(dirSize);
-		String dirPath = path; // adapter.getPath(dir);
+		String dirPath = adapter.getPath(dir);
 		String lastModified = Long.toString(adapter.getModificationTime(dir));
 
 		float boost = 1.0f;
@@ -187,16 +188,16 @@ public class HostCrawler extends Thread {
 		return makeDocument(dirName, "", dirSizeStr, dirPath, lastModified, IndexFields.TYPE_DIR, null, boost);
 	}
 
-	private Document makeFileDocument(Object file, String path) {
+	private Document makeFileDocument(Object file) {
 		String fullName = adapter.getName(file);
 
 		String ext = getExtension(fullName);
 		String name = (ext.length() > 0) ? fullName.substring(0, fullName.length() - ext.length() - 1) : fullName;
-		// String path = adapter.getPath(file);
+		String path = adapter.getPath(file);
 		String lastModified = Long.toString(adapter.getModificationTime(file));
 
 		long sizeValue = adapter.getSize(file);
-		byte[] header = extractHeader(file, path, sizeValue);
+		byte[] header = extractHeader(file, sizeValue);
 		String size = Long.toString(sizeValue);
 
 		// default boost value
@@ -226,34 +227,32 @@ public class HostCrawler extends Thread {
 		return makeDocument(name, ext, size, path, lastModified, IndexFields.TYPE_FILE, header, boost);
 	}
 
-	private byte[] extractHeader(Object item, String path, long size) {
+	private byte[] extractHeader(Object item, long size) {
 		if (headerUse && size > headerThreshold) {
-			return adapter.header(item, path, headerLength);
+			return adapter.header(item, headerLength);
 		} else {
 			return null;
 		}
 	}
 
-	protected long crawlDirectory(Object dir, String path, int deep) {
+	protected long crawlDirectory(Object dir, int deep) {
 		if (deep > maxDeep || isStopRequested()) {
 			return 0L;
 		}
 
 		if (__log.isTraceEnabled()) {
-			__log.trace("Processing " + adapter.getProtocol() + "://" + getIp() + path + adapter.getName(dir));
+			__log.trace("Crawling directory " + adapter.getProtocol() + "://" + getIp() + adapter.getFullPath(dir));
 		}
 
-		Object[] items = adapter.listFiles(dir, path);
-
-		String dirPath = (path.length() != 0) ? path + adapter.getName(dir) + "/" : "/";
+		Object[] items = adapter.listFiles(dir);
 
 		// start actual crawling
 		long size = 0L;
 		List<Document> documentList = new ArrayList<Document>();
 
 		for (Object item : items) {
-			if (!isStopRequested() && shouldProcess(item, path)) {
-				Document doc = processResource(item, dirPath, deep);
+			if (!isStopRequested() && shouldProcess(item)) {
+				Document doc = processResource(item, deep);
 				if (doc != null) {
 					documentList.add(doc);
 					size += Long.parseLong(doc.get(IndexFields.SIZE));
@@ -266,16 +265,16 @@ public class HostCrawler extends Thread {
 		return size;
 	}
 
-	private Document processResource(Object res, String path, int deep) {
+	private Document processResource(Object res, int deep) {
 		Document doc = null;
 
 		if (adapter.isDirectory(res)) {
-			long size = crawlDirectory(res, path, deep + 1);
+			long size = crawlDirectory(res, deep + 1);
 			if (size != 0L) {
-				doc = makeDirDocument(res, path, size);
+				doc = makeDirDocument(res, size);
 			}
 		} else if (adapter.isFile(res)) {
-			doc = makeFileDocument(res, path);
+			doc = makeFileDocument(res);
 		}
 
 		return doc;
@@ -295,26 +294,26 @@ public class HostCrawler extends Thread {
 		boolean badFileFound = false;
 		for (Object item : items) {
 			if (adapter.isFile(item) && !(adapter.getName(item).startsWith(".") || adapter.isHidden(item))) {
-				if (shouldProcess(item, path)) {
+				if (shouldProcess(item)) {
 					return true;
 				} else {
 					badFileFound = true;
 				}
 			}
 		}
+		//__log.trace("Bad file found: " + badFileFound);
 		if (badFileFound && __log.isTraceEnabled()) {
-			__log.trace("Ignored parent dir of: " + currentHostUrl() + path);
+			__log.trace("Ignored: " + currentHostUrl() + path);
 		}
 		return !badFileFound;
 	}
 
-	private boolean shouldProcess(Object item, String path) {
-		// TODO: why we sometimes get "null" items? observed once for FTP with folder name in CP1251 encoding
+	private boolean shouldProcess(Object item) {
 		if (item == null || adapter.getName(item).startsWith(".") || adapter.isLink(item) || adapter.isHidden(item)) {
 			return false;
 		}
 		if (adapter.isDirectory(item)) {
-			return isGoodDirectory(adapter.listFiles(item, path), path);
+			return isGoodDirectory(adapter.listFiles(item), adapter.getFullPath(item));
 		} else {
 			return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
 		}
