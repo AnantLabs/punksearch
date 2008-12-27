@@ -19,6 +19,12 @@
 			<fileset dir="../web/src" includes="**/*.java" />
 			<classpath refid="classpath" />
 		</javadoc>
+		<mkdir dir="${doc.dir}/tmp" />
+		<copydir dest="${doc.dir}/tmp/api" src="${doc.dir}/api" />
+		<zip destfile="${doc.dir}/api.zip" basedir="${doc.dir}/tmp" >
+		</zip>
+		<delete dir="${doc.dir}/tmp" />
+		<delete dir="${doc.dir}/api" />
 	</target>
 
 </project>

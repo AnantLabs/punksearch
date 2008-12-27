@@ -1,5 +1,9 @@
 <project name="punksearch-builder" default="dist">
 
+	<property name="doc.dir" location="docs" />
+
+	<import file="javadoc.xml" />
+	
 	<target name="clean">
 		<delete dir="dist" />
 		<delete>
@@ -62,7 +66,7 @@
 		</zip>
 	</target>
 
-	<target name="dist-quickstart" depends="clean,build-core,build-cli,build-web,build-server">
+	<target name="dist-quickstart" depends="clean,build-core,build-cli,build-web,build-server,javadoc">
 		<mkdir dir="dist" />
 
 		<copy todir="dist/lib">
@@ -104,6 +108,8 @@
 		<mkdir dir="dist/stats" />
 		<mkdir dir="dist/logs" />
 
+		<copy file="docs/api.zip" todir="dist/docs/" />
+		
 		<exec executable="chmod" dir="dist">
 			<arg line="a+x bin/start.sh" />
 		</exec>
