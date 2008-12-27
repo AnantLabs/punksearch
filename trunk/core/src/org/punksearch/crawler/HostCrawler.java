@@ -40,8 +40,7 @@ public class HostCrawler extends Thread {
 
 	private int             maxDeep         = Integer.getInteger(Settings.DEEP, 7);
 
-	private boolean         boostCreateDate = Boolean.parseBoolean(System.getProperty(Settings.BOOST_CREATE_DATE,
-	                                                "true"));
+	private boolean         boostCreateDate = Boolean.parseBoolean(System.getProperty(Settings.BOOST_CREATE_DATE, "true"));
 	private boolean         boostDeep       = Boolean.parseBoolean(System.getProperty(Settings.BOOST_DEEP, "true"));
 	private boolean         boostSize       = Boolean.parseBoolean(System.getProperty(Settings.BOOST_SIZE, "true"));
 
@@ -135,8 +134,7 @@ public class HostCrawler extends Thread {
 		this.knownFileTypes = fileTypes;
 	}
 
-	protected Document makeDocument(String name, String ext, String size, String path, String date, String type,
-	        byte[] header, float boost) {
+	protected Document makeDocument(String name, String ext, String size, String path, String date, String type, byte[] header, float boost) {
 		docCount++;
 		Document document = new Document();
 		document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -244,7 +242,7 @@ public class HostCrawler extends Thread {
 			__log.trace("Crawling directory " + adapter.getProtocol() + "://" + getIp() + adapter.getFullPath(dir));
 		}
 
-		Object[] items = adapter.listFiles(dir);
+		Object[] items = adapter.list(dir);
 
 		// start actual crawling
 		long size = 0L;
@@ -281,42 +279,62 @@ public class HostCrawler extends Thread {
 	}
 
 	/**
-	 * true if at least one good file or all items are directories ("hidden" files are ignored)
+	 * Checks if the directory should be indexed
 	 * 
-	 * @param items
-	 *            list of items in the directory
-	 * @return
+	 * @param dir
+	 *            Directory to check
+	 * @return true if at least one good file or all items are directories ("hidden" files are ignored)
 	 */
-	private boolean isGoodDirectory(Object[] items, String path) {
+	private boolean isGoodDirectory(Object dir) {
+		Object[] items = adapter.list(dir);
 		if (items == null || items.length == 0) {
 			return false;
 		}
 		boolean badFileFound = false;
 		for (Object item : items) {
-			if (adapter.isFile(item) && !(adapter.getName(item).startsWith(".") || adapter.isHidden(item))) {
-				if (shouldProcess(item)) {
+			if (adapter.isFile(item) && isIndexableResource(item)) {
+				if (isGoodFile(item)) {
 					return true;
 				} else {
 					badFileFound = true;
 				}
 			}
 		}
-		//__log.trace("Bad file found: " + badFileFound);
 		if (badFileFound && __log.isTraceEnabled()) {
-			__log.trace("Ignored: " + currentHostUrl() + path);
+			__log.trace("Ignored: " + currentHostUrl() + adapter.getFullPath(dir));
 		}
 		return !badFileFound;
 	}
 
+	/**
+	 * @return true if file has known extension
+	 */
+	private boolean isGoodFile(Object item) {
+		return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
+	}
+
+	/**
+	 * The first, sanity, check if resource should be indexed
+	 * 
+	 * @return true if resource should be indexed (at a first glance)
+	 */
+	private boolean isIndexableResource(Object item) {
+		return (item != null && !adapter.getName(item).startsWith(".") && !adapter.isLink(item) && !adapter.isHidden(item));
+	}
+
+	/**
+	 * Checks if resource is good enough to be added to index.<br/>
+	 * If resource passes this check it for sure will be added to the index.
+	 * 
+	 * @param item
+	 *            Resource to check
+	 * @return true if resource is good and should be added to the index
+	 */
 	private boolean shouldProcess(Object item) {
-		if (item == null || adapter.getName(item).startsWith(".") || adapter.isLink(item) || adapter.isHidden(item)) {
+		if (!isIndexableResource(item)) {
 			return false;
 		}
-		if (adapter.isDirectory(item)) {
-			return isGoodDirectory(adapter.listFiles(item), adapter.getFullPath(item));
-		} else {
-			return knownFileTypes.isExtension(getExtension(adapter.getName(item)));
-		}
+		return (adapter.isDirectory(item)) ? isGoodDirectory(item) : isGoodFile(item);
 	}
 
 	protected String getExtension(String filename) {

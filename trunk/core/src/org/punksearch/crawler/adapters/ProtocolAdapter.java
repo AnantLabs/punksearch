@@ -11,21 +11,35 @@
 package org.punksearch.crawler.adapters;
 
 /**
- * @author Yury Soldak (ysoldak@gmail.com)
+ * General interface any network protocol adapter must implement.
  * 
+ * @author Yury Soldak (ysoldak@gmail.com)
  */
 public interface ProtocolAdapter {
 
 	/**
 	 * In form: name.ext
-	 * 
-	 * @param item
-	 * @return
 	 */
 	public String getName(Object item);
 
+	/**
+	 * Full absolute path w/o last part (i.e. name), ends with "/"
+	 */
+	public String getPath(Object item);
+
+	/**
+	 * Full absolute path w/ last part, last char is NOT "/"
+	 */
+	public String getFullPath(Object item);
+
+	/**
+	 * In milliseconds
+	 */
 	public long getModificationTime(Object item);
 
+	/**
+	 * In bytes
+	 */
 	public long getSize(Object item);
 
 	public boolean isDirectory(Object item);
@@ -36,22 +50,36 @@ public interface ProtocolAdapter {
 
 	public boolean isLink(Object item);
 
+	/**
+	 * smb or ftp
+	 */
 	public String getProtocol();
 
+	/**
+	 * @param ip
+	 *            IP address of remote host to connect to
+	 * @return true in case of success
+	 */
 	public boolean connect(String ip);
 
 	public void disconnect();
 
+	/**
+	 * The first, root directory object
+	 */
 	public Object getRootDir();
 
-	public String getPath(Object item);
+	public Object[] list(Object dir);
 
-	public String getFullPath(Object item);
-
-	public String[] list(Object dir);
-
-	public Object[] listFiles(Object dir);
-
+	/**
+	 * Read some data from start of a file
+	 * 
+	 * @param item
+	 *            File to read data from
+	 * @param length
+	 *            How much data to read (in bytes)
+	 * @return Data read
+	 */
 	public byte[] header(Object item, int length);
 
 }
