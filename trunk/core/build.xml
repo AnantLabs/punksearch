@@ -4,9 +4,8 @@
 		<format property="dateIso" pattern="yyyy-MM-dd" />
 	</tstamp>
 
-	<property name="srcDir" location="src" />
-	<property name="buildDir" location="build" />
-	<property name="docDir" location="doc" />
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
 
 	<path id="classpath">
 		<fileset dir="lib">
@@ -15,26 +14,18 @@
 	</path>
 
 	<target name="jar" depends="clean" description="Compiles the Java sources and builds the JAR file.">
-		<mkdir dir="build/classes" />
-		<javac srcdir="${srcDir}" includes="**/*.java" sourcepath="" deprecation="on" debug="${debug}" includeAntRuntime="no" destdir="${buildDir}/classes">
+		<mkdir dir="${build.dir}/classes" />
+		<javac srcdir="${src.dir}" includes="**/*.java" sourcepath="" deprecation="on" debug="${debug}" includeAntRuntime="no" destdir="${build.dir}/classes">
 			<classpath refid="classpath" />
 		</javac>
 		<jar destfile="punksearch-core.jar">
-			<fileset dir="${buildDir}/classes" />
+			<fileset dir="${build.dir}/classes" />
 		</jar>
 	</target>
 
 	<target name="clean">
 		<delete file="punksearch-core.jar" />
-		<delete dir="${buildDir}" failonerror="true" />
-	</target>
-
-	<target name="javadoc" description="Create Javadocs">
-		<mkdir dir="${docDir}/api/" />
-		<javadoc destdir="${docDir}/api/">
-			<fileset dir="${srcDir}" includes="**/*.java" />
-			<classpath refid="classpath" />
-		</javadoc>
+		<delete dir="${build.dir}" failonerror="true" />
 	</target>
 
 </project>
