@@ -149,54 +149,22 @@ public class FtpAdapter implements ProtocolAdapter {
 		return ((FtpItem) item).isLink();
 	}
 
-	public String[] list(Object dir) {
+	public Object[] list(Object dir) {
 		FtpItem item = (FtpItem) dir;
-		return doList(rootPath + item.getFullPath());
-//		if (dir instanceof String) {
-//			return list((String) dir);
-//		} else {
-//			return list(path + getName(dir) + "/");
-//		}
-	}
-
-	private String[] doList(String path) {
 		try {
-			return ftp.listNames(path);
+			FTPFile[] files = ftp.listFiles(rootPath + item.getFullPath());
+			FtpItem[] result = new FtpItem[files.length];
+			for (int i = 0; i < files.length; i++) {
+				result[i] = new FtpItem(files[i], item.getFullPath() + "/" + files[i].getName());
+			}
+			return result;
 		} catch (IOException e) {
 			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
 			__log.warn("I/O Exception during listing of dir: " + e.getMessage());
 			throw new RuntimeException(e);
 		} catch (Exception e) {
-			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
-			return new String[0];
-		}
-	}
-
-	public Object[] listFiles(Object dir) {
-		FtpItem item = (FtpItem) dir;
-		FTPFile[] files = doListFiles(rootPath + item.getFullPath());
-		FtpItem[] result = new FtpItem[files.length];
-		for (int i = 0; i < files.length; i++) {
-			result[i] = new FtpItem(files[i], item.getFullPath() + "/" + files[i].getName());
-		}
-		return result;
-//		if (dir instanceof String) {
-//			return listFiles((String) dir);
-//		} else {
-//			return listFiles(path + getName(dir) + "/");
-//		}
-	}
-
-	private FTPFile[] doListFiles(String path) {
-		try {
-			return ftp.listFiles(path);
-		} catch (IOException e) {
-			// host communication problem occured, rethrow the exception so crawler will give up crawling this host
-			__log.warn("I/O Exception during listing of dir: " + e.getMessage());
-			throw new RuntimeException(e);
-		} catch (Exception e) {
-			__log.info("Exception (" + e.getMessage() + ") during changing or listing directory: " + path);
-			return new FTPFile[0];
+			__log.info("Exception (" + e.getMessage() + ") during listing directory: " + item.getFullPath());
+			return new FtpItem[0];
 		}
 	}
 

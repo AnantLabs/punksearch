@@ -168,24 +168,7 @@ public class SmbAdapter implements ProtocolAdapter {
 		return smb;
 	}
 
-	public String[] list(Object dir) {
-		try {
-			return ((SmbFile) dir).list();
-		} catch (SmbAuthException e) {
-			__log.debug("Can't list files in restricted directory: " + ((SmbFile) dir).getPath());
-			return new String[0];
-		} catch (SmbException e) {
-			__log.debug("Can't list files (" + e.getMessage() + ") in directory: " + ((SmbFile) dir).getPath());
-			try {
-				smb.list(); // check if we still connected
-				return new String[0];
-			} catch (SmbException e1) {
-				throw new RuntimeException("Connection with host was dropped");
-			}
-		}
-	}
-
-	public Object[] listFiles(Object dir) {
+	public Object[] list(Object dir) {
 		try {
 			return ((SmbFile) dir).listFiles();
 		} catch (SmbAuthException e) {
