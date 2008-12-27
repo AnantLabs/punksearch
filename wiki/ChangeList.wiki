@@ -2,9 +2,10 @@
 #labels Featured
 
 = 0.9.3 (trunk) =
- * gui: sorting stuff in natural order (admin interface)
- * core: fixed ftp indexing
+ * core: fixed ftp indexing (closes defect #27)
  * core: usage of new online host state probe/cache approach
+ * core: fixed issue with non-lowercase file extensions (negative values in statistics, incorrect match during search)
+ * gui: sorting stuff in natural order (admin interface)
 
 = 0.9.2 (2008-08-28) =
   * linux: deb package support release -- minor changes to help packaging. This includes dumping crawling status to temp dir, storing hosts.csv in PUNKSEARCH_HOME/stats dir instead of home dir itself.
