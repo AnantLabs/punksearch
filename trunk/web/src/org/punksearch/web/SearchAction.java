@@ -31,8 +31,8 @@ import org.punksearch.searcher.SearcherResult;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
+import org.punksearch.web.filters.OnlineResultFilter;
 import org.punksearch.web.filters.TypeFilters;
-import org.punksearch.web.online.OnlineResultFilter;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)

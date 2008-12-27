@@ -1,6 +1,6 @@
 <%@ page import="org.punksearch.common.IndexFields"%>
 <%@ page import="java.util.List" %>
-<%@ page import="org.punksearch.web.online.CachedOnlineChecker" %>
+<%@ page import="org.punksearch.online.OnlineStatuses" %>
 <%@ page import="org.punksearch.web.SearchParams" %>
 <%@ page import="org.punksearch.web.SearchResult" %>
 <%@ page import="org.punksearch.web.SearchAction" %>
@@ -37,7 +37,7 @@
 			int counter = 0;
 			for (ItemGroup group : searchResults) {
 				SearchResult file = new SearchResult(group.getItems().get(0));
-				boolean online = CachedOnlineChecker.isOnline(file.host);
+				boolean online = OnlineStatuses.getInstance().isOnline(file.host);
 				counter++;
 		%>
 		<tr>
@@ -56,7 +56,7 @@
 						<%
 							for (int i = 1; i < group.getItems().size(); i++) {
 								SearchResult subFile = new SearchResult(group.getItems().get(i));
-								boolean subOnline = CachedOnlineChecker.isOnline(subFile.host);
+								boolean subOnline = OnlineStatuses.getInstance().isOnline(subFile.host);
 						%>
 						<tr>
 							<td>
