@@ -175,7 +175,8 @@ public class HostStats implements Comparable<HostStats> {
 	 *            Statistics file to parse.
 	 * @return List of host statistics instances. May return empty list in case of permission problems.
 	 */
-	public static List<HostStats> parse(String hostsFilePath) {
+	@SuppressWarnings("unchecked")
+    public static List<HostStats> parse(String hostsFilePath) {
 		List<HostStats> result = new ArrayList<HostStats>();
 		try {
 			List<String> lines = FileUtils.readLines(new File(hostsFilePath));

@@ -235,6 +235,7 @@ public class FtpAdapter implements ProtocolAdapter {
 		return (encMap.containsKey(ip)) ? encMap.get(ip) : defaultEnc;
 	}
 
+	/*
 	private boolean isActiveModeForIp(String ip) {
 		String defaultMode = System.getProperty("org.punksearch.crawler.ftp.mode.default");
 		String customMode = System.getProperty("org.punksearch.crawler.ftp.mode.custom");
@@ -242,6 +243,7 @@ public class FtpAdapter implements ProtocolAdapter {
 		String modeStr = (customModes.containsKey(ip)) ? customModes.get(ip) : defaultMode;
 		return (modeStr.equals("active"));
 	}
+	*/
 
 	private void setupFtpClient(String ip) throws IOException {
 		if (ftp == null) {

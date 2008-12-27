@@ -90,7 +90,8 @@ public class FileTypes {
 		return readFromFile(new File(path));
 	}
 
-	public static FileTypes readFromFile(File file) {
+	@SuppressWarnings("unchecked")
+    public static FileTypes readFromFile(File file) {
 		try {
 			Map<String, FileType> map = new HashMap<String, FileType>();
 			List<String> lines = FileUtils.readLines(file);
