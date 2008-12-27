@@ -11,8 +11,8 @@
 package org.punksearch.web.statistics;
 
 import java.text.NumberFormat;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
@@ -70,7 +70,7 @@ public class FileTypeStatistics {
 
 	public static synchronized Map<String, Long> count() {
 		if (countCache == null || indexChangedAfter(countCacheTimestamp)) {
-			countCache = new HashMap<String, Long>();
+			countCache = new TreeMap<String, Long>();
 
 			FileTypes types = TypeFilters.getTypes();
 			for (String key : types.list()) {
@@ -100,11 +100,12 @@ public class FileTypeStatistics {
 
 	public static synchronized Map<String, Long> size() {
 		if (sizeCache == null || indexChangedAfter(sizeCacheTimestamp)) {
-			sizeCache = new HashMap<String, Long>();
+			sizeCache = new TreeMap<String, Long>();
 			FileTypes types = TypeFilters.getTypes();
 			for (String key : types.list()) {
 				sizeCache.put(key, size(key));
 			}
+			sizeCache.put("directory", Long.valueOf(0));
 			sizeCacheTimestamp = System.currentTimeMillis();
 		}
 		return sizeCache;

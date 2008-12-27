@@ -12,10 +12,10 @@ package org.punksearch.common;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
 
@@ -28,7 +28,7 @@ public class FileTypes {
 
 	public static final String    DEFAULT_CONFIG_FILE = "filetypes.conf";
 
-	private Map<String, FileType> types               = new HashMap<String, FileType>();
+	private Map<String, FileType> types               = new TreeMap<String, FileType>();
 
 	public FileTypes(Map<String, FileType> map) {
 		types = map;
@@ -91,9 +91,9 @@ public class FileTypes {
 	}
 
 	@SuppressWarnings("unchecked")
-    public static FileTypes readFromFile(File file) {
+	public static FileTypes readFromFile(File file) {
 		try {
-			Map<String, FileType> map = new HashMap<String, FileType>();
+			Map<String, FileType> map = new TreeMap<String, FileType>();
 			List<String> lines = FileUtils.readLines(file);
 			for (String line : lines) {
 				line = line.trim();
