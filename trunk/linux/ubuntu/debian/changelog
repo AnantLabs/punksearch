@@ -1,3 +1,14 @@
+punksearch (0.9.3-1) unstable; urgency=high
+
+  * Fixed bug which prevents FTP hosts to be indexed
+  * Fixed bug with lowercase file extensions which leads to missed search
+    results and negative values in statistics
+  * New approach for online host status probe/caching
+  * Sorting various tables in admin interface according to natural order of
+    titles
+
+ -- Yury Soldak <ysoldak@gmail.com>  Sun, 28 December 2008 01:00:00 +0200
+
 punksearch (0.9.2-1) unstable; urgency=low
 
   * Several bugs fixed / features implemented to help packaging

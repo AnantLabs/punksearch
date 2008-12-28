@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=0.9.2
+VERSION=0.9.3
 
 SRC=punksearch-$VERSION-quickstart
 DST=punksearch_$VERSION
