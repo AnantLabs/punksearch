@@ -8,10 +8,14 @@ This page explains how you can achieve this using different techniques.
 
 All advices are for Ubuntu 8.04 regarding paths and commands used, but of course you may adapt them for your linux distribution or completely different operating system.
 
+Two ways are known right now:
+  # mod_jk
+  # mod_proxy + mod_rewrite
+
 = mod_jk =
+The advised way is to use apache's module mod_jk.
 
 == Steps in a glance ==
-The simpliest way is to use apache's module mod_jk.
   # *install mod_jk*<br/>apt-get install libapache2-mod-jk
   # *create file /etc/apache2/workers.properties* (see listing below)
   # *create file /etc/apache2/mods-available/jk.conf* (see listing below)
