@@ -29,7 +29,7 @@ workers.tomcat_home=/usr/share/tomcat5.5/
 workers.java_home=/usr/lib/jvm/java-1.5.0-sun/
 }}}
 
-== jk.conf ==
+== jk.conf (tested with tomcat) ==
 {{{
 # Sample mod_jk configuration for Apache 2
 #
@@ -51,4 +51,14 @@ JkLogLevel      info
 
 # Send all requests ending in .jsp to ajp13_worker
 JkMount /*.jsp localhost
+}}}
+
+= mod_proxy + mod_rewrite =
+  # *place .htaccess file* (see listing below) in some subdirectory of your apache served site (somewhere inside /var/www)
+  # *ensure you can use .htaccess*<br/>look for AllowOverride and set in to "All" in site's config file, like /etc/apache2/sites-enables/001-default
+
+== .htaccess ==
+{{{
+RewriteEngine   on
+RewriteRule     (.*) http://localhost:8180/punksearch/$1 [P]
 }}}
