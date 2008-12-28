@@ -1,7 +1,7 @@
 #summary setup for (linux) experts, system administrators.
 #labels Featured
 
-*NB: the description below is for version 0.8.1, the home directory structure changed as from 0.9.0. The major thoughts and advices are still valid, but keep in mind home directory changes! (and look into deb file for 0.9.1 to see how author prefers to spread the application across a linux installation)*
+*NB: the description below is for version 0.8.1, the home directory structure changed as from 0.9.0. The major thoughts and advices are still valid, but keep in mind home directory changes! (and look into latest .deb file to see how author prefers to spread the application across a linux installation)*
 
 = Introduction =
 
