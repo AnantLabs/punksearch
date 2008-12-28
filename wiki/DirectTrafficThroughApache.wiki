@@ -4,6 +4,8 @@
 
 You may prefer not to launch application server (like tomcat) on port 80. For various reasons, for example you already have apache server running on 80 port. You still may want use default http port (80) for punksearch.
 
+Additional benefit of directing traffic through apache is possibility to use well known and useful statistics analysis tools like AWStats, etc.
+
 This page explains how you can achieve this using different techniques.
 
 All advices are for Ubuntu 8.04 regarding paths and commands used, but of course you may adapt them for your linux distribution or completely different operating system.
