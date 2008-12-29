@@ -1,7 +1,7 @@
 #summary changelist for application versions
 #labels Featured
 
-= 0.9.3 (trunk) =
+= 0.9.3 (2008-12-28) =
  * bugfix: fixed ftp indexing (closes defect #27)
  * bugfix: fixed issue with non-lowercase file extensions (negative values in statistics, incorrect match during search)
  * core: usage of new online host state probe/cache approach
