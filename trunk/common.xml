@@ -77,4 +77,16 @@
     <target name="ivy-report" depends="resolve">
         <ivy:report todir="${build.dir}/ivy-reports" graph="false" />
     </target>
+
+    <!--
+    this task can be usefull to use maven's dependency updates discovery through
+    mvn -f module.pom versions:display-dependency-updates
+    -->
+    <target name="ivy-make-pom">
+        <ivy:makepom ivyfile="${basedir}/ivy.xml" pomfile="${build.dir}/module.pom" conf="*">
+            <!--<mapping conf="default" scope="compile"/>-->
+            <!--<mapping conf="runtime" scope="runtime"/>-->
+            <!--<dependency group="com.acme" artifact="acme-logging" version="1.0" optional="true"/>-->
+        </ivy:makepom>
+    </target>
 </project>
