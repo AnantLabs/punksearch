@@ -13,28 +13,26 @@ package org.punksearch.crawler.adapters;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.punksearch.common.Settings.getBool;
+import static org.punksearch.crawler.CrawlerKeys.FTP_ENABLED;
+import static org.punksearch.crawler.CrawlerKeys.SMB_ENABLED;
+
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
- * 
  */
 public class ProtocolAdapterFactory {
+    private static boolean smbEnabled = getBool(SMB_ENABLED, true);
+    private static boolean ftpEnabled = getBool(FTP_ENABLED, true);
 
-	public static final String SMB_ENABLED = "org.punksearch.crawler.smb";
-	public static final String FTP_ENABLED = "org.punksearch.crawler.ftp";
-
-	private static boolean     smbEnabled  = Boolean.parseBoolean(System.getProperty(SMB_ENABLED, "true"));
-	private static boolean     ftpEnabled  = Boolean.parseBoolean(System.getProperty(FTP_ENABLED, "true"));
-
-	public static Set<ProtocolAdapter> createAll() {
-		Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
-		if (smbEnabled) {
-			adapters.add(new SmbAdapter());
-		}
-		if (ftpEnabled) {
-			adapters.add(new FtpAdapter());
-		}
-		return adapters;
-	}
-
+    public static Set<ProtocolAdapter> createAll() {
+        Set<ProtocolAdapter> adapters = new HashSet<ProtocolAdapter>();
+        if (smbEnabled) {
+            adapters.add(new SmbAdapter());
+        }
+        if (ftpEnabled) {
+            adapters.add(new FtpAdapter());
+        }
+        return adapters;
+    }
 }
