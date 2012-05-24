@@ -10,16 +10,18 @@
  ***************************************************************************/
 package org.punksearch.crawler.adapters;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.punksearch.online.OnlineStatuses;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.punksearch.crawler.CrawlerKeys.*;
 
 /**
  * Adapter for crawling FTP hosts. Uses commons-net library.
@@ -30,7 +32,7 @@ public class FtpAdapter implements ProtocolAdapter {
 
 	private static Log __log = LogFactory.getLog(FtpAdapter.class);
 
-	private FTPClient  ftp   = new FTPClient();
+    private FTPClient  ftp   = new FTPClient();
 
 	private String     rootPath;
 
@@ -197,8 +199,8 @@ public class FtpAdapter implements ProtocolAdapter {
 	}
 
 	private String getFtpEncodingForIp(String ip) {
-		String defaultEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.default", "UTF-8");
-		String customEnc = System.getProperty("org.punksearch.crawler.ftp.encoding.custom");
+		String defaultEnc = System.getProperty(FTP_ENCODING_DEFAULT, "UTF-8");
+		String customEnc = System.getProperty(FTP_ENCODING_CUSTOM);
 		Map<String, String> encMap = parseCustomEncodings(customEnc);
 		return (encMap.containsKey(ip)) ? encMap.get(ip) : defaultEnc;
 	}
@@ -223,16 +225,16 @@ public class FtpAdapter implements ProtocolAdapter {
 		// if (isActiveModeForIp(ip)) {
 		// ftp.setConnectMode(FTPConnectMode.ACTIVE); } else { ftp.setConnectMode(FTPConnectMode.PASV); }
 		// ftp.setRemoteHost(ip);
-		ftp.setDefaultTimeout(Integer.parseInt(System.getProperty("org.punksearch.crawler.ftp.timeout")));
+		ftp.setDefaultTimeout(Integer.parseInt(System.getProperty(FTP_TIMEOUT)));
 	}
 
 	private String getUser() {
-		String user = System.getProperty("org.punksearch.crawler.ftp.user");
+		String user = System.getProperty(FTP_USER);
 		return (user.length() == 0) ? "anonymous" : user;
 	}
 
 	private String getPassword() {
-		String passwd = System.getProperty("org.punksearch.crawler.ftp.password");
+		String passwd = System.getProperty(FTP_PASSWORD);
 		return (passwd.length() == 0) ? "some@email.com" : passwd;
 	}
 

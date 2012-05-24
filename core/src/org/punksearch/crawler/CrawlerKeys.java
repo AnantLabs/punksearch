@@ -53,4 +53,17 @@ public class CrawlerKeys {
     public static final String HEADER_THRESHOLD = "org.punksearch.crawler.data.header.threshold";
 
     public static final String DUMP_STATUS_PERIOD = "org.punksearch.crawler.dump.status.period";
+
+    /* SMB related keys */
+    public static final String SMB_DOMAIN = "org.punksearch.crawler.smb.domain";
+    public static final String SMB_USER = "org.punksearch.crawler.smb.user";
+    public static final String SMB_PASSWORD = "org.punksearch.crawler.smb.password";
+    public static final String SMB_TIMEOUT = "org.punksearch.crawler.smb.timeout";
+
+    /* FTP related keys */
+    public static final String FTP_ENCODING_DEFAULT = "org.punksearch.crawler.ftp.encoding.default";
+    public static final String FTP_ENCODING_CUSTOM = "org.punksearch.crawler.ftp.encoding.custom";
+    public static final String FTP_USER = "org.punksearch.crawler.ftp.user";
+    public static final String FTP_PASSWORD = "org.punksearch.crawler.ftp.password";
+    public static final String FTP_TIMEOUT = "org.punksearch.crawler.ftp.timeout";
 }
