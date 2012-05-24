@@ -1,4 +1,4 @@
-<project name="punksearch-web" default="war">
+<project name="punksearch-web" default="war" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <import file="../common.xml" />
 
@@ -6,6 +6,14 @@
 	<property name="docDir" location="doc" />
 
 	<target name="war" depends="build-core,clean,compile,prepare" description="Compiles sources and builds the WAR file.">
+        <!--<ivy:cachefileset setid="ivy_war_classpath" conf="war"/>-->
+        <ivy:retrieve pattern="${build.dir}/war_lib/[artifact]-[type]-[revision].[ext]"
+                      conf="war"
+                      type="jar"
+                      sync="true"
+                      overwriteMode="different"
+                      setid="ivy_war_classpath"/>
+
 		<war destfile="${build.dir}/punksearch.war"
              webxml="${build.dir}/web/WEB-INF/web.xml">
 
@@ -15,7 +23,8 @@
 				<exclude name="META-INF/context.xml" />
 			</fileset>
 
-            <lib refid="lib.fileset" />
+            <!--<lib refid="lib.fileset" />-->
+            <lib refid="ivy_war_classpath" />
 		</war>
 	</target>
 

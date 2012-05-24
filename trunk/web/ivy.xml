@@ -3,10 +3,17 @@
 
     <info organisation="punksearch" module="web"/>
 
-    <dependencies>
-        <dependency org="punksearch" name="core" rev="latest.integration"/>
+    <configurations>
+        <conf name="default" />
+        <conf name="provided" />
+        <conf name="compile" extends="default, provided" />
+        <conf name="war" extends="default" />
+    </configurations>
 
-        <dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2"/>
+    <dependencies>
+        <dependency org="punksearch" name="core" rev="latest.integration" conf="default->runtime"/>
+
+        <dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="provided->default"/>
         <dependency org="jfree" name="jfreechart" rev="1.0.13"/>
         <dependency org="org.apache.lucene" name="lucene-core" rev="2.3.1"/>
     </dependencies>
