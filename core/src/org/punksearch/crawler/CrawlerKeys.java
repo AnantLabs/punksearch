@@ -15,7 +15,7 @@ package org.punksearch.crawler;
  *
  * @author Yury Soldak (ysoldak@gmail.com)
  */
-public class Settings {
+public class CrawlerKeys {
 
     /**
      * Use this property to customize directory for temporary indexes
@@ -53,52 +53,4 @@ public class Settings {
     public static final String HEADER_THRESHOLD = "org.punksearch.crawler.data.header.threshold";
 
     public static final String DUMP_STATUS_PERIOD = "org.punksearch.crawler.dump.status.period";
-
-    /*
-    Access methods
-     */
-    public static int getInt(String key) {
-        return getInt(key, 0);
-    }
-
-    public static int getInt(String key, int defaultVal) {
-        return Integer.getInteger(key, defaultVal);
-    }
-
-    public static float getFloat(String key) {
-        return getFloat(key, 0F);
-    }
-
-    public static float getFloat(String key, float defaultVal) {
-        final String propVal = System.getProperty(key);
-
-        if (propVal == null) {
-            return defaultVal;
-        }
-
-        return Float.parseFloat(propVal);
-    }
-
-    public static long getLong(String key) {
-        return getLong(key, 0L);
-    }
-
-    public static long getLong(String key, long defaultVal) {
-        return Long.getLong(key, defaultVal);
-    }
-
-    public static boolean getBool(String key) {
-        return getBool(key, false);
-    }
-
-    public static boolean getBool(String key, boolean defaultVal) {
-        final String propVal = System.getProperty(key);
-
-        if (propVal == null) {
-            return defaultVal;
-        }
-
-        return Boolean.parseBoolean(propVal);
-    }
-
 }

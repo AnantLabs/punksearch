@@ -10,12 +10,6 @@
  ***************************************************************************/
 package org.punksearch.crawler;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
@@ -25,6 +19,11 @@ import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.adapters.ProtocolAdapter;
 import org.punksearch.crawler.adapters.ProtocolAdapterFactory;
 import org.punksearch.ip.Ip;
+
+import java.util.*;
+
+import static org.punksearch.common.Settings.*;
+import static org.punksearch.crawler.CrawlerKeys.*;
 
 /**
  * Implementation of a crawler thread. Crawls one host a time.
@@ -37,15 +36,15 @@ import org.punksearch.ip.Ip;
 public class HostCrawler extends Thread {
     private static final Log log = LogFactory.getLog(HostCrawler.class);
 
-    private int maxDeep = Settings.getInt(Settings.DEEP, 7);
+    private int maxDeep = getInt(DEEP, 7);
 
-    private boolean boostCreateDate = Settings.getBool(Settings.BOOST_CREATE_DATE, true);
-    private boolean boostDeep = Settings.getBool(Settings.BOOST_DEEP, true);
-    private boolean boostSize = Settings.getBool(Settings.BOOST_SIZE, true);
+    private boolean boostCreateDate = getBool(BOOST_CREATE_DATE, true);
+    private boolean boostDeep = getBool(BOOST_DEEP, true);
+    private boolean boostSize = getBool(BOOST_SIZE, true);
 
-    private boolean headerUse = Settings.getBool(Settings.HEADER_USE, true);
-    private int headerLength = Settings.getInt(Settings.HEADER_LENGTH, 128);
-    private long headerThreshold = Settings.getLong(Settings.HEADER_THRESHOLD, 50000000L);
+    private boolean headerUse = getBool(HEADER_USE, true);
+    private int headerLength = getInt(HEADER_LENGTH, 128);
+    private long headerThreshold = getLong(HEADER_THRESHOLD, 50000000L);
 
     private Iterator<Ip> ipIterator;
     private FileTypes knownFileTypes;

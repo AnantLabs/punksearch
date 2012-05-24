@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static org.punksearch.common.Settings.*;
+import static org.punksearch.crawler.CrawlerKeys.*;
+
 /**
  * The crawling process manager. It starts crawling threads, cleans target index, merges data crawled by threads into
  * the target index, cleans temporary files.
@@ -149,20 +152,20 @@ public class NetworkCrawler implements Runnable {
     /**
      * Extracts configuration from system properties.
      * <p/>
-     * The system property names are defined by static final fields of Settings class.
+     * The system property names are defined by static final fields of CrawlerKeys class.
      */
     private void readProperties() {
         this.indexDirectory = PunksearchFs.resolveIndexDirectory();
 
-        this.forceUnlock = Settings.getBool(Settings.UNLOCK_PROPERTY, false);
-        this.threadCount = Settings.getInt(Settings.THREADS_PROPERTY, 5);
+        this.forceUnlock = getBool(UNLOCK_PROPERTY, false);
+        this.threadCount = getInt(THREADS_PROPERTY, 5);
 
         this.fileTypes = FileTypes.readFromDefaultFile();
 
-        this.daysToKeep = Settings.getFloat(Settings.KEEPDAYS_PROPERTY, 7);
-        this.maxHours = Settings.getInt(Settings.MAXHOURS_PROPERTY, 12);
+        this.daysToKeep = getFloat(KEEPDAYS_PROPERTY, 7);
+        this.maxHours = getInt(MAXHOURS_PROPERTY, 12);
 
-        this.ranges = parseRanges(System.getProperty(Settings.RANGE_PROPERTY));
+        this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
     }
 
     private void startTimers() {
@@ -170,7 +173,7 @@ public class NetworkCrawler implements Runnable {
         processTimer.schedule(new MaxRunWatchDog(), maxHours * 3600 * 1000L);
 
         Timer statusDumpTimer = new Timer();
-        long dumpPeriod = Long.getLong(Settings.DUMP_STATUS_PERIOD, 10L) * 1000;
+        long dumpPeriod = Long.getLong(DUMP_STATUS_PERIOD, 10L) * 1000;
         statusDumpTimer.scheduleAtFixedRate(new ThreadStatusDump(), dumpPeriod, dumpPeriod);
 
         timers.add(processTimer);
@@ -296,7 +299,7 @@ public class NetworkCrawler implements Runnable {
     }
 
     private static String getThreadDirectory(int index) {
-        String tempDir = System.getProperty(Settings.TMP_DIR_PROPERTY);
+        String tempDir = System.getProperty(TMP_DIR_PROPERTY);
         if (tempDir == null || tempDir.length() == 0) {
             tempDir = System.getProperty("java.io.tmpdir");
         }
