@@ -1,0 +1,189 @@
+BODY {
+	padding: 0px;
+	margin: 0px;
+	font-family: Arial, sans-serif;
+	text-align: center;
+	font-size: 10px;
+}
+
+TABLE {
+	text-align: left;
+}
+
+TABLE.data TD, TABLE.data TH {
+	padding: 2px;
+}
+
+#topline {
+    height: 30px;
+    position: relative;
+}
+
+#logo {
+    position: absolute;
+    z-index: 2007;
+    top: 0px;
+    left: 25px;
+    width: 150px;
+    height: 60px;
+    font-size: 10px;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+#quickLinks {
+    font-size: 10px;
+}
+
+#hint {
+    /*font-weight: bold;*/
+    padding-bottom: 10px;
+}
+
+.errorMessage {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 5px;
+}
+
+.infoMessage {
+    font-weight: bold;
+    font-size: 14px;
+    padding: 20px;
+    margin-top: -10px;
+    width: 300px;
+    left: 50%;
+    margin-left: -170px;
+    position: absolute;
+}
+
+
+/* QUERY Tabs */
+#tabsContainer {
+    position: absolute;
+    z-index: 2007;
+    top: 30px;
+    left: 0px;
+    margin-top: -2em;
+}
+
+#tabs {
+    height: 2em;
+}
+
+#tabs TD.tab {
+    padding: 0px 12px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#tabs TD.spacer {
+    padding: 1px;
+}
+
+#tabs TD a {
+    text-decoration: none;
+}
+
+
+/* QUERY Form */
+#queryContainer {
+    font-size: 12px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+#searchFormContainer {
+    position: relative;
+}
+
+#searchForm {
+    font-size: 18px;
+    min-height: 30px;
+    padding: 5px 140px 5px 200px;
+    margin: 0px;
+    white-space: nowrap;
+}
+
+#searchForm INPUT {
+    font-size: 20px;
+}
+
+#searchForm TABLE.fieldset {
+    padding-bottom: 4px;
+    font-size: 20px;
+}
+
+#searchForm TABLE.fieldset TD {
+    text-align: left;
+}
+
+
+/* RESULTS */
+#searchResultsContainer {
+    margin: 10px;
+}
+
+TABLE#results {
+	width: 90%;
+}
+
+TABLE#results TD {
+	text-align: left;
+	padding: 2px;
+	font-size: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+TABLE#results TD DIV.othersInGroup TD {
+    border-bottom: none;
+    padding: 2pt;
+}
+
+/* RESULTS Pager */
+TABLE#pager {
+	width: 90%;
+}
+
+TABLE#pager TD {
+	padding: 0px;
+	margin: 0px;
+}
+
+TABLE#pager A {
+	text-decoration: none;
+	padding: 1px 8pt 1px 8pt;
+	margin: 0px;
+	vertical-align: bottom;
+	font-size: 10px;
+}
+
+TABLE#pager A.pageNumStyle {
+	border: 0px;
+}
+
+TABLE#pager A.pageCurrNumStyle {
+	font-weight: bold;
+}
+
+/* RESULTS Items */
+SPAN.name {
+	font-weight: normal;
+}
+
+SPAN.path {
+	padding-left: 0pt;
+}
+
+DIV.othersInGroup {
+	padding-top: 5pt;
+}
+
+DIV.othersInGroup SPAN.name {
+	font-size: 10pt;
+}
+
+DIV.othersInGroup SPAN.path {
+	font-size: 8pt;
+}

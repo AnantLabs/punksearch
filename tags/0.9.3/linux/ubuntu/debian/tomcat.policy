@@ -1,0 +1,101 @@
+grant codeBase "file:/usr/share/punksearch/web/-" {
+  // for System.getProperties() in admin's config.jsp
+  permission java.util.PropertyPermission "*", "read,write";
+
+  // common permissions
+  permission java.util.PropertyPermission "java.*", "read";
+
+	// our own permissions
+  permission java.util.PropertyPermission "org.punksearch.*", "read,write";
+  
+  // for lucene
+  permission java.util.PropertyPermission "org.apache.lucene.*", "read";
+  
+  // for jcifs
+  permission java.util.PropertyPermission "jcifs.*", "read,write";
+  permission java.util.PropertyPermission "file.encoding", "read";
+
+	// for multithreaded crawling and online status
+  permission java.lang.RuntimePermission "modifyThread";
+  
+  // read configurations
+  permission java.io.FilePermission "/etc/punksearch/-", "read";
+  
+  // read own jars
+  permission java.io.FilePermission "/usr/lib/punksearch/-", "read";
+  
+  // access to punksearch home
+  permission java.io.FilePermission "/usr/share/punksearch/-", "read";
+  
+  //permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
+  
+  // access to own log directory
+  permission java.io.FilePermission "/var/log/punksearch/-", "read,write";
+  
+  // dump crawler status and temp crawling directories
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp", "read";
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write,delete";
+	
+	// access to index directory and dump statistics (stats)
+	permission java.io.FilePermission "/var/lib/punksearch/-", "read,write,delete";
+  
+  // access to common java libs
+  permission java.io.FilePermission "/usr/share/java/-", "read";
+  
+  // connect to remote hosts to crawl
+  permission java.net.SocketPermission "*:*", "connect,resolve";
+  
+  permission java.net.NetPermission "specifyStreamHandler";
+};
+grant codeBase "file:/usr/lib/punksearch/-" {
+  // for System.getProperties() in admin's config.jsp
+  permission java.util.PropertyPermission "*", "read,write";
+
+	// commons permissions
+  permission java.util.PropertyPermission "java.*", "read";
+
+	// our own permissions
+  permission java.util.PropertyPermission "org.punksearch.*", "read,write";
+  
+  // for lucene
+  permission java.util.PropertyPermission "org.apache.lucene.*", "read";
+  
+  // for jcifs
+  permission java.util.PropertyPermission "jcifs.*", "read,write";
+  permission java.util.PropertyPermission "file.encoding", "read";
+
+	// for multithreaded crawling and online status
+  permission java.lang.RuntimePermission "modifyThread";
+  
+  // read configurations
+  permission java.io.FilePermission "/etc/punksearch/-", "read";
+  
+  // read own jars
+  permission java.io.FilePermission "/usr/lib/punksearch/-", "read";
+  
+  // access to punksearch home
+  permission java.io.FilePermission "/usr/share/punksearch/-", "read";
+  
+  //permission java.io.FilePermission "/var/log/tomcat5.5/-", "read,write";
+  
+  // access to own log directory
+  permission java.io.FilePermission "/var/log/punksearch/-", "read,write";
+  
+  // dump crawler status and temp crawling directories
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp", "read";
+  permission java.io.FilePermission "/var/lib/tomcat5.5/temp/-", "read,write,delete";
+	
+	// access to index directory and dump statistics (stats)
+	permission java.io.FilePermission "/var/lib/punksearch/-", "read,write,delete";
+  
+  // access to common java libs
+  permission java.io.FilePermission "/usr/share/java/-", "read";
+  
+  // connect to remote hosts to crawl
+  permission java.net.SocketPermission "*:*", "connect,resolve";
+  
+  permission java.net.NetPermission "specifyStreamHandler";
+};
+grant codeBase "file:${catalina.home}/bin/tomcat-juli.jar" {
+	permission java.io.FilePermission "/usr/share/punksearch/web/WEB-INF/classes/logging.properties", "read";
+};

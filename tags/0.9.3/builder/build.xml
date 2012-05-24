@@ -1,0 +1,138 @@
+<project name="punksearch-builder" default="dist">
+
+	<property file="build.properties" />
+	
+	<property name="doc.dir" location="docs" />
+
+	<import file="javadoc.xml" />
+	
+	<target name="clean">
+		<delete dir="dist" />
+		<delete>
+			<fileset dir="." includes="*-quickstart.zip" />
+			<fileset dir="." includes="*-slim.zip" />
+		</delete>
+	</target>
+
+	<target name="build-core">
+		<ant dir="../core" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+			<property name="ant.build.javac.target" value="${ant.build.javac.target}" />
+		</ant>
+	</target>
+
+	<target name="build-cli">
+		<ant dir="../cli" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+			<property name="ant.build.javac.target" value="${ant.build.javac.target}" />
+		</ant>
+	</target>
+
+	<target name="build-web">
+		<ant dir="../web" target="war" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+			<property name="ant.build.javac.target" value="${ant.build.javac.target}" />
+		</ant>
+	</target>
+
+	<target name="build-server">
+		<ant dir="../server" target="jar" inheritAll="false">
+			<property name="version" value="${version}" />
+			<property name="debug" value="${debug}" />
+			<property name="ant.build.javac.target" value="${ant.build.javac.target}" />
+		</ant>
+	</target>
+
+	<target name="clean-war">
+		<delete dir="dist-war" />
+		<delete>
+			<fileset dir="." includes="*-war.zip" />
+		</delete>
+	</target>
+
+	<target name="dist-war" depends="clean-war,build-web">
+		<mkdir dir="dist-war" />
+
+		<copyfile dest="dist-war/punksearch.war" src="../web/punksearch.war" />
+
+		<copy todir="dist-war">
+			<fileset dir="skel">
+				<include name="conf/*.*" />
+				<include name="docs/*.*" />
+			</fileset>
+		</copy>
+
+		<zip destfile="punksearch-${version}-war.zip">
+			<fileset dir="dist-war">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="dist-quickstart" depends="clean,build-core,build-cli,build-web,build-server,javadoc">
+		<mkdir dir="dist" />
+
+		<copy todir="dist/lib">
+			<fileset dir="lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../core/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../core">
+				<include name="punksearch-core.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="dist/lib">
+			<fileset dir="../cli">
+				<include name="punksearch-cli.jar" />
+			</fileset>
+		</copy>
+
+		<copyfile dest="dist/punksearch.war" src="../web/punksearch.war" />
+
+		<zip destfile="punksearch-${version}-slim.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+
+		<copy todir="dist/lib">
+			<fileset dir="../server/lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="../server">
+				<include name="punksearch-server.jar" />
+			</fileset>
+		</copy>
+
+		<copydir dest="dist" src="skel" />
+		<mkdir dir="dist/stats" />
+		<mkdir dir="dist/logs" />
+
+		<copy file="docs/api.zip" todir="dist/docs/" />
+		
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x bin/start.sh" />
+		</exec>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x bin/crawl.sh" />
+		</exec>
+		<exec executable="chmod" dir="dist">
+			<arg line="a+x bin/crawl-cron.sh" />
+		</exec>
+
+		<zip destfile="punksearch-${version}-quickstart.zip">
+			<fileset dir="dist">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+	<target name="dist" depends="dist-war,dist-quickstart" />
+
+</project>

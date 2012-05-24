@@ -1,0 +1,111 @@
+/* GLOBALS */
+BODY {
+	background-color: #0070AD;
+}
+
+INPUT {
+	border: 1px solid black;
+}
+
+H1, H2, H3 {
+	color: white;
+}
+
+TABLE.data TD, TABLE.data TH {
+	background-color: white;
+}
+
+
+A {
+	color: white;
+	text-decoration: none;
+}
+A:hover {
+	color: #FF7B00;
+}
+
+.errorMessage {
+	background-color: red;
+	color: white;
+}
+
+.infoMessage {
+	background-color: #CCCCCC;
+	color: black;
+}
+
+#hint {
+	color: #DDDDDD;
+}
+
+/* TOP */
+#topline {
+	background-color: #004368;
+}
+
+#logo {
+	background-color: #004368;
+}
+
+#quickLinks A {
+	color: #FF7B00;
+}
+
+/* QUERY */
+#queryContainer {
+	background-color: #004368;
+	color: #FFFFFF;
+}
+
+#tabs TD.tab {
+	color: white;
+}
+
+#tabs TD.selected {
+	color: #FFFFFF;
+	background-color: #FF7B00;
+	border-bottom: 1px solid #FF7B00;
+}
+
+#tabs TD a:hover {
+	color: #FF7B00;
+}
+
+#searchForm {
+	background-color: #FF7B00;
+}
+
+/* RESULTS */
+TABLE#results {
+	border-top: 5px solid #FF7B00;
+}
+
+TABLE#results TD {
+	background-color: #E6F6FF;
+	border-bottom: 1px solid #0070AD;
+}
+
+TABLE#pager {
+	color: #FFFFFF;
+}
+
+TABLE#pager A {
+	color: #000000;
+}
+
+TABLE#pager A.pageNumStyle {
+	background-color: #FFF2E6;
+}
+
+TABLE#pager A.pageCurrNumStyle {
+	background-color: #FF7B00;
+	border-top: 2px solid #FF7B00;
+}
+
+SPAN.path {
+	color: #0070AD;
+}
+
+SPAN.more A {
+	color: #FF7B00;
+}
