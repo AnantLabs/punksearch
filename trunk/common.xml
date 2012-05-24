@@ -28,6 +28,14 @@
         <delete dir="${build.dir}" failonerror="true"/>
     </target>
 
+    <target name="clean-lib">
+        <delete>
+            <fileset dir="${lib.dir}">
+                <include name="*"/>
+            </fileset>
+        </delete>
+    </target>
+
     <target name="compile" depends="clean,resolve" description="Compiles the JAVA sources">
         <mkdir dir="${build.dir}/classes"/>
 
@@ -64,5 +72,9 @@
         <ivy:publish artifactspattern="${build.dir}/[artifact].[ext]"
                      resolver="local"
                      overwrite="true"/>
+    </target>
+
+    <target name="ivy-report" depends="resolve">
+        <ivy:report todir="${build.dir}/ivy-reports" graph="false" />
     </target>
 </project>
