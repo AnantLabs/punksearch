@@ -17,6 +17,9 @@ public class HostnameByIpComputable implements Computable<String, String> {
 
     @Override
     public String compute(String ip) throws InterruptedException {
+        // hmmm.. now ip is of form smb://1.1.1.1
+        ip = fixIp(ip);
+
         InetAddress addr;
         try {
             addr = InetAddress.getByName(ip);
@@ -25,5 +28,14 @@ public class HostnameByIpComputable implements Computable<String, String> {
             return null;
         }
         return addr.getHostName();
+    }
+
+    private String fixIp(String ip) {
+        int pos = ip.indexOf("://");
+        if (pos >= 0) {
+            return ip.substring(pos + 3);
+        } else {
+            return ip;
+        }
     }
 }
