@@ -8,6 +8,7 @@
 <%@ page import="org.punksearch.web.filters.TypeFilters" %>
 <%@ page import="org.punksearch.web.ItemGroup" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.punksearch.hosts_resolver.HostnameResolver" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <% boolean showScores = Boolean.parseBoolean(System.getProperty("org.punksearch.web.showscores")); %>
@@ -38,6 +39,7 @@
 			for (ItemGroup group : searchResults) {
 				SearchResult file = new SearchResult(group.getItems().get(0));
 				boolean online = OnlineStatuses.getInstance().isOnline(file.host);
+                String host = HostnameResolver.getInstance().resolveByIp(file.host);
 				counter++;
 		%>
 		<tr>
@@ -46,6 +48,7 @@
 				<div style='font-size: 4px; margin: 1px; background-color: <%= (online) ? "#00FF00;" : "#FF0000;" %>;'>&nbsp;&nbsp;</div>
 			</td>
 			<td style="padding-left: 2px;">
+                [<%=host%>]
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
 				<span class="more"><%=(group.getItems().size() > 1) ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
 				<%=(showScores) ? "(" + file.score + ")" : ""%><br/>
