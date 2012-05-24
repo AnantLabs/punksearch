@@ -1,20 +1,26 @@
 <ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
 
-    <info organisation="punksearch" module="web"/>
+    <info organisation="punksearch" module="web" revision="0.9.3"/>
 
     <configurations>
         <conf name="default" />
         <conf name="provided" />
         <conf name="compile" extends="default, provided" />
         <conf name="war" extends="default" />
+        <conf name="test" extends="compile" />
     </configurations>
 
     <dependencies>
-        <dependency org="punksearch" name="core" rev="latest.integration" conf="default->runtime"/>
+        <!-- changing = not cache metadata (ivy.xml) -->
+        <dependency org="punksearch" name="core" rev="latest.integration" changing="true" conf="default->runtime"/>
 
-        <dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="provided->default"/>
+        <!--<dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="provided->default"/>-->
+        <dependency org="org.jboss.spec.javax.servlet" name="jboss-servlet-api_3.0_spec" rev="1.0.1.Final" conf="provided->default"/>
+
         <dependency org="jfree" name="jfreechart" rev="1.0.13"/>
         <dependency org="org.apache.lucene" name="lucene-core" rev="2.3.1"/>
+
+        <dependency org="junit" name="junit" rev="4.10" conf="test->default"/>
     </dependencies>
 </ivy-module>
