@@ -10,13 +10,13 @@
  ***************************************************************************/
 package org.punksearch.server;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 public class EmbededServer
 {
-	private Server	server;
+	private Server server;
 
 	private String	port;
 	private String	warFileName;
