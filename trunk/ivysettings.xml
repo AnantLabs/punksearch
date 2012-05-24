@@ -1,0 +1,6 @@
+<ivysettings>
+    <!-- just use default settings -->
+    <include url="${ivy.default.settings.dir}/ivysettings.xml"/>
+
+    <caches useOrigin="true" /> <!-- not cache local repo -->
+</ivysettings>
