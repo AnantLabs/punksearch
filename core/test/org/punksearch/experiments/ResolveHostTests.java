@@ -1,4 +1,4 @@
-package org.punksearch;
+package org.punksearch.experiments;
 
 import org.junit.Test;
 
