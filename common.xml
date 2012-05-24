@@ -1,0 +1,68 @@
+<project name="common" xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property name="punkserach.version">0.9.3</property>
+    <property name="version">${punkserach.version}</property>
+
+    <property name="debug">true</property>
+
+    <property name="lib.dir">${basedir}/lib</property>
+    <property name="build.dir">${basedir}/build</property>
+    <property name="classes.dir">${build.dir}/classes</property>
+    <property name="src.dir">${basedir}/src</property>
+
+    <!--<property name="ivy.resolver.default.check.modified" value="true"/>-->
+    <ivy:settings file="../ivysettings.xml" /> <!--TODO: relative path?-->
+
+    <tstamp>
+        <format property="dateIso" pattern="yyyy-MM-dd"/>
+    </tstamp>
+
+    <fileset id="lib.fileset" dir="${lib.dir}">
+        <include name="*-jar-*.jar"/>
+    </fileset>
+
+    <path id="lib.path.id">
+        <fileset refid="lib.fileset"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="true"/>
+    </target>
+
+    <target name="compile" depends="clean,resolve" description="Compiles the JAVA sources">
+        <mkdir dir="${build.dir}/classes"/>
+
+        <javac srcdir="${src.dir}"
+               debug="${debug}"
+               deprecation="on"
+               includeAntRuntime="no"
+               destdir="${build.dir}/classes"
+               failonerror="true">
+            <classpath refid="lib.path.id"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile" description="Compiles the Java sources and builds the JAR file.">
+        <!--<echoproperties/>-->
+
+        <jar destfile="${build.dir}/${ivy.module}.jar">
+            <fileset dir="${build.dir}/classes"/>
+        </jar>
+    </target>
+
+
+    <target name="resolve" description="--> retreive dependencies with ivy">
+        <ivy:resolve />
+
+        <ivy:retrieve pattern="${lib.dir}/[artifact]-[type]-[revision].[ext]"
+                sync="true"
+                overwriteMode="different"/>
+    </target>
+
+    <target name="publish-local" depends="jar" description="Publishes to local ivy rep">
+        <!--<echoproperties/>-->
+
+        <ivy:publish artifactspattern="${build.dir}/[artifact].[ext]"
+                     resolver="local"
+                     overwrite="true"/>
+    </target>
+</project>
