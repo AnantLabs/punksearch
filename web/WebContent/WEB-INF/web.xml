@@ -36,6 +36,29 @@
 		<location>/login.jsp</location>
 	</error-page>
 
+    <!--
+       - This is useful because current browsers typically do not
+       - set a character encoding even if specified in the HTML page or form
+       see: http://wiki.apache.org/tomcat/FAQ/CharacterEncoding
+    -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.punksearch.web.web.filters.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>
 		<servlet-class>org.punksearch.web.InitServlet</servlet-class>
