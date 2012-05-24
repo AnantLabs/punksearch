@@ -1,14 +1,8 @@
-<%@ page import="org.punksearch.common.IndexFields"%>
-<%@ page import="java.util.List" %>
+<%@ page import="org.punksearch.hosts_resolver.HostnameResolver"%>
 <%@ page import="org.punksearch.online.OnlineStatuses" %>
-<%@ page import="org.punksearch.web.SearchParams" %>
-<%@ page import="org.punksearch.web.SearchResult" %>
-<%@ page import="org.punksearch.web.SearchAction" %>
-<%@ page import="org.punksearch.web.SearchPager" %>
-<%@ page import="org.punksearch.web.filters.TypeFilters" %>
-<%@ page import="org.punksearch.web.ItemGroup" %>
+<%@ page import="org.punksearch.web.*" %>
+<%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.punksearch.hosts_resolver.HostnameResolver" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <% boolean showScores = Boolean.parseBoolean(System.getProperty("org.punksearch.web.showscores")); %>
