@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="org.punksearch.hosts_resolver.HostnameResolver"%>
 <%@ page import="org.punksearch.online.OnlineStatuses" %>
 <%@ page import="org.punksearch.web.*" %>

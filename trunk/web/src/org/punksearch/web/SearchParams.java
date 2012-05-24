@@ -95,11 +95,12 @@ public class SearchParams {
 		if (paramValue == null)
 			return "";
 
-		try {
+//        OMG WTF??? this prevents russian queries!
+/*		try {
 			paramValue = new String(paramValue.getBytes("ISO-8859-1"), "UTF-8");
 		} catch (UnsupportedEncodingException uee) {
 			__log.warn(uee.getMessage());
-		}
+		}*/
 
 		return paramValue;
 	}
