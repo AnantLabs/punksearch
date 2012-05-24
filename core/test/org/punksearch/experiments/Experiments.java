@@ -12,7 +12,7 @@ import java.io.UnsupportedEncodingException;
 public class Experiments {
     @Test
     public void stringEncodingConversion() throws UnsupportedEncodingException {
-        String paramValue = "тест";
+        String paramValue = "С‚РµСЃС‚";
         System.out.println(paramValue);
         paramValue = new String(paramValue.getBytes("ISO-8859-1"), "UTF-8");
         System.out.println(paramValue);

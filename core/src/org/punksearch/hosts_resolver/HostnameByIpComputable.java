@@ -12,14 +12,14 @@ import java.net.UnknownHostException;
  * Date: 21.05.12
  * Time: 16:01
  */
-class HostnameByIpComputable implements Computable<String,String> {
+public class HostnameByIpComputable implements Computable<String, String> {
     private static Log log = LogFactory.getLog(HostnameByIpComputable.class);
 
     @Override
     public String compute(String ip) throws InterruptedException {
         InetAddress addr;
         try {
-            addr = InetAddress.getByName("194.85.80.61");
+            addr = InetAddress.getByName(ip);
         } catch (UnknownHostException e) {
             log.warn("Unable to resolve ip: " + ip, e);
             return null;
