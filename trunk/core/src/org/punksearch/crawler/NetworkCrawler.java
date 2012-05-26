@@ -138,7 +138,8 @@ public class NetworkCrawler implements Runnable {
         }
 
         // should always optimize, since some old items could have been deleted and no one new host crawled.
-        IndexOperator.optimize(indexDirectory);
+        // optimization is depricated in new Lucene
+// ***       IndexOperator.optimize(indexDirectory);
 
         long finishTime = new Date().getTime();
         log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
@@ -193,8 +194,9 @@ public class NetworkCrawler implements Runnable {
             return false;
         }
         for (int i = 0; i < threadCount; i++) {
-            if (!prepareIndex(getThreadDirectory(i))) {
-                log.warn("Can't prepare directory for crawl thread: " + getThreadDirectory(i));
+            final String threadDirectory = getThreadDirectory(i);
+            if (!prepareIndex(threadDirectory)) {
+                log.warn("Can't prepare directory for crawl thread: " + threadDirectory);
                 return false;
             }
         }
@@ -217,11 +219,9 @@ public class NetworkCrawler implements Runnable {
             IndexOperator.deleteAll(indexDirectory);
             log.trace("Target index directory wiped out");
         } else {
-
             log.trace("Start cleaning target index directory from old items");
             IndexOperator.deleteByAge(indexDirectory, daysToKeep);
             log.trace("Finished cleaning target index directory from old items");
-
         }
         log.trace("Target index directory cleaned up.");
     }

@@ -19,18 +19,14 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.*;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
+import org.punksearch.crawler.IndexUtils;
+import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.web.filters.TypeFilters;
 
 public class FileTypeStatistics {
@@ -56,9 +52,10 @@ public class FileTypeStatistics {
 	private static Hits extractDocsForType(String type) {
 		Filter filter = TypeFilters.get(type);
 		try {
-			IndexSearcher indexSearcher = new IndexSearcher(PunksearchFs.resolveIndexDirectory());
-			Hits hits = indexSearcher.search(makeQuery(), filter);
-			return hits;
+            final IndexReader indexReader = IndexReader.open(IndexUtils.dir(PunksearchFs.resolveIndexDirectory()));
+            IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+            final TopDocs topDocs = indexSearcher.search(makeQuery(), filter, indexReader.numDocs());
+            return new Hits(indexSearcher, topDocs);
 		} catch (Exception e) {
 			return null;
 		}
@@ -105,7 +102,7 @@ public class FileTypeStatistics {
 			for (String key : types.list()) {
 				sizeCache.put(key, size(key));
 			}
-			sizeCache.put("directory", Long.valueOf(0));
+			sizeCache.put("directory", 0L);
 			sizeCacheTimestamp = System.currentTimeMillis();
 		}
 		return sizeCache;
@@ -119,11 +116,14 @@ public class FileTypeStatistics {
 				// Obviously, non-latin1 directory names slip through the filter, we'll catch them later
 				// Maybe we should use some ranges with UTF8-16 characters... TODO
 				String approxQuery = "Host:ftp_* Host:smb_* -Path:{a TO Z*} -Path:{0 TO 9*}";
-				QueryParser parser = new QueryParser("Host", new SimpleAnalyzer());
+				QueryParser parser = new QueryParser(LuceneVersion.VERSION,
+                        "Host", new SimpleAnalyzer(LuceneVersion.VERSION));
 				Query query = parser.parse(approxQuery);
-				IndexSearcher indexSearcher = new IndexSearcher(PunksearchFs.resolveIndexDirectory());
-				Hits hits = indexSearcher.search(query);
-				for (int i = 0; i < hits.length(); i++) {
+                IndexReader indexReader = IndexReader.open(IndexUtils.dir(PunksearchFs.resolveIndexDirectory()));
+				IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+                final TopDocs topDocs = indexSearcher.search(query, indexReader.numDocs());
+                Hits hits = new Hits(indexSearcher, topDocs);
+                for (int i = 0; i < hits.length(); i++) {
 					Document doc = hits.doc(i);
 					String path = doc.get(IndexFields.PATH);
 					if (!path.equals("/")) {
@@ -175,7 +175,8 @@ public class FileTypeStatistics {
 
 	private static boolean indexChangedAfter(long timestamp) {
 		try {
-			return (IndexReader.lastModified(PunksearchFs.resolveIndexDirectory()) > timestamp);
+            // TODO: rewrite
+			return (IndexReader.lastModified(IndexUtils.dir(PunksearchFs.resolveIndexDirectory())) > timestamp);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

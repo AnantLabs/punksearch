@@ -135,16 +135,16 @@ public class HostCrawler extends Thread {
     protected Document makeDocument(String name, String ext, String size, String path, String date, String type, byte[] header, float boost) {
         docCount++;
         Document document = new Document();
-        document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.UN_TOKENIZED));
-        document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.TOKENIZED));
-        document.add(new Field(IndexFields.EXTENSION, ext.toLowerCase(), Field.Store.YES, Field.Index.UN_TOKENIZED));
-        document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.UN_TOKENIZED));
-        document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.TOKENIZED));
-        document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.UN_TOKENIZED));
-        document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.UN_TOKENIZED));
-        document.add(new Field(IndexFields.TYPE, type, Field.Store.NO, Field.Index.UN_TOKENIZED));
+        document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.ANALYZED));
+        document.add(new Field(IndexFields.EXTENSION, ext.toLowerCase(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.PATH, path, Field.Store.YES, Field.Index.ANALYZED));
+        document.add(new Field(IndexFields.DATE, date, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.INDEXED, timestamp, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.TYPE, type, Field.Store.NO, Field.Index.NOT_ANALYZED));
         if (header != null) {
-            document.add(new Field(IndexFields.HEADER, header, Field.Store.YES));
+            document.add(new Field(IndexFields.HEADER, header));
         }
         document.setBoost(boost);
         return document;

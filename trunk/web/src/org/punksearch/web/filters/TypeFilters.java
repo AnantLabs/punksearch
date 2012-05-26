@@ -26,6 +26,7 @@ import org.apache.lucene.search.TermQuery;
 import org.punksearch.common.FileType;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
+import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
@@ -54,7 +55,7 @@ public class TypeFilters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param min
 	 * @param max
 	 * @param itemType
@@ -93,7 +94,9 @@ public class TypeFilters {
 		try {
 			Query extQuery;
 			if (extStr.length() != 0) {
-				extQuery = new QueryParser(IndexFields.EXTENSION, new StandardAnalyzer()).parse(extStr);
+				extQuery = new QueryParser(LuceneVersion.VERSION,
+                        IndexFields.EXTENSION,
+                        new StandardAnalyzer(LuceneVersion.VERSION)).parse(extStr);
 			} else {
 				extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
 			}
