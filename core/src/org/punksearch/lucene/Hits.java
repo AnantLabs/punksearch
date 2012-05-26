@@ -1,4 +1,4 @@
-package org.punksearch.web.statistics;
+package org.punksearch.lucene;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;

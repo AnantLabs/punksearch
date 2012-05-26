@@ -27,9 +27,9 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.analysis.FilenameAnalyzer;
+import org.punksearch.lucene.LuceneUtils;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 
@@ -215,7 +215,7 @@ public class IndexOperator {
 
 	public static void deleteByAge(String dirPath, float days) {
 		try {
-            final Directory dir = IndexUtils.dir(dirPath);
+            final Directory dir = LuceneUtils.dir(dirPath);
             boolean indexExists = IndexReader.indexExists(dir);
             if (!indexExists) {
                 return;
@@ -247,7 +247,7 @@ public class IndexOperator {
 			Directory[] dirs = new Directory[sourceDirs.size()];
 			int i = 0;
 			for (String source : sourceDirs) {
-				dirs[i] = IndexUtils.dir(source);
+				dirs[i] = LuceneUtils.dir(source);
 				i++;
 			}
 			iw.addIndexes(dirs);
@@ -262,13 +262,13 @@ public class IndexOperator {
 	private static IndexWriter createIndexWriter(String dir) throws IOException {
 //		boolean indexExists = IndexReader.indexExists(dir);
 //		return new IndexWriter(dir, analyzer, !indexExists);
-        return new IndexWriter(IndexUtils.dir(dir),
+        return new IndexWriter(LuceneUtils.dir(dir),
                 new IndexWriterConfig(LuceneVersion.VERSION, analyzer));
 	}
 
 	public static boolean isLocked(String dir) {
 		try {
-			return IndexUtils.dir(dir).fileExists(WRITE_LOCK_FILE);
+			return LuceneUtils.dir(dir).fileExists(WRITE_LOCK_FILE);
 		} catch (IOException e) {
 			log.warn("IOException during checking if index directory is locked, "
                     + "assuming it is not (maybe index directory just does not exist?)");
@@ -280,7 +280,7 @@ public class IndexOperator {
         try {
             log.info("Clearing lock: " + dir);
 
-            final Directory d = IndexUtils.dir(dir);
+            final Directory d = LuceneUtils.dir(dir);
             d.clearLock(WRITE_LOCK_FILE);
             d.close();
         } catch (IOException e) {
@@ -290,7 +290,7 @@ public class IndexOperator {
 
 	public static boolean indexExists(String dir) {
         try {
-            return IndexReader.indexExists(IndexUtils.dir(dir));
+            return IndexReader.indexExists(LuceneUtils.dir(dir));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

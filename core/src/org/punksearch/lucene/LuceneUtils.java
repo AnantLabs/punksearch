@@ -1,4 +1,4 @@
-package org.punksearch.crawler;
+package org.punksearch.lucene;
 
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -11,7 +11,7 @@ import java.io.IOException;
  * Date: 25.05.12
  * Time: 15:40
  */
-public class IndexUtils {
+public class LuceneUtils {
     public static Directory dir(String dir) throws IOException {
         return dir(new File(dir));
     }
