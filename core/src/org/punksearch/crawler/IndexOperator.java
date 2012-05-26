@@ -12,7 +12,9 @@ package org.punksearch.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -22,14 +24,8 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.index.*;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
@@ -39,22 +35,25 @@ import org.punksearch.searcher.filters.NumberRangeFilter;
 
 /**
  * Utility class to work with an index. Hides all Lucene's read/write logics.
- * 
+ *
  * It has both instance and static methods. The instance methods affect the index directory IndexOperator was
  * instantiated with. The static methods are for utility tasks -- they open and close an index themselves.
- * 
+ *
  * @author Yury Soldak (ysoldak@gmail.com)
- * 
+ *
  */
 public class IndexOperator {
-	private static Log   __log    = LogFactory.getLog(IndexOperator.class);
+	private static final Log log = LogFactory.getLog(IndexOperator.class);
 
 	private IndexWriter     indexWriter;
 	private static Analyzer analyzer = createAnalyzer();
 
-	/**
+    public static final String WRITE_LOCK_FILE = "write.lock";
+
+
+    /**
 	 * Creates an instance of the class and opens index directory.
-	 * 
+	 *
 	 * @param indexDirectory
 	 *            Index directory to operate under.
 	 */
@@ -68,11 +67,11 @@ public class IndexOperator {
 
 	/**
 	 * Adds documents to the current index.
-	 * 
+	 *
 	 * @param documentList
 	 *            List of Document. Null value is synonymous to an empty list.
 	 * @return Boolean result. False in the case of internal I/O exception.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             In the case "close" method was called before.
 	 */
@@ -91,7 +90,7 @@ public class IndexOperator {
 			}
 			return true;
 		} catch (IOException e) {
-			__log.warn("Failed adding documents into index. " + e.getMessage());
+			log.warn("Failed adding documents into index. " + e.getMessage());
 			return false;
 		}
 
@@ -99,13 +98,13 @@ public class IndexOperator {
 
 	/**
 	 * Deletes all documents (what match IP and protocol) from the current index.
-	 * 
+	 *
 	 * @param ip
 	 *            IP of a host to delete documents for.
 	 * @param proto
 	 *            Protocol to match for documents to be deleted. "smb" or "ftp".
 	 * @return Boolean result. False in the case of internal I/O exception.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             In the case "close" method was called before.
 	 */
@@ -117,14 +116,14 @@ public class IndexOperator {
 			indexWriter.deleteDocuments(new Term(IndexFields.HOST, proto + "_" + ip));
 			return true;
 		} catch (IOException e) {
-			__log.warn("Failed deleting documents for host '" + proto + "://" + ip + "'. " + e.getMessage());
+			log.warn("Failed deleting documents for host '" + proto + "://" + ip + "'. " + e.getMessage());
 			return false;
 		}
 	}
 
 	/**
 	 * Optimizes the current index.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             In the case "close" method was called before.
 	 */
@@ -141,13 +140,13 @@ public class IndexOperator {
 		}
 	}
 
-	/**
+	/* *
 	 * Ensures all data was merged into the current index on disk.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             In the case "close" method was called before.
 	 */
-	public void flush() {
+	/*public void flush() {
 		if (isClosed()) {
 			throw new IllegalStateException("Index was closed already.");
 		}
@@ -158,12 +157,12 @@ public class IndexOperator {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
+	}*/
 
 	/**
 	 * Closes the index, unlocks it. It is not possible to use any instance methods except "isClosed" after this method
 	 * was called.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             In the case "close" method was called before.
 	 */
@@ -183,7 +182,7 @@ public class IndexOperator {
 
 	/**
 	 * Checks if index was closed. Use this method to check (if unsure) if you can call instance methods.
-	 * 
+	 *
 	 * @return True if index was closed (i.e. "close" method called before).
 	 */
 	public boolean isClosed() {
@@ -196,7 +195,7 @@ public class IndexOperator {
 			iw.deleteDocuments(new Term(IndexFields.HOST, host));
 			iw.close();
 		} catch (IOException ex) {
-			__log.error("Exception during merging index directories", ex);
+			log.error("Exception during merging index directories", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -214,25 +213,30 @@ public class IndexOperator {
 		}
 	}
 
-	public static void deleteByAge(String dir, float days) {
-		boolean indexExists = IndexReader.indexExists(dir);
-		if (!indexExists) {
-			return;
-		}
+	public static void deleteByAge(String dirPath, float days) {
 		try {
-			IndexSearcher is = new IndexSearcher(FSDirectory.getDirectory(dir));
+            final Directory dir = IndexUtils.dir(dirPath);
+            boolean indexExists = IndexReader.indexExists(dir);
+            if (!indexExists) {
+                return;
+            }
+
+            final IndexReader indexReader = IndexReader.open(dir);
+            IndexSearcher is = new IndexSearcher(indexReader);
 			long max = System.currentTimeMillis() - Math.round(days * 1000 * 3600 * 24);
 			NumberRangeFilter<Long> oldDocs = FilterFactory.createNumberFilter(IndexFields.INDEXED, null, max);
 			Query query = new WildcardQuery(new Term(IndexFields.HOST, "*"));
-			Hits hits = is.search(query, oldDocs);
-			__log.info("Deleting by age from index directory. Items to delete: " + hits.length());
-			IndexReader ir = IndexReader.open(dir);
-			for (int i = 0; i < hits.length(); i++) {
-				ir.deleteDocument(hits.id(i));
+            final TopDocs topDocs = is.search(query, oldDocs, indexReader.numDocs());
+            log.info("Deleting by age from index directory. Items to delete: " + topDocs.totalHits);
+
+            final ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+
+            for (int i = 0; i < scoreDocs.length; i++) {
+				indexReader.deleteDocument(scoreDocs[i].doc); // TODO!!!
 			}
-			ir.close();
+			indexReader.close();
 		} catch (IOException ex) {
-			__log.error("Exception during deleting by age from index directory", ex);
+			log.error("Exception during deleting by age from index directory", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -243,48 +247,54 @@ public class IndexOperator {
 			Directory[] dirs = new Directory[sourceDirs.size()];
 			int i = 0;
 			for (String source : sourceDirs) {
-				dirs[i] = FSDirectory.getDirectory(source);
+				dirs[i] = IndexUtils.dir(source);
 				i++;
 			}
-			iw.addIndexesNoOptimize(dirs);
-			// iw.optimize();
-			iw.flush();
+			iw.addIndexes(dirs);
+			iw.commit();
 			iw.close();
 		} catch (IOException ex) {
-			__log.error("Exception during merging index directories", ex);
+			log.error("Exception during merging index directories", ex);
 			throw new RuntimeException(ex);
 		}
 	}
 
 	private static IndexWriter createIndexWriter(String dir) throws IOException {
-		boolean indexExists = IndexReader.indexExists(dir);
-		return new IndexWriter(dir, analyzer, !indexExists);
+//		boolean indexExists = IndexReader.indexExists(dir);
+//		return new IndexWriter(dir, analyzer, !indexExists);
+        return new IndexWriter(IndexUtils.dir(dir),
+                new IndexWriterConfig(LuceneVersion.VERSION, analyzer));
 	}
 
 	public static boolean isLocked(String dir) {
 		try {
-			return IndexReader.isLocked(dir);
+			return IndexUtils.dir(dir).fileExists(WRITE_LOCK_FILE);
 		} catch (IOException e) {
-			__log.warn("IOException during checking if index directory is locked, "
-			        + "assuming it is not (maybe index directory just does not exist?)");
+			log.warn("IOException during checking if index directory is locked, "
+                    + "assuming it is not (maybe index directory just does not exist?)");
 			return false;
 		}
 	}
 
 	public static void unlock(String dir) {
-		try {
-			if (IndexReader.isLocked(dir)) {
-				IndexReader.unlock(FSDirectory.getDirectory(dir));
-			}
-		} catch (IOException e) {
-			__log.warn("IOException during unlocking of index directory "
-			        + "(maybe index directory just does not exist?)");
-		}
+        try {
+            log.info("Clearing lock: " + dir);
+
+            final Directory d = IndexUtils.dir(dir);
+            d.clearLock(WRITE_LOCK_FILE);
+            d.close();
+        } catch (IOException e) {
+            log.error("Error clearing lock", e);
+        }
 	}
 
 	public static boolean indexExists(String dir) {
-		return IndexReader.indexExists(dir);
-	}
+        try {
+            return IndexReader.indexExists(IndexUtils.dir(dir));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public static void createIndex(String dir) throws IOException {
 		IndexWriter iw = createIndexWriter(dir);
@@ -292,14 +302,16 @@ public class IndexOperator {
 	}
 
 	private static Analyzer createAnalyzer() {
-		PerFieldAnalyzerWrapper paw = new PerFieldAnalyzerWrapper(new KeywordAnalyzer());
-		FilenameAnalyzer analyzer = new FilenameAnalyzer();
-		paw.addAnalyzer(IndexFields.NAME, analyzer);
-		paw.addAnalyzer(IndexFields.PATH, analyzer);
-		return paw;
+        final FilenameAnalyzer filenameAnalyzer = new FilenameAnalyzer();
+
+        Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+        analyzerMap.put(IndexFields.NAME, filenameAnalyzer);
+        analyzerMap.put(IndexFields.PATH, filenameAnalyzer);
+
+        return new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), analyzerMap);
 	}
 
-	public static void optimize(String dir) {
+	/*public static void optimize(String dir) {
 		IndexWriter iw;
 		try {
 			iw = createIndexWriter(dir);
@@ -307,7 +319,7 @@ public class IndexOperator {
 			iw.flush();
 			iw.close();
 		} catch (IOException e) {
-			__log.error("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
+			log.error("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
 		}
-	}
+	}*/
 }

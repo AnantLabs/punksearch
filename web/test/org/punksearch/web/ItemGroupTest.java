@@ -50,8 +50,8 @@ public class ItemGroupTest extends TestCase {
 
 	private Document newItem(int size, String ext) {
 		Document item = new Document();
-		item.add(new Field(IndexFields.SIZE, String.valueOf(size), Store.NO, Index.TOKENIZED));
-		item.add(new Field(IndexFields.EXTENSION, ext, Store.NO, Index.TOKENIZED));
+		item.add(new Field(IndexFields.SIZE, String.valueOf(size), Store.NO, Index.ANALYZED));
+		item.add(new Field(IndexFields.EXTENSION, ext, Store.NO, Index.ANALYZED));
 		return item;
 	}
 

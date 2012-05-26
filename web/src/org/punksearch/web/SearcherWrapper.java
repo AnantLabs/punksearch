@@ -35,9 +35,9 @@ public class SearcherWrapper {
 		return searcher != null;
 	}
 	
-	public static SearcherResult search(Query query, Integer first, Integer last, Filter filter) {
+	/*public static SearcherResult search(Query query, Integer first, Integer last, Filter filter) {
 		return searcher.search(query, first, last, filter);
-	}
+	}*/
 
 	public static SearcherResult search(Query query, Filter filter, Integer limit) {
 		return searcher.search(query, filter, limit);

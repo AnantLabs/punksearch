@@ -10,20 +10,18 @@
  ***************************************************************************/
 package org.punksearch.searcher;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class to search over Lucene index. Tracks changes in the index and re-inits itself if necessary.
@@ -31,12 +29,14 @@ import org.apache.lucene.store.FSDirectory;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class Searcher {
-	private static final Log __log                = LogFactory.getLog(Searcher.class);
+	private static final Log log = LogFactory.getLog(Searcher.class);
 
 	private IndexSearcher       indexSearcher;
+    private IndexReader indexReader;
 
 	private String              indexDir;
-	private long                indexSearcherCreated = 0;
+//	private long                indexSearcherCreated = 0;
+    public static final int MAX_COUNT = 100000;
 
 	public Searcher(String dir) {
 		this.indexDir = dir;
@@ -45,15 +45,23 @@ public class Searcher {
 
 	private void init(String dir) {
 		try {
-			indexSearcher = new IndexSearcher(FSDirectory.getDirectory(dir));
+            initReader(dir);
+            indexSearcher = new IndexSearcher(indexReader);
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Index directory is invalid: " + dir);
 		}
-		this.indexSearcherCreated = System.currentTimeMillis();
+//		this.indexSearcherCreated = System.currentTimeMillis();
 	}
 
-	public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
-		__log.trace("Search for: " + query);
+    private void initReader(String dir) throws IOException {
+        if (indexReader != null) {
+            indexReader.close();
+        }
+        indexReader = IndexReader.open(FSDirectory.open(new File(dir)));
+    }
+
+    /*public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
+		log.trace("Search for: " + query);
 
 		checkIndexDirectory();
 
@@ -67,7 +75,6 @@ public class Searcher {
 
 			// Sort sort = (null != sortFieldId)? new Sort(new SortField(sortFieldId + SearcherConstants.SORT_SUFFIX)) :
 			// null;
-			Hits hits = indexSearcher.search(query, filter);
 
 			Integer first = start;
 			Integer last = stop;
@@ -88,41 +95,49 @@ public class Searcher {
 
 			return new SearcherResult(hits.length(), docs);
 		} catch (IOException e) {
-			__log.error("IOException during search", e);
+			log.error("IOException during search", e);
 			throw new RuntimeException("IOException during search", e);
 		}
-	}
+	}*/
 
-	public SearcherResult search(Query query, Filter filter, Integer limit) {
-		__log.trace("Search for: " + query);
+	public SearcherResult search(Query query, Filter filter, final int limit) {
+		log.trace("Search for: " + query);
 		
 		checkIndexDirectory();
 
 		try {
-			Hits hits = indexSearcher.search(query, filter);
+            int myLimit = (limit <= 0 || limit > MAX_COUNT) ? MAX_COUNT : limit;
 
-			int myLimit = (limit == null || limit <= 0 || limit > hits.length()) ? hits.length() : limit;
+            final TopDocs topDocs = indexSearcher.search(query, filter, myLimit);
 
-			List<Document> docs = new ArrayList<Document>(myLimit);
-			for (int i = 0; i < myLimit; i++) {
-				Document doc = hits.doc(i);
-				doc.setBoost(hits.score(i));
-				docs.add(doc);
-			}
-			return new SearcherResult(hits.length(), docs);
+            final int totalHitsCount = Math.min(topDocs.totalHits, myLimit);
+
+            final ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+            final int resultLen = scoreDocs.length;
+
+			List<Document> docs = new ArrayList<Document>(resultLen);
+
+            for (final ScoreDoc scoreDoc : scoreDocs) {
+                Document doc = indexSearcher.doc(scoreDoc.doc);
+                doc.setBoost(scoreDoc.score);// TODO: is this necessary?
+                docs.add(doc);
+            }
+
+			return new SearcherResult(totalHitsCount, docs);
 		} catch (IOException e) {
-			__log.error("IOException during search", e);
+			log.error("IOException during search", e);
 			throw new RuntimeException("IOException during search", e);
 		}
 	}
 
 	private void checkIndexDirectory() {
 		try {
-			if (IndexReader.lastModified(indexDir) > indexSearcherCreated) {
+//			if (IndexReader.lastModified(indexDir) > indexSearcherCreated) {
+			if (!indexReader.isCurrent()) {
 				init(indexDir);
 			}
 		} catch (CorruptIndexException e1) {
-			__log.error("Index directory corrupted: " + indexDir);
+			log.error("Index directory corrupted: " + indexDir);
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		} catch (IOException e1) {

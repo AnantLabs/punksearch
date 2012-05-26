@@ -17,7 +17,9 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.util.DocIdBitSet;
 
 public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter {
 	private String  fieldName;
@@ -45,14 +47,15 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 	}
 
 	@Override
-	public BitSet bits(IndexReader reader) throws IOException {
+	public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
 		BitSet bits = new BitSet(reader.maxDoc());
+        DocIdBitSet docIdBitSet = new DocIdBitSet(bits);
 		TermEnum enumerator = reader.terms(new Term(fieldName, ""));
 
 		try {
 
 			if (enumerator.term() == null) {
-				return bits;
+				return docIdBitSet;
 			}
 
 			TermDocs termDocs = reader.termDocs();
@@ -82,7 +85,7 @@ public abstract class NumberRangeFilter<N extends Comparable<N>> extends Filter 
 			enumerator.close();
 		}
 
-		return bits;
+		return docIdBitSet;
 	}
 
 	public abstract N termTextToNumber(String text);

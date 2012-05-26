@@ -91,7 +91,7 @@ public class SearchAction {
 		}
 	}
 
-	@Deprecated
+	/*@Deprecated
 	public List<SearchResult> doSearch() {
 		Query query = makeQuery();
 		Filter filter = makeFilter();
@@ -109,7 +109,7 @@ public class SearchAction {
 		}
 
 		return searchResults;
-	}
+	}*/
 
 	public List<ItemGroup> doSearchGroupped() {
 		return doSearchGroupped(0, MAX_DOCS);

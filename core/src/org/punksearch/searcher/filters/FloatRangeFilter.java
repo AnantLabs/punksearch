@@ -17,7 +17,9 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.util.DocIdBitSet;
 
 public class FloatRangeFilter extends Filter {
 
@@ -45,14 +47,16 @@ public class FloatRangeFilter extends Filter {
 		}
 	}
 
-	public BitSet bits(IndexReader reader) throws IOException {
+    @Override
+    public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
 		BitSet bits = new BitSet(reader.maxDoc());
-		TermEnum enumerator = reader.terms(new Term(fieldName, ""));
+        DocIdBitSet docIdBitSet = new DocIdBitSet(bits);
+        TermEnum enumerator = reader.terms(new Term(fieldName, ""));
 
 		try {
 
 			if (enumerator.term() == null) {
-				return bits;
+				return docIdBitSet;
 			}
 
 			TermDocs termDocs = reader.termDocs();
@@ -87,7 +91,7 @@ public class FloatRangeFilter extends Filter {
 
 		System.out.println(lowerTerm + " " + upperTerm);
 
-		return bits;
+		return docIdBitSet;
 	}
 
 	public String toString() {
