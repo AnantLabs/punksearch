@@ -25,7 +25,8 @@ import org.jfree.data.general.PieDataset;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
-import org.punksearch.crawler.IndexUtils;
+import org.punksearch.lucene.Hits;
+import org.punksearch.lucene.LuceneUtils;
 import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.web.filters.TypeFilters;
 
@@ -52,7 +53,7 @@ public class FileTypeStatistics {
 	private static Hits extractDocsForType(String type) {
 		Filter filter = TypeFilters.get(type);
 		try {
-            final IndexReader indexReader = IndexReader.open(IndexUtils.dir(PunksearchFs.resolveIndexDirectory()));
+            final IndexReader indexReader = IndexReader.open(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory()));
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
             final TopDocs topDocs = indexSearcher.search(makeQuery(), filter, indexReader.numDocs());
             return new Hits(indexSearcher, topDocs);
@@ -119,7 +120,7 @@ public class FileTypeStatistics {
 				QueryParser parser = new QueryParser(LuceneVersion.VERSION,
                         "Host", new SimpleAnalyzer(LuceneVersion.VERSION));
 				Query query = parser.parse(approxQuery);
-                IndexReader indexReader = IndexReader.open(IndexUtils.dir(PunksearchFs.resolveIndexDirectory()));
+                IndexReader indexReader = IndexReader.open(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory()));
 				IndexSearcher indexSearcher = new IndexSearcher(indexReader);
                 final TopDocs topDocs = indexSearcher.search(query, indexReader.numDocs());
                 Hits hits = new Hits(indexSearcher, topDocs);
@@ -176,7 +177,7 @@ public class FileTypeStatistics {
 	private static boolean indexChangedAfter(long timestamp) {
 		try {
             // TODO: rewrite
-			return (IndexReader.lastModified(IndexUtils.dir(PunksearchFs.resolveIndexDirectory())) > timestamp);
+			return (IndexReader.lastModified(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory())) > timestamp);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
