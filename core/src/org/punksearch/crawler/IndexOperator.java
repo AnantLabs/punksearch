@@ -27,6 +27,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.analysis.FilenameAnalyzer;
 import org.punksearch.lucene.LuceneUtils;
@@ -226,15 +227,18 @@ public class IndexOperator {
 			long max = System.currentTimeMillis() - Math.round(days * 1000 * 3600 * 24);
 			NumberRangeFilter<Long> oldDocs = FilterFactory.createNumberFilter(IndexFields.INDEXED, null, max);
 			Query query = new WildcardQuery(new Term(IndexFields.HOST, "*"));
-            final TopDocs topDocs = is.search(query, oldDocs, indexReader.numDocs());
-            log.info("Deleting by age from index directory. Items to delete: " + topDocs.totalHits);
+            final int docsInReader = indexReader.numDocs();
+            if (docsInReader > 0) {
+                final TopDocs topDocs = is.search(query, oldDocs, docsInReader);
+                log.info("Deleting by age from index directory. Items to delete: " + topDocs.totalHits);
 
-            final ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+                final ScoreDoc[] scoreDocs = topDocs.scoreDocs;
 
-            for (int i = 0; i < scoreDocs.length; i++) {
-				indexReader.deleteDocument(scoreDocs[i].doc); // TODO!!!
-			}
-			indexReader.close();
+                for (ScoreDoc scoreDoc : scoreDocs) {
+                    indexReader.deleteDocument(scoreDoc.doc); // TODO!!!
+                }
+            }
+            indexReader.close();
 		} catch (IOException ex) {
 			log.error("Exception during deleting by age from index directory", ex);
 			throw new RuntimeException(ex);
@@ -262,7 +266,7 @@ public class IndexOperator {
 	private static IndexWriter createIndexWriter(String dir) throws IOException {
 //		boolean indexExists = IndexReader.indexExists(dir);
 //		return new IndexWriter(dir, analyzer, !indexExists);
-        return new IndexWriter(LuceneUtils.dir(dir),
+        return new IndexWriter(FSDirectory.open(new File(dir)),
                 new IndexWriterConfig(LuceneVersion.VERSION, analyzer));
 	}
 
@@ -290,7 +294,8 @@ public class IndexOperator {
 
 	public static boolean indexExists(String dir) {
         try {
-            return IndexReader.indexExists(LuceneUtils.dir(dir));
+            final File dirFile = new File(dir);
+            return dirFile.isDirectory() && IndexReader.indexExists(LuceneUtils.dir(dir));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

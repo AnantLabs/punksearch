@@ -22,7 +22,7 @@ public class LuceneUtils {
         }
 
         if (!dir.isDirectory()) {
-            throw new IllegalArgumentException("Not a directory");
+            throw new IllegalArgumentException("Not a directory: " + dir);
         }
 
         return FSDirectory.open(dir);
