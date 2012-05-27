@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core"%>
+<%@ include file="/WEB-INF/inc/imports.jsp" %>
 <%@ page import="org.punksearch.web.SearchParams"%>
 
 <%
@@ -15,7 +15,7 @@
 <div id="tabsContainer">
 <table cellspacing="0" id="tabs">
 	<tr>
-		<td style="width: 200px;">&#160;</td>
+		<%--<td style="width: 200px;">&#160;</td>--%>
 		<c:forEach items="${tabsArray}" var="tab">
 			<c:choose>
 				<c:when test="${tab == 'advanced'}" >

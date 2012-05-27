@@ -31,6 +31,7 @@ public class WorkspaceDevServer {
         server.addConnector(connector);
 
         WebAppContext root = new WebAppContext(join(webModule, "WebContent"), "/");
+//        WebAppContext root = new WebAppContext(join(webModule, "WebContent"), "/punksearch");
         root.addOverrideDescriptor("org/punksearch/server/override-web.xml");
 
         WebAppClassLoader rootClassLoader = new WebAppClassLoader(root);

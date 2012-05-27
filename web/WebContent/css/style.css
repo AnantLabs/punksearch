@@ -60,9 +60,12 @@ TABLE.data TD, TABLE.data TH {
 
 /* QUERY Tabs */
 #tabsContainer {
-    position: absolute;
+    /*position: absolute;*/
+    position: relative;
+
+    margin-left: 200px;
     z-index: 2007;
-    top: 30px;
+    /*top: 30px;*/
     left: 0px;
     margin-top: -2em;
 }

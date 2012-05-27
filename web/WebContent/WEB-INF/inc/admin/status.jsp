@@ -1,4 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core"%>
+<%@ include file="/WEB-INF/inc/imports.jsp" %>
 
 <%@ page import="java.util.*" %>
 <%@ page import="org.punksearch.common.*" %>
