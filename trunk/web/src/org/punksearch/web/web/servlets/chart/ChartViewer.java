@@ -1,4 +1,4 @@
-package org.punksearch.web.chart;
+package org.punksearch.web.web.servlets.chart;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
