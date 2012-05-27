@@ -24,7 +24,7 @@
 
 	<filter>
 		<filter-name>AuthFilter</filter-name>
-		<filter-class>org.punksearch.web.AuthFilter</filter-class>
+		<filter-class>org.punksearch.web.web.filters.AuthFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
@@ -61,13 +61,13 @@
 
 	<servlet>
 		<servlet-name>InitServlet</servlet-name>
-		<servlet-class>org.punksearch.web.InitServlet</servlet-class>
+		<servlet-class>org.punksearch.web.web.servlets.InitServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet>
 		<servlet-name>ChartViewerServlet</servlet-name>
-		<servlet-class>org.punksearch.web.chart.ChartViewer</servlet-class>
+		<servlet-class>org.punksearch.web.web.servlets.chart.ChartViewer</servlet-class>
 	</servlet>
 
 	<servlet-mapping>

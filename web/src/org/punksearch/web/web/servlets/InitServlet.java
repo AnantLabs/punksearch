@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.web;
+package org.punksearch.web.web.servlets;
 
 import java.io.FileNotFoundException;
 
@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import org.punksearch.common.PunksearchProperties;
+import org.punksearch.web.SearcherWrapper;
 
 public class InitServlet extends HttpServlet {
 
