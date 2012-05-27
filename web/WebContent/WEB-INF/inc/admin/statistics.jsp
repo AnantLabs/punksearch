@@ -8,12 +8,15 @@
 <%@page import="org.jfree.chart.JFreeChart"%>
 <%@page import="org.jfree.chart.ChartFactory"%>
 <%@page import="java.text.NumberFormat" %>
+<%@ page import="org.punksearch.lucene.LuceneUtils" %>
+<%@ page import="org.apache.lucene.store.Directory" %>
 
-	<div id="statistics">
+<div id="statistics">
 		<h2>Index Statistics</h2>
 		<%
 			String indexDir = PunksearchFs.resolveIndexDirectory();
-			IndexReader ir = IndexReader.open(indexDir);
+            final Directory dir = LuceneUtils.dir(indexDir);
+            IndexReader ir = IndexReader.open(dir);
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			NumberFormat nfPercent = NumberFormat.getPercentInstance();
 			nfPercent.setMaximumFractionDigits(2);
@@ -30,7 +33,7 @@
 			</tr>
 			<tr>
 				<th>Last Modified</th>
-				<td><%= new Date(IndexReader.lastModified(indexDir)).toString() %></td>
+				<td><%= new Date(IndexReader.lastModified(dir)).toString() %></td>
 			</tr>
 			<tr>
 				<th>Total Count of Indexed Items</th>
