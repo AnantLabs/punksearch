@@ -1,11 +1,13 @@
 package org.punksearch.web;
 
+import org.punksearch.common.Settings;
+
 import javax.servlet.ServletRequest;
 
 public class SearchPager {
 
     private static final int PAGE_LINKS_PER_SIDE = 10;
-    public static final int PAGE_SIZE = 15;
+    public static final int PAGE_SIZE = Settings.getInt("org.punksearch.web.results_per_page", 15);
 
     public static String makePagesRow(ServletRequest request, int all) {
         int cur = SearchParams.getIntegerValue(request, "first", 0) / PAGE_SIZE;
