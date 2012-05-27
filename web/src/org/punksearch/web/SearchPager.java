@@ -15,7 +15,7 @@ public class SearchPager {
 
         StringBuilder result = new StringBuilder("<div>");
 
-        int maxNum = (all % PAGE_SIZE == 0) ? all / PAGE_SIZE : all / PAGE_SIZE + 1;
+        int maxNum = getPageCount(all);
         //int pageNum = 0;
         int startNum = (cur - PAGE_LINKS_PER_SIDE < 0) ? 0 : cur - PAGE_LINKS_PER_SIDE;
         int stopNum = (cur + PAGE_LINKS_PER_SIDE + 1 > maxNum) ? maxNum : cur + PAGE_LINKS_PER_SIDE + 1;
@@ -36,7 +36,7 @@ public class SearchPager {
             if (i == cur) {
                 result.append(makePageLink("", i + 1));
             } else {
-                String url = urlPrefix.toString() + "first=" + (i * PAGE_SIZE) + "&last=" + ((i + 1) * PAGE_SIZE - 1);
+                String url = urlPrefix.toString() + "first=" + (i * PAGE_SIZE) + "&last=" + ((i + 1) * PAGE_SIZE/* - 1*/); // TODO: why -1???
                 result.append(makePageLink(url, i + 1));
             }
         }
@@ -47,7 +47,7 @@ public class SearchPager {
     }
 
     public static int getPageCount(int all) {
-        return (all % PAGE_SIZE == 0) ? all / PAGE_SIZE : all / PAGE_SIZE + 1;
+        return all % PAGE_SIZE == 0 ? (all / PAGE_SIZE) : (all / PAGE_SIZE) + 1;
     }
 
     private static String makePageLink(String url, int num) {

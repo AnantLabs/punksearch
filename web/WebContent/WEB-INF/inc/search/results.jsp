@@ -4,9 +4,10 @@
 <%@ page import="org.punksearch.web.*" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.punksearch.common.Settings" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
-<% boolean showScores = Boolean.parseBoolean(System.getProperty("org.punksearch.web.showscores")); %>
+<% boolean showScores = Settings.getBool("org.punksearch.web.showscores"); %>
 <div id="searchResultsContainer">
 	<%
 		Map parameterMap = request.getParameterMap();
