@@ -129,8 +129,13 @@ public class FtpAdapter implements ProtocolAdapter {
 		}
 		return new FtpItem(null, "");
 	}
-	
-	public long getSize(Object item) {
+
+    @Override
+    public Object resolvePath(String path) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    public long getSize(Object item) {
 		return ((FtpItem) item).getSize();
 	}
 

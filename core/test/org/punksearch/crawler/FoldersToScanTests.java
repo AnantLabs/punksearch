@@ -1,7 +1,7 @@
 package org.punksearch.crawler;
 
 import org.junit.Test;
-import org.punksearch.crawler.selective_scan.FoldersToScanRegistry;
+import org.punksearch.crawler.selective_scan.ScannedFoldersRegistry;
 
 import java.util.HashMap;
 
@@ -20,14 +20,14 @@ public class FoldersToScanTests {
         protocolToFoldersStr.put("smb", "1.1.1.1:only:aaa/111:bbb|2.2.2.2:not1:ccc/3/3/3");
 
         try {
-            new FoldersToScanRegistry(protocolToFoldersStr);
+            new ScannedFoldersRegistry(protocolToFoldersStr);
             fail();
         } catch (IllegalArgumentException e) {
         }
 
         protocolToFoldersStr.put("smb", "1.1.1.1:ZZZ:aaa/111:bbb|2.2.2.2:not:ccc/3/3/3");
         try {
-            new FoldersToScanRegistry(protocolToFoldersStr);
+            new ScannedFoldersRegistry(protocolToFoldersStr);
             fail();
         } catch (IllegalArgumentException e) {
         }
@@ -39,25 +39,25 @@ public class FoldersToScanTests {
 
         protocolToFoldersStr.put("smb", "1.1.1.1:only:aaa/111:/bbb|2.2.2.2:not:ccc/3/3/3");
 
-        FoldersToScanRegistry foldersToScanRegistry = new FoldersToScanRegistry(protocolToFoldersStr);
+        ScannedFoldersRegistry scannedFoldersRegistry = new ScannedFoldersRegistry(protocolToFoldersStr);
 
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "3.3.3.3", "qqq"));// no info
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "aaa//111///222"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "aaa\\111\\\\222"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "/aaa//111///222"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "aaa//111111"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "aaa"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "cccc"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "bbb"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "/bbb"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "1.1.1.1", "bbb/BBB"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "3.3.3.3", "qqq"));// no info
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "aaa//111///222"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "aaa\\111\\\\222"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "/aaa//111///222"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "aaa//111111"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "aaa"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "cccc"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "bbb"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "/bbb"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "1.1.1.1", "bbb/BBB"));
 
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "bbb/BBB"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc\\3\\3"));
-        assertTrue(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/333"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/3"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/3/"));
-        assertFalse(foldersToScanRegistry.allowedScan("smb", "2.2.2.2", "ccc/3\\3/3\\333"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "bbb/BBB"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc\\3\\3"));
+        assertTrue(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/333"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/3"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc/3/3/3/"));
+        assertFalse(scannedFoldersRegistry.allowedScan("smb", "2.2.2.2", "ccc/3\\3/3\\333"));
     }
 }
