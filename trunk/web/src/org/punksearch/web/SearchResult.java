@@ -15,20 +15,35 @@ import java.text.DecimalFormat;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.common.IndexFields;
+import org.punksearch.web.utils.BrowserOS;
 
 public class SearchResult {
 
-	public String host  = null;
-	public String path  = null;
-	public String name  = null;
-	public String ext   = null;
-	public String date  = null;
-	public String size  = null;
+    public final String host;
+    public final String protocol;
+    public final String ip;
+
+	public final String path;
+	public String name;
+	public String ext;
+	public String date;
+	public String size;
 
 	public float  score = 0;
 
-	public SearchResult(Document doc) {
-		host = doc.get(IndexFields.HOST).replace("smb_", "smb://").replace("ftp_", "ftp://");
+	public SearchResult(Document doc, BrowserOS os) {
+        host = doc.get(IndexFields.HOST); // like smb_1.1.1.1
+        String[] parts = host.split("_");
+
+        String protocol = parts[0];
+        ip = parts[1];
+
+        if ("smb".equals(protocol) && os != BrowserOS.UNIX_LIKE) {
+            protocol = "file";
+        }
+
+        this.protocol = protocol;
+
 		path = doc.get(IndexFields.PATH).replaceAll("&", "&amp;");
 		name = doc.get(IndexFields.NAME).replaceAll("&", "&amp;");
 		ext = doc.get(IndexFields.EXTENSION);
