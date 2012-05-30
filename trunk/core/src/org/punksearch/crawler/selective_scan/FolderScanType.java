@@ -1,4 +1,4 @@
-package org.punksearch.crawler;
+package org.punksearch.crawler.selective_scan;
 
 /**
  * User: gubarkov

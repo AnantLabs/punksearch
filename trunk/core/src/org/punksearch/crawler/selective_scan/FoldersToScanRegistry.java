@@ -1,6 +1,7 @@
-package org.punksearch.crawler;
+package org.punksearch.crawler.selective_scan;
 
 import org.punksearch.common.Settings;
+import org.punksearch.crawler.CrawlerKeys;
 
 import java.util.*;
 
