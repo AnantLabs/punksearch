@@ -15,6 +15,8 @@
         <!-- changing = not cache metadata (ivy.xml) -->
         <dependency org="punksearch" name="core" rev="latest.integration" changing="true" conf="default->runtime"/>
 
+        <dependency org="commons-lang" name="commons-lang" rev="2.6" conf="default"/>
+
         <!--<dependency org="org.apache.geronimo.specs" name="geronimo-servlet_2.5_spec" rev="1.2" conf="provided->default"/>-->
         <dependency org="org.jboss.spec.javax.servlet" name="jboss-servlet-api_3.0_spec" rev="1.0.1.Final" conf="provided->default"/>
 

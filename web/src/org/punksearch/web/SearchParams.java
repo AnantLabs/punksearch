@@ -10,6 +10,7 @@
  ***************************************************************************/
 package org.punksearch.web;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,8 +59,8 @@ public class SearchParams {
             ext = getStringValue(request, "ext");
 
             /* maxSize & minSize */
-            minSize = (Long) Math.round(getDoubleValue(request, "minSize", 0.0) * 1024 * 1024);
-            maxSize = (Long) Math.round(getDoubleValue(request, "maxSize", 0.0) * 1024 * 1024);
+            minSize = Math.round(getDoubleValue(request, "minSize", 0.0) * 1024 * 1024);
+            maxSize = Math.round(getDoubleValue(request, "maxSize", 0.0) * 1024 * 1024);
             if (minSize == 0)
                 minSize = null;
             if (maxSize == 0)
@@ -70,16 +71,26 @@ public class SearchParams {
 
             /* fromDate & toDate */
             DateFormat fmt = new SimpleDateFormat(DATE_FORMAT);
-            try {
-                fromDate = fmt.parse(getStringValue(request, "fromDate")).getTime();
-            } catch (ParseException pe) {
-                log.warn("problem parsing fromDate: " + pe.getMessage());
+
+            final String fromDateStr = getStringValue(request, "fromDate");
+            final String toDateStr = getStringValue(request, "toDate");
+
+            if (StringUtils.isNotEmpty(fromDateStr)) {
+                try {
+                    fromDate = fmt.parse(fromDateStr).getTime();
+                } catch (ParseException pe) {
+                    log.warn("problem parsing fromDate: " + pe.getMessage());
+                }
             }
-            try {
-                toDate = fmt.parse(getStringValue(request, "toDate")).getTime();
-            } catch (ParseException pe) {
-                log.warn("problem parsing toDate: " + pe.getMessage());
+
+            if (StringUtils.isNotEmpty(toDateStr)) {
+                try {
+                    toDate = fmt.parse(toDateStr).getTime();
+                } catch (ParseException pe) {
+                    log.warn("problem parsing toDate: " + pe.getMessage());
+                }
             }
+
             if (fromDate != null && toDate != null && fromDate > toDate) {
                 fromDate = toDate = null;
             }
