@@ -67,4 +67,12 @@ public class FolderScanInfo {
     String getIp() {
         return ip;
     }
+
+    List<String> getFolders() {
+        return folders;
+    }
+
+    FolderScanType getScanType() {
+        return scanType;
+    }
 }

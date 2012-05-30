@@ -21,6 +21,7 @@ import org.punksearch.online.OnlineStatuses;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 
 import static org.punksearch.crawler.CrawlerKeys.*;
 
@@ -161,6 +162,17 @@ public class SmbAdapter implements ProtocolAdapter {
             throw new IllegalStateException("Can't get root dir since not connected to any smb host");
         }
         return smb;
+    }
+
+    @Override
+    public Object resolvePath(String path) {
+        try {
+            return new SmbFile(smb, path);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object[] list(Object dir) {

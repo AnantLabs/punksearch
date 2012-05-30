@@ -10,16 +10,16 @@ import java.util.*;
  * Date: 30.05.12
  * Time: 15:42
  */
-public class FoldersToScanRegistry {
+public class ScannedFoldersRegistry implements ScannedFolders {
     private Map<String, FolderScanInfo> folderScanInfos = new HashMap<String, FolderScanInfo>();
 
-    private final static FoldersToScanRegistry instance = new FoldersToScanRegistry();
+    private final static ScannedFoldersRegistry instance = new ScannedFoldersRegistry();
 
-    public static FoldersToScanRegistry getInstance() {
+    public static ScannedFolders getInstance() {
         return instance;
     }
 
-    FoldersToScanRegistry() {
+    ScannedFoldersRegistry() {
         final Map<String, String> protocolToFoldersStr = new HashMap<String, String>();
 
         protocolToFoldersStr.put("smb", Settings.get(CrawlerKeys.SMB_FOLDERS));
@@ -28,7 +28,7 @@ public class FoldersToScanRegistry {
         init(protocolToFoldersStr);
     }
 
-    public FoldersToScanRegistry(Map<String, String> protocolToFoldersStr) {
+    public ScannedFoldersRegistry(Map<String, String> protocolToFoldersStr) {
         init(protocolToFoldersStr);
     }
 
@@ -45,12 +45,29 @@ public class FoldersToScanRegistry {
         }
     }
 
+    @Override
     public boolean allowedScan(String protocol, String ip, String path) {
-        final String protocolIpKey = protocolIpKey(protocol, ip);
-
-        final FolderScanInfo folderScanInfo = folderScanInfos.get(protocolIpKey);
+        final FolderScanInfo folderScanInfo = folderScanInfos.get(protocolIpKey(protocol, ip));
 
         return folderScanInfo == null || folderScanInfo.allowedScan(path);
+    }
+
+    @Override
+    public List<String> foldersAllowedToScan(String protocol, String ip) {
+        final FolderScanInfo folderScanInfo = folderScanInfos.get(protocolIpKey(protocol, ip));
+
+        if (folderScanInfo.getScanType() == FolderScanType.ONLY_THOSE) {
+            List<String> result = new ArrayList<String>(folderScanInfo.getFolders().size());
+            for (String folder : folderScanInfo.getFolders()) {
+                if (!folder.endsWith("/")) {
+                    folder += "/";
+                }
+                result.add(folder);
+            }
+            return result;
+        } else {
+            return null;
+        }
     }
 
     private String protocolIpKey(String protocol, String ip) {

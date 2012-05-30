@@ -18,6 +18,7 @@ import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.adapters.ProtocolAdapter;
 import org.punksearch.crawler.adapters.ProtocolAdapterFactory;
+import org.punksearch.crawler.selective_scan.ScannedFoldersRegistry;
 import org.punksearch.ip.Ip;
 
 import java.util.*;
@@ -92,7 +93,17 @@ public class HostCrawler extends Thread {
             connected = adapter.connect(ip.toString());
             if (connected) {
                 log.info("Start crawling " + currentHostUrl());
-                long size = crawlDirectory(adapter.getRootDir(), 0);
+                long size = 0;
+
+                final List<String> scanOnlyThose = ScannedFoldersRegistry.getInstance().foldersAllowedToScan(adapter.getProtocol(), ip.toString());
+                if (scanOnlyThose != null) {
+                    for (String path : scanOnlyThose) {
+                        size += crawlDirectory(adapter.resolvePath(path), 0);
+                    }
+                } else {
+                    size = crawlDirectory(adapter.getRootDir(), 0);
+                }
+
                 if (size > 0) {
                     log.info("Stop crawling " + currentHostUrl() + ", crawled " + size + " bytes");
                     crawledHosts.add(new HostStats(ip, adapter.getProtocol(), size, docCount));
@@ -232,7 +243,8 @@ public class HostCrawler extends Thread {
     }
 
     protected long crawlDirectory(Object dir, int deep) {
-        if (deep > maxDeep || isStopRequested()) {
+        if (deep > maxDeep || isStopRequested()
+                || !ScannedFoldersRegistry.getInstance().allowedScan(adapter.getProtocol(), getIp(), adapter.getFullPath(dir))) {
             return 0L;
         }
 

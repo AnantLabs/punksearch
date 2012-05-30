@@ -69,6 +69,8 @@ public interface ProtocolAdapter {
 	 */
 	public Object getRootDir();
 
+    public Object resolvePath(String path);
+
 	public Object[] list(Object dir);
 
 	/**
