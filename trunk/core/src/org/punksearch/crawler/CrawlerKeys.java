@@ -62,6 +62,7 @@ public class CrawlerKeys {
     public static final String SMB_USER = "org.punksearch.crawler.smb.user";
     public static final String SMB_PASSWORD = "org.punksearch.crawler.smb.password";
     public static final String SMB_TIMEOUT = "org.punksearch.crawler.smb.timeout";
+    public static final String SMB_FOLDERS = "org.punksearch.crawler.smb.folders";
 
     /* FTP related keys */
     public static final String FTP_ENCODING_DEFAULT = "org.punksearch.crawler.ftp.encoding.default";
@@ -69,4 +70,5 @@ public class CrawlerKeys {
     public static final String FTP_USER = "org.punksearch.crawler.ftp.user";
     public static final String FTP_PASSWORD = "org.punksearch.crawler.ftp.password";
     public static final String FTP_TIMEOUT = "org.punksearch.crawler.ftp.timeout";
+    public static final String FTP_FOLDERS = "org.punksearch.crawler.ftp.folders";
 }
