@@ -5,11 +5,14 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.punksearch.common.Settings" %>
+<%@ page import="org.punksearch.web.utils.BrowserOS" %>
+<%@ page import="org.punksearch.web.utils.RequestUtils" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <% boolean showScores = Settings.getBool("org.punksearch.web.showscores"); %>
 <div id="searchResultsContainer">
 	<%
+        BrowserOS os = RequestUtils.getBrowserOS(request);
 		Map parameterMap = request.getParameterMap();
 		if (!parameterMap.isEmpty() && !(parameterMap.size() == 1 && parameterMap.get("type") != null)) {
 			SearchAction searchAction = new SearchAction(params);
@@ -33,9 +36,9 @@
 		<%
 			int counter = 0;
 			for (ItemGroup group : searchResults) {
-				SearchResult file = new SearchResult(group.getItems().get(0));
+				SearchResult file = new SearchResult(group.getItems().get(0), os);
 				boolean online = OnlineStatuses.getInstance().isOnline(file.host);
-                String host = HostnameResolver.getInstance().resolveByIp(file.host);
+                String host = HostnameResolver.getInstance().resolveByIp(file.ip);
 				counter++;
 		%>
 		<tr>
@@ -48,13 +51,13 @@
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
 				<span class="more"><%=(group.getItems().size() > 1) ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
 				<%=(showScores) ? "(" + file.score + ")" : ""%><br/>
-				<span style="font-size: 8pt;" class="path"><%=file.host + file.path%></span>
+				<span style="font-size: 8pt;" class="path"><%= file.protocol %>://<%= file.ip %><%= file.path %></span>
 				<br/>
 				<div class="othersInGroup" id="subGroup<%= counter %>" style="display:none;">
 					<table>
 						<%
 							for (int i = 1; i < group.getItems().size(); i++) {
-								SearchResult subFile = new SearchResult(group.getItems().get(i));
+								SearchResult subFile = new SearchResult(group.getItems().get(i), os);
 								boolean subOnline = OnlineStatuses.getInstance().isOnline(subFile.host);
 						%>
 						<tr>
@@ -64,7 +67,7 @@
 							</td>
 							<td>
 								<span class="name"><%= subFile.name %></span><br/>
-								<span class="path"><%= subFile.host + subFile.path %></span>
+								<span class="path"><%= file.protocol %>://<%= subFile.ip %><%= subFile.path %></span>
 							</td>
 						</tr>
 						<%

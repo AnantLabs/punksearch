@@ -213,11 +213,11 @@ public class SearchAction {
         return result;
     }
 
-    private static List<SearchResult> prepareResults(List<Document> results) {
+    /*private static List<SearchResult> prepareResults(List<Document> results) {
         List<SearchResult> searchResults = new ArrayList<SearchResult>(results.size());
         for (Document doc : results) {
             searchResults.add(new SearchResult(doc));
         }
         return searchResults;
-    }
+    }*/
 }
