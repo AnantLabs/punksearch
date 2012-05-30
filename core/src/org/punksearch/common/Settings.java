@@ -22,7 +22,7 @@ public class Settings {
     }
 
     public static float getFloat(String key, float defaultVal) {
-        final String propVal = System.getProperty(key);
+        final String propVal = get(key);
 
         if (propVal == null) {
             return defaultVal;
@@ -44,12 +44,20 @@ public class Settings {
     }
 
     public static boolean getBool(String key, boolean defaultVal) {
-        final String propVal = System.getProperty(key);
+        final String propVal = get(key);
 
         if (propVal == null) {
             return defaultVal;
         }
 
         return Boolean.parseBoolean(propVal);
+    }
+
+    public static String get(String key) {
+        return System.getProperty(key);
+    }
+
+    public static String get(String key, String defaultVal) {
+        return System.getProperty(key, defaultVal);
     }
 }
