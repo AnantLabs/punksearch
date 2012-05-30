@@ -1,4 +1,4 @@
-package org.punksearch.crawler;
+package org.punksearch.crawler.selective_scan;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -52,9 +52,15 @@ public class FolderScanInfo {
 
     private String norm(String path) {
         String norm = FilenameUtils.normalize(path, true);
+
+        if (!norm.startsWith("/")) {
+            norm = "/" + norm;
+        }
+
         if (!norm.endsWith("/")) {
             norm += "/";
         }
+
         return norm;
     }
 
