@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.common.IndexFields;
+import org.punksearch.hosts_resolver.HostnameResolver;
 import org.punksearch.web.utils.BrowserOS;
 
 public class SearchResult {
@@ -22,6 +23,7 @@ public class SearchResult {
     public final String host;
     public final String protocol;
     public final String ip;
+    public final String hostname;
 
 	public final String path;
 	public String name;
@@ -37,6 +39,8 @@ public class SearchResult {
 
         String protocol = parts[0];
         ip = parts[1];
+
+        hostname = HostnameResolver.getInstance().resolveByIp(ip);
 
         if ("smb".equals(protocol) && os != BrowserOS.UNIX_LIKE) {
             protocol = "file";

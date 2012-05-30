@@ -1,12 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="org.punksearch.hosts_resolver.HostnameResolver"%>
+<%@ page import="org.punksearch.common.Settings"%>
 <%@ page import="org.punksearch.online.OnlineStatuses" %>
 <%@ page import="org.punksearch.web.*" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.punksearch.common.Settings" %>
 <%@ page import="org.punksearch.web.utils.BrowserOS" %>
 <%@ page import="org.punksearch.web.utils.RequestUtils" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 
 <% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <% boolean showScores = Settings.getBool("org.punksearch.web.showscores"); %>
@@ -38,7 +37,6 @@
 			for (ItemGroup group : searchResults) {
 				SearchResult file = new SearchResult(group.getItems().get(0), os);
 				boolean online = OnlineStatuses.getInstance().isOnline(file.host);
-                String host = HostnameResolver.getInstance().resolveByIp(file.ip);
 				counter++;
 		%>
 		<tr>
@@ -47,11 +45,10 @@
 				<div style='font-size: 4px; margin: 1px; background-color: <%= (online) ? "#00FF00;" : "#FF0000;" %>;'>&nbsp;&nbsp;</div>
 			</td>
 			<td style="padding-left: 2px;">
-                [<%=host%>]
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
 				<span class="more"><%=(group.getItems().size() > 1) ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
 				<%=(showScores) ? "(" + file.score + ")" : ""%><br/>
-				<span style="font-size: 8pt;" class="path"><%= file.protocol %>://<%= file.ip %><%= file.path %></span>
+				<span style="font-size: 8pt;" class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= file.path %></span>
 				<br/>
 				<div class="othersInGroup" id="subGroup<%= counter %>" style="display:none;">
 					<table>
@@ -67,7 +64,7 @@
 							</td>
 							<td>
 								<span class="name"><%= subFile.name %></span><br/>
-								<span class="path"><%= file.protocol %>://<%= subFile.ip %><%= subFile.path %></span>
+								<span class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= subFile.path %></span>
 							</td>
 						</tr>
 						<%
