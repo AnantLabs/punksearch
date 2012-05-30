@@ -156,17 +156,17 @@ public class NetworkCrawler implements Runnable {
      * The system property names are defined by static final fields of CrawlerKeys class.
      */
     private void readProperties() {
-        this.indexDirectory = PunksearchFs.resolveIndexDirectory();
+        indexDirectory = PunksearchFs.resolveIndexDirectory();
 
-        this.forceUnlock = getBool(UNLOCK_PROPERTY, false);
-        this.threadCount = getInt(THREADS_PROPERTY, 5);
+        forceUnlock = getBool(UNLOCK_PROPERTY, false);
+        threadCount = getInt(THREADS_PROPERTY, 5);
 
-        this.fileTypes = FileTypes.readFromDefaultFile();
+        fileTypes = FileTypes.readFromDefaultFile();
 
-        this.daysToKeep = getFloat(KEEPDAYS_PROPERTY, 7);
-        this.maxHours = getInt(MAXHOURS_PROPERTY, 12);
+        daysToKeep = getFloat(KEEPDAYS_PROPERTY, 7);
+        maxHours = getInt(MAXHOURS_PROPERTY, 12);
 
-        this.ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
+        ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
     }
 
     private void startTimers() {
@@ -272,7 +272,7 @@ public class NetworkCrawler implements Runnable {
      * 22.33.44.55, smth else, foo
      * </pre>
      *
-     * @param path Either absolute or relative (to punksearch home) path to the file
+     * @param file file to get ip ranges from
      * @return list of IpRanage objects
      */
     @SuppressWarnings("unchecked")
@@ -299,14 +299,24 @@ public class NetworkCrawler implements Runnable {
     }
 
     private static String getThreadDirectory(int index) {
+        return getTempDir() + "punksearch_crawler" + index;
+    }
+
+    /**
+     * @return temp dir ending by file.separator
+     */
+    private static String getTempDir() {
         String tempDir = System.getProperty(TMP_DIR_PROPERTY);
+
         if (tempDir == null || tempDir.length() == 0) {
             tempDir = System.getProperty("java.io.tmpdir");
         }
-        if (!tempDir.endsWith(System.getProperty("file.separator"))) {
-            tempDir += System.getProperty("file.separator");
+
+        if (!tempDir.endsWith(File.separator)) {
+            tempDir += File.separator;
         }
-        return tempDir + "punksearch_crawler" + index;
+
+        return tempDir;
     }
 
     private HostCrawler makeThread(int index, IpIterator iter) {
@@ -377,7 +387,7 @@ public class NetworkCrawler implements Runnable {
                 }
                 dump += thread.getName() + " : " + status + " : " + thread.getCrawledHosts().size() + "\n";
             }
-            String path = System.getProperty("java.io.tmpdir") + File.separator + STATUS_FILENAME;
+            String path = getTempDir() + STATUS_FILENAME;
             try {
                 FileUtils.writeStringToFile(new File(path), dump);
             } catch (IOException e) {
@@ -385,5 +395,4 @@ public class NetworkCrawler implements Runnable {
             }
         }
     }
-
 }
