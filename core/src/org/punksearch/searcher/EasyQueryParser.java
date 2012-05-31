@@ -10,6 +10,7 @@
  ***************************************************************************/
 package org.punksearch.searcher;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.index.Term;
@@ -18,6 +19,7 @@ import org.punksearch.common.IndexFields;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static org.punksearch.common.Settings.getBool;
 import static org.punksearch.common.Settings.getInt;
@@ -30,15 +32,19 @@ import static org.punksearch.common.Settings.getInt;
 public class EasyQueryParser {
     private static final Log log = LogFactory.getLog(Searcher.class);
 
-    public static final String CLAUSES_PROPERTY = "org.punksearch.search.clauses";
-    public static final String TERM_LENGTH_PROPERTY = "org.punksearch.search.termlength";
-    public static final String FAST_SEARCH_PROPERTY = "org.punksearch.search.fast";
+    public static final String SEARCH_MAX_CLAUSES = "org.punksearch.search.clauses";
+    public static final String SEARCH_MAX_TERM_LENGTH = "org.punksearch.search.termlength";
+    public static final String SEARCH_EXPAND = "org.punksearch.search.expand";
+    public static final String SEARCH_FAST_SEARCH = "org.punksearch.search.fast";
 
-    private static final int maxClauseCount = getInt(CLAUSES_PROPERTY, 10000);
-    private static final int minTermLength = getInt(TERM_LENGTH_PROPERTY, 3);
-    private static final boolean isFastSearch = getBool(FAST_SEARCH_PROPERTY, true);
+    private static final int maxClauseCount = getInt(SEARCH_MAX_CLAUSES, 10000);
+    private static final int minTermLength = getInt(SEARCH_MAX_TERM_LENGTH, 3);
+    private static final boolean isExpandTerms = getBool(SEARCH_EXPAND, true);
+    private static final boolean isFastSearch = getBool(SEARCH_FAST_SEARCH, true);
 
     private static final EasyQueryParser instance = new EasyQueryParser();
+
+    private static final Pattern CLEAN_CHARS_REGEX = prepareCleanCharsRegex();
 
     static {
         BooleanQuery.setMaxClauseCount(maxClauseCount);
@@ -49,6 +55,14 @@ public class EasyQueryParser {
 
     public static EasyQueryParser getInstance() {
         return instance;
+    }
+
+    private static Pattern prepareCleanCharsRegex() {
+        String cleanChars = "_|!|\\.|,|:|\\[|\\]|#|\\(|\\)|'|/|&";
+        if (isExpandTerms) {
+            cleanChars += "|\\*";
+        }
+        return Pattern.compile(cleanChars);
     }
 
     public Query makeSimpleQuery(String userQuery) {
@@ -66,10 +80,11 @@ public class EasyQueryParser {
         for (String item : terms) {
             BooleanQuery itemQuery = new BooleanQuery();
 
-            Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
+            final String term = prepareItem(item);
+            Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, term));
             itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
 
-            Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
+            Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, term));
             itemQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 
             query.add(itemQuery, occurItem(item));
@@ -162,11 +177,12 @@ public class EasyQueryParser {
     private List<String> prepareQueryParameter(String str) {
         List<String> result = new LinkedList<String>();
         if (str != null) {
-            str = str.replaceAll("\\*|_|!|\\.|,|\\:|\\[|\\]|#|\\(|\\)|'|/|&", " ");
-            String[] terms = str.toLowerCase().split(" ");
+            str = CLEAN_CHARS_REGEX.matcher(str).replaceAll(" ");
+            String[] terms = StringUtils.split(str.toLowerCase());
             for (String term : terms) {
                 term = term.trim();
-                if (term.length() >= minTermLength) {
+                if (term.length() >= minTermLength
+                        || !isExpandTerms && term.length() > 0) {
                     result.add(term);
                 }
             }
@@ -178,7 +194,11 @@ public class EasyQueryParser {
         if (item.startsWith("+") || item.startsWith("-")) {
             item = item.substring(1);
         }
-        return isFastSearch ? item + "*" : "*" + item + "*";
+        return !isExpandTerms
+                ? item
+                : isFastSearch
+                ? item + "*"
+                : "*" + item + "*";
     }
 
     private BooleanClause.Occur occurItem(String item) {

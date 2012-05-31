@@ -16,6 +16,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LengthFilter;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.punksearch.crawler.LuceneVersion;
 
 /**
  * Analyzes file names.
@@ -37,8 +38,10 @@ public class FilenameAnalyzer extends Analyzer {
 	@Override
 	public TokenStream tokenStream(String fieldName, Reader reader) {
 		TokenStream result = new FilenameTokenizer(reader);
-		result = new LengthFilter(result, MIN_TERM_LENGTH, 1000);
-		result = new LowerCaseFilter(result);
+
+        // TODO: what is boolean enablePositionIncrements for?
+		result = new LengthFilter(false, result, MIN_TERM_LENGTH, 1000);
+		result = new LowerCaseFilter(LuceneVersion.VERSION, result);
 		return result;
 	}
 
