@@ -56,7 +56,10 @@ public class ScannedFoldersRegistry implements ScannedFolders {
     public List<String> foldersAllowedToScan(String protocol, String ip) {
         final FolderScanInfo folderScanInfo = folderScanInfos.get(protocolIpKey(protocol, ip));
 
-        if (folderScanInfo.getScanType() == FolderScanType.ONLY_THOSE) {
+        if (folderScanInfo == null
+                || folderScanInfo.getScanType() != FolderScanType.ONLY_THOSE) {
+            return null;
+        } else {
             List<String> result = new ArrayList<String>(folderScanInfo.getFolders().size());
             for (String folder : folderScanInfo.getFolders()) {
                 if (!folder.endsWith("/")) {
@@ -65,8 +68,6 @@ public class ScannedFoldersRegistry implements ScannedFolders {
                 result.add(folder);
             }
             return result;
-        } else {
-            return null;
         }
     }
 
