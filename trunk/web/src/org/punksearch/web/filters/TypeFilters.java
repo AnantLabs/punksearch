@@ -10,19 +10,12 @@
  ***************************************************************************/
 package org.punksearch.web.filters;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.CachingWrapperFilter;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.QueryWrapperFilter;
-import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.*;
 import org.punksearch.common.FileType;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
@@ -31,98 +24,93 @@ import org.punksearch.searcher.filters.CompositeFilter;
 import org.punksearch.searcher.filters.FilterFactory;
 import org.punksearch.searcher.filters.NumberRangeFilter;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 public class TypeFilters {
+    public static final String DIRECTORY_KEY = "directory";
 
-	public static final String         DIRECTORY_KEY = "directory";
+    private static Map<String, Filter> filters = new HashMap<String, Filter>();
+    private static FileTypes types = FileTypes.readFromDefaultFile();
 
-	private static Map<String, Filter> filters       = new HashMap<String, Filter>();
-	private static FileTypes           types         = FileTypes.readFromDefaultFile();
+    static {
+        init();
+    }
 
-	static {
-		init();
-	}
+    public static Filter get(String type) {
+        return filters.get(type);
+    }
 
-	public static Filter get(String type) {
-		return filters.get(type);
-	}
+    private static void init() {
+        for (String key : types.list()) {
+            filters.put(key, create(key));
+        }
+        filters.put(DIRECTORY_KEY, createByItemType(null, null, IndexFields.TYPE_DIR));
+    }
 
-	private static void init() {
+    /**
+     * @param min
+     * @param max
+     * @param itemType "DIR" or "FILE"
+     * @return
+     */
+    private static Filter createByItemType(Long min, Long max, String itemType) {
+        CompositeFilter filter = new CompositeFilter();
 
-		for (String key : types.list()) {
-			filters.put(key, create(key));
-		}
-		filters.put(DIRECTORY_KEY, createByItemType(null, null, IndexFields.TYPE_DIR));
-	}
+        if (min != null || max != null) {
+            NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
+            filter.add(sizeFilter);
+        }
 
-	/**
-	 *
-	 * @param min
-	 * @param max
-	 * @param itemType
-	 *            "DIR" or "FILE"
-	 * @return
-	 */
-	private static Filter createByItemType(Long min, Long max, String itemType) {
-		CompositeFilter filter = new CompositeFilter();
+        Query typeQuery = new TermQuery(new Term(IndexFields.TYPE, itemType));
+        QueryWrapperFilter typeFilter = new QueryWrapperFilter(typeQuery);
+        filter.add(typeFilter);
 
-		if (min != null || max != null) {
-			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
-			filter.add(sizeFilter);
-		}
+        return new CachingWrapperFilter(filter);
+    }
 
-		Query typeQuery = new TermQuery(new Term(IndexFields.TYPE, itemType));
-		QueryWrapperFilter typeFilter = new QueryWrapperFilter(typeQuery);
-		filter.add(typeFilter);
+    private static Filter createByExt(Long min, Long max, Set<String> extensions) {
+        CompositeFilter filter = new CompositeFilter();
 
-		return new CachingWrapperFilter(filter);
-	}
+        if (min != null || max != null) {
+            NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
+            filter.add(sizeFilter);
+        }
 
-	private static Filter createByExt(Long min, Long max, Set<String> extensions) {
-		CompositeFilter filter = new CompositeFilter();
+        final String extStr = StringUtils.join(extensions, ' ');
 
-		if (min != null || max != null) {
-			NumberRangeFilter<Long> sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, min, max);
-			filter.add(sizeFilter);
-		}
-
-		String extStr = "";
-		for (String tmp : extensions) {
-			extStr += " " + tmp;
-		}
-		extStr = extStr.trim();
-
-		try {
-			Query extQuery;
-			if (extStr.length() != 0) {
-				extQuery = new QueryParser(LuceneVersion.VERSION,
+        Query extQuery;
+        if (extStr.length() != 0) {
+            try {
+                extQuery = new QueryParser(LuceneVersion.VERSION,
                         IndexFields.EXTENSION,
                         new StandardAnalyzer(LuceneVersion.VERSION)).parse(extStr);
-			} else {
-				extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
-			}
-			QueryWrapperFilter extFilter = new QueryWrapperFilter(extQuery);
-			filter.add(extFilter);
-		} catch (ParseException pe) {
-			// dummy
-		}
+            } catch (ParseException pe) {
+                throw new AssertionError(pe);
+            }
+        } else {
+            extQuery = new TermQuery(new Term(IndexFields.EXTENSION, ""));
+        }
+        QueryWrapperFilter extFilter = new QueryWrapperFilter(extQuery);
+        filter.add(extFilter);
 
-		return new CachingWrapperFilter(filter);
-	}
+        return new CachingWrapperFilter(filter);
+    }
 
-	private static Filter create(String typeName) {
-		FileType type = types.get(typeName);
-		if (type != null) {
-			Long min = type.getMinBytes();
-			Long max = type.getMaxBytes();
-			Set<String> ext = type.getExtensions();
-			return createByExt(min, max, ext);
-		} else {
-			throw new IllegalArgumentException("File type not found: " + typeName);
-		}
-	}
+    private static Filter create(String typeName) {
+        FileType type = types.get(typeName);
+        if (type != null) {
+            Long min = type.getMinBytes();
+            Long max = type.getMaxBytes();
+            Set<String> ext = type.getExtensions();
+            return createByExt(min, max, ext);
+        } else {
+            throw new IllegalArgumentException("File type not found: " + typeName);
+        }
+    }
 
-	public static FileTypes getTypes() {
-		return types;
-	}
-
+    public static FileTypes getTypes() {
+        return types;
+    }
 }
