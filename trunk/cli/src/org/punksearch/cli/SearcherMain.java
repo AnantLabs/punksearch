@@ -33,7 +33,7 @@ public class SearcherMain {
 			System.exit(1);
 		}
 
-		EasyQueryParser parser = new EasyQueryParser();
+		EasyQueryParser parser = EasyQueryParser.getInstance();
 		Query query = parser.makeSimpleQuery(args[0]);
 
 		Searcher searcher = new Searcher(PunksearchFs.resolveIndexDirectory());

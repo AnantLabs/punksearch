@@ -50,7 +50,7 @@ public class IndexUtilsMain {
 		System.out.println("Query: " + queryStr);
 
 		Searcher searcher = new Searcher(indexDir);
-		Query query = new EasyQueryParser().makeSimpleQuery(queryStr);
+		Query query = EasyQueryParser.getInstance().makeSimpleQuery(queryStr);
 		SearcherResult result = searcher.search(query, null, Integer.MAX_VALUE);
 
 		System.out.println("Found: " + result.count());
