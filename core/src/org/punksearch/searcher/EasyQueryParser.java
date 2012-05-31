@@ -34,14 +34,21 @@ public class EasyQueryParser {
     public static final String TERM_LENGTH_PROPERTY = "org.punksearch.search.termlength";
     public static final String FAST_SEARCH_PROPERTY = "org.punksearch.search.fast";
 
-    private final int maxClauseCount;
-    private final int minTermLength;
-    private final boolean isFastSearch;
+    private static final int maxClauseCount = getInt(CLAUSES_PROPERTY, 10000);
+    private static final int minTermLength = getInt(TERM_LENGTH_PROPERTY, 3);
+    private static final boolean isFastSearch = getBool(FAST_SEARCH_PROPERTY, true);
 
-    public EasyQueryParser() {
-        maxClauseCount = getInt(CLAUSES_PROPERTY, 10000);
-        minTermLength = getInt(TERM_LENGTH_PROPERTY, 3);
-        isFastSearch = getBool(FAST_SEARCH_PROPERTY, true);
+    private static final EasyQueryParser instance = new EasyQueryParser();
+
+    static {
+        BooleanQuery.setMaxClauseCount(maxClauseCount);
+    }
+
+    private EasyQueryParser() {
+    }
+
+    public static EasyQueryParser getInstance() {
+        return instance;
     }
 
     public Query makeSimpleQuery(String userQuery) {
@@ -55,12 +62,9 @@ public class EasyQueryParser {
         }
 
         BooleanQuery query = new BooleanQuery(false);
-        BooleanQuery.setMaxClauseCount(maxClauseCount);
 
         for (String item : terms) {
             BooleanQuery itemQuery = new BooleanQuery();
-
-            BooleanClause.Occur occurItem = occurItem(item);
 
             Query nameQuery = new WildcardQuery(new Term(IndexFields.NAME, prepareItem(item)));
             itemQuery.add(nameQuery, BooleanClause.Occur.SHOULD);
@@ -68,7 +72,7 @@ public class EasyQueryParser {
             Query pathQuery = new WildcardQuery(new Term(IndexFields.PATH, prepareItem(item)));
             itemQuery.add(pathQuery, BooleanClause.Occur.SHOULD);
 
-            query.add(itemQuery, occurItem);
+            query.add(itemQuery, occurItem(item));
         }
 
         return query;
@@ -80,7 +84,6 @@ public class EasyQueryParser {
         }
 
         BooleanQuery query = new BooleanQuery(false);
-        BooleanQuery.setMaxClauseCount(maxClauseCount);
 
         List<String> dirTerms = prepareQueryParameter(dir);
         List<String> fileTerms = prepareQueryParameter(file);

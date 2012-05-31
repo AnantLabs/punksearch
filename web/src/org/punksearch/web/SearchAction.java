@@ -73,7 +73,7 @@ public class SearchAction {
     }
 
     private Query makeQuery() {
-        EasyQueryParser parser = new EasyQueryParser();
+        EasyQueryParser parser = EasyQueryParser.getInstance();
         if (SearchParams.TYPE_ADVANCED.equals(params.type)) {
             return parser.makeAdvancedQuery(params.dir, params.file, params.ext);
         } else {
