@@ -47,27 +47,25 @@ public class SearchAction {
     }
 
     private Filter makeFilter() {
-        if (params.type.equals("advanced")) {
+        if (SearchParams.TYPE_ADVANCED.equals(params.type)) {
+            List<Filter> filters = new LinkedList<Filter>();
 
-            NumberRangeFilter<Long> sizeFilter = null;
             if (params.minSize != null || params.maxSize != null) {
-                sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, params.minSize, params.maxSize);
+                Filter sizeFilter = FilterFactory.createNumberFilter(IndexFields.SIZE, params.minSize, params.maxSize);
+                filters.add(sizeFilter);
             }
 
-            NumberRangeFilter<Long> dateFilter = null;
             if (params.fromDate != null || params.toDate != null) {
-                dateFilter = FilterFactory.createNumberFilter(IndexFields.DATE, params.fromDate, params.toDate);
+                Filter dateFilter = FilterFactory.createNumberFilter(IndexFields.DATE, params.fromDate, params.toDate);
+                filters.add(dateFilter);
             }
 
-            if (sizeFilter != null || dateFilter != null) {
-                CompositeFilter resultFilter = new CompositeFilter();
-                if (sizeFilter != null)
-                    resultFilter.add(sizeFilter);
-                if (dateFilter != null)
-                    resultFilter.add(dateFilter);
-                return resultFilter;
-            } else {
+            if (filters.isEmpty()) {
                 return null;
+            } else if (filters.size() == 1) {
+                return filters.get(0);
+            } else {
+                return new CompositeFilter(filters);
             }
         } else {
             return TypeFilters.get(params.type);
@@ -76,7 +74,7 @@ public class SearchAction {
 
     private Query makeQuery() {
         EasyQueryParser parser = new EasyQueryParser();
-        if (params.type.equals("advanced")) {
+        if (SearchParams.TYPE_ADVANCED.equals(params.type)) {
             return parser.makeAdvancedQuery(params.dir, params.file, params.ext);
         } else {
             return parser.makeSimpleQuery(params.query);
@@ -110,21 +108,21 @@ public class SearchAction {
     public List<ItemGroup> doSearchGroupped(int start, int stop) {
         Query query = makeQuery();
         if (query == null) {
-            return new ArrayList<ItemGroup>(0);
+            return Collections.emptyList();
         }
         log.info("query constructed: " + query.toString());
 
         Filter filter = makeFilter();
 
-        Date startDate = new Date();
+        long startTime = System.currentTimeMillis();
         SearcherResult result = SearcherWrapper.search(query, filter, MAX_DOCS);
-        Date stopDate = new Date();
+        long stopTime = System.currentTimeMillis();
 
         List<Document> docs = sortDocsOnlineFirst(result.items());
         List<ItemGroup> searchResults = makeGroupsFromDocs(docs);
 
-        searchTime = stopDate.getTime() - startDate.getTime();
-        presentationTime = new Date().getTime() - stopDate.getTime();
+        searchTime = stopTime - startTime;
+        presentationTime = System.currentTimeMillis() - stopTime;
         overallCount = searchResults.size();
 
         int min = (start > 0) ? Math.max(0, start) : 0;

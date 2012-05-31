@@ -27,7 +27,10 @@ public class SearchParams {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    public String type = "everything";
+    public static final String TYPE_EVERYTHING = "everything";
+    public static final String TYPE_ADVANCED = "advanced";
+
+    public String type = TYPE_EVERYTHING;
     public String query = null;
 
     public String dir = null;
@@ -46,13 +49,13 @@ public class SearchParams {
     public SearchParams(ServletRequest request) {
         type = getStringValue(request, "type");
         if (type.length() == 0)
-            type = "everything";
+            type = TYPE_EVERYTHING;
 
         /* first & last */
         first = getIntegerValue(request, "first", 0);
         last = getIntegerValue(request, "last", SearchPager.PAGE_SIZE/* - 1*/); // TODO: why -1???
 
-        if (type.equals("advanced")) {
+        if (TYPE_ADVANCED.equals(type)) {
             /* dir & file & ext */
             dir = getStringValue(request, "dir");
             file = getStringValue(request, "file");
