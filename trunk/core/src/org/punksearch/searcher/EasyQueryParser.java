@@ -33,12 +33,12 @@ public class EasyQueryParser {
     private static final Log log = LogFactory.getLog(Searcher.class);
 
     public static final String SEARCH_MAX_CLAUSES = "org.punksearch.search.clauses";
-    public static final String SEARCH_MAX_TERM_LENGTH = "org.punksearch.search.termlength";
+    public static final String SEARCH_MIN_TERM_LENGTH = "org.punksearch.search.termlength";
     public static final String SEARCH_EXPAND = "org.punksearch.search.expand";
     public static final String SEARCH_FAST_SEARCH = "org.punksearch.search.fast";
 
     private static final int maxClauseCount = getInt(SEARCH_MAX_CLAUSES, 10000);
-    private static final int minTermLength = getInt(SEARCH_MAX_TERM_LENGTH, 3);
+    private static final int minTermLength = getInt(SEARCH_MIN_TERM_LENGTH, 3);
     private static final boolean isExpandTerms = getBool(SEARCH_EXPAND, true);
     private static final boolean isFastSearch = getBool(SEARCH_FAST_SEARCH, true);
 
@@ -181,8 +181,8 @@ public class EasyQueryParser {
             String[] terms = StringUtils.split(str.toLowerCase());
             for (String term : terms) {
                 term = term.trim();
-                if (term.length() >= minTermLength
-                        || !isExpandTerms && term.length() > 0) {
+                if (isExpandTerms && term.length() >= minTermLength
+                        || term.length() > 0) {
                     result.add(term);
                 }
             }
