@@ -33,7 +33,7 @@ public class IpIterator implements Iterator<Ip>
 
 		Ip result = nextIp;
 
-		nextIp = new Ip(nextIp.toLong().longValue() + 1);
+		nextIp = new Ip(nextIp.toLong() + 1);
 		if (nextIp.toLong() > currentIpRange.getFinishIp().toLong())
 		{
 			if (rangesIterator.hasNext())
