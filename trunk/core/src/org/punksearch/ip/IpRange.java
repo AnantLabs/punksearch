@@ -57,6 +57,11 @@ public class IpRange implements Comparable<IpRange> {
         }
     }
 
+    public boolean contains(Ip ip) {
+        return ip.toLong() >= startIp.toLong() &&
+                ip.toLong() <= finishIp.toLong();
+    }
+
     public Ip getFinishIp() {
         return finishIp;
     }
