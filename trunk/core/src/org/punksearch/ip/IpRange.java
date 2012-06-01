@@ -110,10 +110,14 @@ public class IpRange implements Comparable<IpRange> {
 
     /**
      * @param range to check
-     * @return if range is of form N.* or N.N.* or N.N.N.*
+     * @return if range is of form "*" or "N.*" or "N.N.*" or "N.N.N.*"
      */
     private static boolean isIpWildcardRange(String range) {
         final String[] parts = range.split("\\.");
+
+        if (parts.length > 4) {
+            return false;
+        }
 
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];

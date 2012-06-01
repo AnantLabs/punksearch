@@ -74,7 +74,11 @@ public class Ip implements Comparable<Ip> {
     }
 
     static boolean validIpPart(String part) {
-        int value = Integer.parseInt(part);
+        int value = -1;
+        try {
+            value = Integer.parseInt(part);
+        } catch (NumberFormatException ignore) {
+        }
         return value >= 0 && value <= 255;
     }
 }
