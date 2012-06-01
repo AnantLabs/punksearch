@@ -1,7 +1,5 @@
 package org.punksearch.ip;
 
-import org.punksearch.ip.Ip;
-
 import junit.framework.TestCase;
 
 public class IpTest extends TestCase
@@ -19,9 +17,9 @@ public class IpTest extends TestCase
 	public void testToLong()
 	{
 		Ip ip1 = new Ip("0.0.0.0");
-		assertEquals(0L, ip1.toLong().longValue());
+		assertEquals(0L, ip1.toLong());
 
 		Ip ip2 = new Ip("1.2.3.4");
-		assertEquals(16909060, ip2.toLong().longValue()); // 00000001.00000010.00000011.00000100
+		assertEquals(16909060, ip2.toLong()); // 00000001.00000010.00000011.00000100
 	}
 }
