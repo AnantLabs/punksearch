@@ -45,4 +45,22 @@ public class IpRangeTest extends TestCase {
         } catch (IllegalArgumentException e) {
         }
     }
+
+    public void testRangeContains() {
+        final IpRange range_1_2_3 = new IpRange("1.2.3.*");
+
+        assertTrue(range_1_2_3.contains(new Ip("1.2.3.4")));
+        assertTrue(range_1_2_3.contains(new Ip("1.2.3.0")));
+        assertTrue(range_1_2_3.contains(new Ip("1.2.3.255")));
+        assertFalse(range_1_2_3.contains(new Ip("3.3.3.3")));
+
+        IpRange ipr = new IpRange("1.2.3.4-1.2.4.10");
+
+        assertTrue(ipr.contains(ipr.getStartIp()));
+        assertTrue(ipr.contains(ipr.getFinishIp()));
+        assertTrue(ipr.contains(new Ip("1.2.3.4")));
+        assertTrue(ipr.contains(new Ip("1.2.4.0")));
+        assertFalse(ipr.contains(new Ip("1.2.3.0")));
+        assertFalse(ipr.contains(new Ip("1.2.5.0")));
+    }
 }
