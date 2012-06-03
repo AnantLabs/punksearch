@@ -22,7 +22,11 @@
 		<welcome-file>search.jsp</welcome-file>
 	</welcome-file-list>
 
-	<filter>
+    <listener>
+        <listener-class>org.punksearch.web.web.listeners.InitListener</listener-class>
+    </listener>
+
+    <filter>
 		<filter-name>AuthFilter</filter-name>
 		<filter-class>org.punksearch.web.web.filters.AuthFilter</filter-class>
 	</filter>
@@ -35,6 +39,16 @@
 		<error-code>401</error-code>
 		<location>/login.jsp</location>
 	</error-page>
+
+    <filter>
+        <filter-name>ipFilter</filter-name>
+        <filter-class>org.punksearch.web.web.filters.IpFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>ipFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
     <!--
        - This is useful because current browsers typically do not
@@ -58,12 +72,6 @@
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
-	<servlet>
-		<servlet-name>InitServlet</servlet-name>
-		<servlet-class>org.punksearch.web.web.servlets.InitServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
 
 	<servlet>
 		<servlet-name>ChartViewerServlet</servlet-name>

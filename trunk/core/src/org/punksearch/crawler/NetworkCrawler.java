@@ -17,6 +17,7 @@ import org.punksearch.common.FileTypes;
 import org.punksearch.common.PunksearchFs;
 import org.punksearch.ip.IpIterator;
 import org.punksearch.ip.IpRange;
+import org.punksearch.ip.IpRanges;
 import org.punksearch.ip.SynchronizedIpIterator;
 
 import java.io.File;
@@ -243,7 +244,7 @@ public class NetworkCrawler implements Runnable {
      * @return list of IP ranges. May return empty list, never null.
      */
     private static List<IpRange> parseRanges(String rangesString) {
-        List<IpRange> result = IpRange.parseList(rangesString);
+        List<IpRange> result = IpRanges.parseList(rangesString);
         if (result.isEmpty()) {
             File file = new File(PunksearchFs.resolve(rangesString));
             if (file.exists()) {
