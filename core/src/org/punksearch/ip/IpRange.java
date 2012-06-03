@@ -133,25 +133,4 @@ public class IpRange implements Comparable<IpRange> {
 
         return "*".equals(parts[parts.length - 1]);
     }
-
-    /**
-     * Converts comma-separated ranges string to a list of IpRange objects.
-     * <p/>
-     * Implementation skips chunks what can't be parsed. In case of empty or null argument the empty list will be
-     * returned.
-     *
-     * @param ranges Comma-separated ranges string to be converted
-     * @return List of IpRange instances, may be empty.
-     */
-    public static List<IpRange> parseList(String ranges) {
-        List<IpRange> result = new ArrayList<IpRange>();
-        if (ranges != null) {
-            for (String range : ranges.split(",")) {
-                if (isIpRange(range)) {
-                    result.add(new IpRange(range));
-                }
-            }
-        }
-        return result;
-    }
 }
