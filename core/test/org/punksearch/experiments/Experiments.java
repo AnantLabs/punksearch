@@ -8,7 +8,7 @@ import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
 import org.punksearch.common.PunksearchProperties;
 import org.punksearch.util.lucene.LuceneUtils;
-import org.punksearch.online.Probe;
+import org.punksearch.logic.online.Probe;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

@@ -15,7 +15,7 @@ import java.text.DecimalFormat;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.common.IndexFields;
-import org.punksearch.hosts_resolver.HostnameResolver;
+import org.punksearch.logic.hosts_resolver.HostnameResolver;
 import org.punksearch.web.utils.BrowserOS;
 
 public class SearchResult {

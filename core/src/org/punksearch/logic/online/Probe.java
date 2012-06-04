@@ -8,7 +8,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-package org.punksearch.online;
+package org.punksearch.logic.online;
 
 import java.io.IOException;
 import java.net.InetAddress;
