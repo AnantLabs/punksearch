@@ -7,7 +7,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 
-<% SearchParams params = (SearchParams) session.getAttribute("params"); %>
 <% boolean showScores = Settings.getBool("org.punksearch.web.showscores"); %>
 <div id="searchResultsContainer">
 	<%
