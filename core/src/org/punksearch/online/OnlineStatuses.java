@@ -28,7 +28,7 @@ import org.punksearch.util.RenewableMemoizer;
  * 
  */
 public class OnlineStatuses {
-	private static Log                         __log                  = LogFactory.getLog(OnlineStatuses.class);
+	private static Log log = LogFactory.getLog(OnlineStatuses.class);
 
 	public static final String                 PROBE_THREADS_PROPERTY = "org.punksearch.online.threads";
 
@@ -81,13 +81,13 @@ public class OnlineStatuses {
 			try {
 				result = cache.compute(normalize(host));
 			} catch (InterruptedException e) {
-				// TODO: log
+				log.warn("isOnline", e);
 				result = false;
 			}
 		} else {
 			result = probe.probe(normalize(host));
 		}
-		__log.debug("isOnline: " + host + " = " + result);
+		log.debug("isOnline: " + host + " = " + result);
 		return result;
 	}
 
@@ -108,7 +108,7 @@ public class OnlineStatuses {
 			// TODO: log
 			onlineHosts = new HashSet<String>();
 		}
-		__log.debug("getOnline: " + hosts.size() + " -> " + onlineHosts.size());
+		log.debug("getOnline: " + hosts.size() + " -> " + onlineHosts.size());
 		return onlineHosts;
 	}
 
@@ -132,8 +132,8 @@ class ProbeAdapter implements Computable<String, Boolean> {
 }
 
 class OnlineCheckThread extends Thread {
-	private Set<String>      out;
-	private Iterator<String> iter;
+	private final Set<String>      out;
+	private final Iterator<String> iter;
 
 	public OnlineCheckThread(String name, Iterator<String> iter, Set<String> out) {
 		super(name);
