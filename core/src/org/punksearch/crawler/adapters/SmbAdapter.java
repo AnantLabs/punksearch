@@ -16,7 +16,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.punksearch.logic.online.OnlineStatuses;
+import org.punksearch.online.OnlineStatuses;
 
 import java.io.IOException;
 import java.io.InputStream;
