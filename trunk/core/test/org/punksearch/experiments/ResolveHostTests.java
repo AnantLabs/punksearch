@@ -2,7 +2,7 @@ package org.punksearch.experiments;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.punksearch.hosts_resolver.HostnameByIpComputable;
+import org.punksearch.logic.hosts_resolver.HostnameByIpComputable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

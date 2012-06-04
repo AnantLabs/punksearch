@@ -1,4 +1,4 @@
-package org.punksearch.hosts_resolver;
+package org.punksearch.logic.hosts_resolver;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

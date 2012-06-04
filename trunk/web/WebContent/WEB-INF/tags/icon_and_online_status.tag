@@ -1,4 +1,4 @@
-<%@ tag import="org.punksearch.online.OnlineStatuses" %>
+<%@ tag import="org.punksearch.logic.online.OnlineStatuses" %>
 <%@ attribute name="file" type="org.punksearch.web.SearchResult" required="true" %>
 <%
     boolean online = OnlineStatuses.getInstance().isOnline(file.host);
