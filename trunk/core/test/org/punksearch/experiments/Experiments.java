@@ -13,6 +13,9 @@ import org.punksearch.online.Probe;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * User: gubarkov
@@ -45,6 +48,9 @@ public class Experiments {
 
         final TermEnum terms = indexReader.terms(new Term(IndexFields.HOST));
 
+        // see https://issues.apache.org/jira/browse/LUCENE-6
+        System.out.println(terms.term());
+
         while (terms.next()) {
             final Term term = terms.term();
 
@@ -53,6 +59,36 @@ public class Experiments {
             }
 
             System.out.println(term);
+        }
+    }
+    @Test
+    public void attemptToReadFieldTerms1() throws IOException {
+        PunksearchProperties.loadDefault();
+
+        final String dir = PunksearchFs.resolveIndexDirectory();
+
+        final IndexReader indexReader = IndexReader.open(LuceneUtils.dir(dir));
+
+        final TermEnum terms = indexReader.terms();
+
+        Set<String> hosts = new LinkedHashSet<String>();
+
+        boolean print = false;
+        while (terms.next()) {
+            final Term term = terms.term();
+
+            if (IndexFields.HOST.equals(term.field())) {
+                print = true;
+                hosts.add(term.text());
+            }
+
+            if (print) {
+                System.out.println(term);
+            }
+        }
+
+        for (String host : hosts) {
+            System.out.println(host);
         }
     }
 }
