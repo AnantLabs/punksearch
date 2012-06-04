@@ -60,7 +60,7 @@
                             </td>
 							<td>
 								<span class="name"><%= subFile.name %></span><br/>
-								<span class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= subFile.path %></span>
+								<span class="path"><%= subFile.protocol %>://<span title="<%= subFile.ip %>"><%= subFile.hostname %></span><%= subFile.path %></span>
 							</td>
 						</tr>
 						<%
