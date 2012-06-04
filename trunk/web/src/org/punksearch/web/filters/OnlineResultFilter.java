@@ -17,7 +17,7 @@ import java.util.Set;
 
 import org.apache.lucene.document.Document;
 import org.punksearch.common.IndexFields;
-import org.punksearch.online.OnlineStatuses;
+import org.punksearch.logic.online.OnlineStatuses;
 import org.punksearch.web.ResultFilter;
 
 /**
