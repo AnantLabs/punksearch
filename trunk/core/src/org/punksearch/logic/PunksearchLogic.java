@@ -7,6 +7,7 @@ import org.punksearch.common.PunksearchHost;
 import org.punksearch.searcher.IndexReaderHolder;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +40,8 @@ public class PunksearchLogic {
 
             hosts.add(new PunksearchHost(term.text()));
         }
+
+        Collections.sort(hosts);
 
         return hosts;
     }

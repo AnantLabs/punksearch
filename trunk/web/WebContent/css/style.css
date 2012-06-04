@@ -187,3 +187,13 @@ DIV.othersInGroup {
 DIV.othersInGroup SPAN.name {
 	font-size: 10pt;
 }
+
+TABLE.data .online,
+.online {
+    background-color: #00FF00;
+}
+
+TABLE.data .offline,
+.offline {
+    background-color: #FF0000;
+}
