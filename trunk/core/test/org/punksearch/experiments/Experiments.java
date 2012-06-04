@@ -7,13 +7,11 @@ import org.junit.Test;
 import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
 import org.punksearch.common.PunksearchProperties;
-import org.punksearch.lucene.LuceneUtils;
+import org.punksearch.util.lucene.LuceneUtils;
 import org.punksearch.online.Probe;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

@@ -1,4 +1,4 @@
-package org.punksearch.lucene;
+package org.punksearch.util.lucene;
 
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
