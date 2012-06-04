@@ -1,24 +1,33 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<%@ include file="/WEB-INF/inc/imports.jsp" %>
 <%@ page import="org.punksearch.common.PunksearchFs" %>
 <%@ page import="org.punksearch.web.SearchParams"%>
 <%@ page import="org.punksearch.web.SearcherWrapper" %>
 <%
-		SearchParams params = new SearchParams(request);
-		session.setAttribute("params", params);
+    SearchParams params = new SearchParams(request);
+    request.setAttribute("params", params);
 %>
+<c:set var="currentTab" value="${params.type}" />
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 	<%@ include file="/WEB-INF/inc/head.jsp"%>
 
-	<body onload="setFocus('<%= params.type %>')">
+	<body onload="setFocus('${currentTab}')">
 
 		<script type="text/javascript" src="js/search.js" > </script>
 
 		<%@ include file="/WEB-INF/inc/header.jsp" %>
-		<jsp:include page="/WEB-INF/inc/search/query.jsp" />
+
+        <%@ include file="/WEB-INF/inc/search/tabs.jsp" %>
+
+		<%@ include file="/WEB-INF/inc/search/query.jsp" %>
+
 		<% if (SearcherWrapper.isReady()) { %>
-		<jsp:include page="/WEB-INF/inc/search/results.jsp" />
-		<% } else { %>
+
+        <%@ include file="/WEB-INF/inc/search/results.jsp" %>
+
+        <% } else { %>
 		<div class="errorMessage">
 			PUNKSearch is not ready.<br/>
 			Index directory "<%= PunksearchFs.resolveIndexDirectory() %>" is invalid.<br/>
