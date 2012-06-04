@@ -115,7 +115,6 @@ public class OnlineStatuses {
 	private static String normalize(String host) {
 		return host.replace("_", "://");
 	}
-
 }
 
 class ProbeAdapter implements Computable<String, Boolean> {

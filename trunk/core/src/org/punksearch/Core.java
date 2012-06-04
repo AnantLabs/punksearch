@@ -16,9 +16,9 @@ import java.io.IOException;
 public final class Core {
     private static final Log log = LogFactory.getLog(Core.class);
 
-    private final static PunksearchLogic punksearchLogic = new PunksearchLogic();
     private final static String indexDirectory = PunksearchFs.resolveIndexDirectory();
     private final static IndexReaderHolder indexReaderHolder = initIndexHolder(indexDirectory);
+    private final static PunksearchLogic punksearchLogic = new PunksearchLogic(indexReaderHolder);
 
     private static IndexReaderHolder initIndexHolder(String indexDirectory) {
         try {
