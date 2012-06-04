@@ -14,7 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.punksearch.logic.online.OnlineStatuses;
+import org.punksearch.online.OnlineStatuses;
 
 import java.io.IOException;
 import java.io.InputStream;
