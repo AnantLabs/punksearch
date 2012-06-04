@@ -21,22 +21,29 @@
 
         <%@ include file="/WEB-INF/inc/search/tabs.jsp" %>
 
-		<%@ include file="/WEB-INF/inc/search/query.jsp" %>
+        <c:choose>
+            <c:when test="${currentTab == 'scanned'}">
+                <%@ include file="WEB-INF/inc/scanned.jsp"%>
+            </c:when>
+            <c:otherwise>
+                <%@ include file="/WEB-INF/inc/search/query.jsp" %>
 
-		<% if (SearcherWrapper.isReady()) { %>
+                <% if (SearcherWrapper.isReady()) { %>
 
-        <%@ include file="/WEB-INF/inc/search/results.jsp" %>
+                <%@ include file="/WEB-INF/inc/search/results.jsp" %>
 
-        <% } else { %>
-		<div class="errorMessage">
-			PUNKSearch is not ready.<br/>
-			Index directory "<%= PunksearchFs.resolveIndexDirectory() %>" is invalid.<br/>
-			Either crawl the network or supply correct index directory.
-		</div>
-		<% } %>
+                <% } else { %>
+                <div class="errorMessage">
+                    PUNKSearch is not ready.<br/>
+                    Index directory "<%= PunksearchFs.resolveIndexDirectory() %>" is invalid.<br/>
+                    Either crawl the network or supply correct index directory.
+                </div>
+                <% } %>
 
-		<div id="hint">
-			use "+/-" to specialize search terms, like: "+pink -floyd"
-		</div>
+                <div id="hint">
+                    use "+/-" to specialize search terms, like: "+pink -floyd"
+                </div>
+            </c:otherwise>
+        </c:choose>
 	</body>
 </html>
