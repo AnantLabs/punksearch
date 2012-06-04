@@ -7,6 +7,11 @@
     request.setAttribute("indexedHosts", indexedHosts);
 %>
 
+<div id="searchFormContainer">
+    <%--for layout only--%>
+    <div id="searchForm">&#160;</div>
+</div>
+
 <h2>Scanned hosts</h2>
 
 <table align="center" class="data">
