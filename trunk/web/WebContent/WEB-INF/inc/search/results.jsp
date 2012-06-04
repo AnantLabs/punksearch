@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ include file="/WEB-INF/inc/imports.jsp"%>
 <%@ page import="org.punksearch.common.Settings"%>
-<%@ page import="org.punksearch.online.OnlineStatuses" %>
 <%@ page import="org.punksearch.web.*" %>
 <%@ page import="org.punksearch.web.utils.BrowserOS" %>
 <%@ page import="org.punksearch.web.utils.RequestUtils" %>
@@ -36,18 +36,16 @@
 			int counter = 0;
 			for (ItemGroup group : searchResults) {
 				SearchResult file = new SearchResult(group.getItems().get(0), os);
-				boolean online = OnlineStatuses.getInstance().isOnline(file.host);
 				counter++;
 		%>
 		<tr>
 			<td style="width: 16px; padding-right: 2px; vertical-align: top; padding-top: 4px;">
-				<img src="images/<%= (file.ext.length() != 0) ? "stock_new-16.gif" : "stock_folder-16.gif" %>"/>
-				<div style='font-size: 4px; margin: 1px; background-color: <%= (online) ? "#00FF00;" : "#FF0000;" %>;'>&nbsp;&nbsp;</div>
+                <punksearch:icon_and_online_status file="<%= file %>" />
 			</td>
 			<td style="padding-left: 2px;">
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
-				<span class="more"><%=(group.getItems().size() > 1) ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
-				<%=(showScores) ? "(" + file.score + ")" : ""%><br/>
+				<span class="more"><%=group.getItems().size() > 1 ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
+				<%= showScores ? "(" + file.score + ")" : ""%><br/>
 				<span style="font-size: 8pt;" class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= file.path %></span>
 				<br/>
 				<div class="othersInGroup" id="subGroup<%= counter %>" style="display:none;">
@@ -55,13 +53,11 @@
 						<%
 							for (int i = 1; i < group.getItems().size(); i++) {
 								SearchResult subFile = new SearchResult(group.getItems().get(i), os);
-								boolean subOnline = OnlineStatuses.getInstance().isOnline(subFile.host);
 						%>
 						<tr>
 							<td>
-								<img src="images/<%= (subFile.ext.length() != 0) ? "stock_new-16.gif" : "stock_folder-16.gif" %>"/>
-								<div style='font-size: 4px; margin: 1px; background-color: <%= (subOnline) ? "#00FF00;" : "#FF0000;" %>;'>&nbsp;&nbsp;</div>
-							</td>
+                                <punksearch:icon_and_online_status file="<%= subFile %>" />
+                            </td>
 							<td>
 								<span class="name"><%= subFile.name %></span><br/>
 								<span class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= subFile.path %></span>
