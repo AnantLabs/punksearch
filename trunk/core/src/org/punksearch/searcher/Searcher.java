@@ -13,12 +13,8 @@ package org.punksearch.searcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
-import org.apache.lucene.store.FSDirectory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,33 +27,19 @@ import java.util.List;
 public class Searcher {
 	private static final Log log = LogFactory.getLog(Searcher.class);
 
-	private IndexSearcher       indexSearcher;
-    private IndexReader indexReader;
-
-	private String              indexDir;
-//	private long                indexSearcherCreated = 0;
     public static final int MAX_COUNT = 100000;
+    private IndexReaderHolder indexReaderHolder;
 
-	public Searcher(String dir) {
-		this.indexDir = dir;
-		init(dir);
-	}
-
-	private void init(String dir) {
-		try {
-            initReader(dir);
-            indexSearcher = new IndexSearcher(indexReader);
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Index directory is invalid: " + dir);
-		}
-//		this.indexSearcherCreated = System.currentTimeMillis();
-	}
-
-    private void initReader(String dir) throws IOException {
-        if (indexReader != null) {
-            indexReader.close();
+    public Searcher(String dir) {
+        try {
+            indexReaderHolder = new IndexReaderHolder(dir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        indexReader = IndexReader.open(FSDirectory.open(new File(dir)));
+    }
+
+    public Searcher(IndexReaderHolder indexReaderHolder) {
+        this.indexReaderHolder = indexReaderHolder;
     }
 
     /*public SearcherResult search(Query query, Integer start, Integer stop, Filter filter) {
@@ -102,10 +84,10 @@ public class Searcher {
 
 	public SearcherResult search(Query query, Filter filter, final int limit) {
 		log.trace("Search for: " + query);
-		
-		checkIndexDirectory();
 
-		try {
+        try {
+            IndexSearcher indexSearcher = indexReaderHolder.getCurrentSearcher();
+
             int myLimit = (limit <= 0 || limit > MAX_COUNT) ? MAX_COUNT : limit;
 
             final TopDocs topDocs = indexSearcher.search(query, filter, myLimit);
@@ -127,22 +109,6 @@ public class Searcher {
 		} catch (IOException e) {
 			log.error("IOException during search", e);
 			throw new RuntimeException("IOException during search", e);
-		}
-	}
-
-	private void checkIndexDirectory() {
-		try {
-//			if (IndexReader.lastModified(indexDir) > indexSearcherCreated) {
-			if (!indexReader.isCurrent()) {
-				init(indexDir);
-			}
-		} catch (CorruptIndexException e1) {
-			log.error("Index directory corrupted: " + indexDir);
-			e1.printStackTrace();
-			throw new RuntimeException(e1);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			throw new RuntimeException(e1);
 		}
 	}
 }
