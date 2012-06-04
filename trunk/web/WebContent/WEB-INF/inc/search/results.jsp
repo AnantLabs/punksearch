@@ -46,8 +46,8 @@
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
 				<span class="more"><%=group.getItems().size() > 1 ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
 				<%= showScores ? "(" + file.score + ")" : ""%><br/>
-				<span style="font-size: 8pt;" class="path"><%= file.protocol %>://<span title="<%= file.ip %>"><%= file.hostname %></span><%= file.path %></span>
-				<br/>
+                <punksearch:path_line file="<%= file %>" />
+                <br/>
 				<div class="othersInGroup" id="subGroup<%= counter %>" style="display:none;">
 					<table>
 						<%
@@ -60,7 +60,7 @@
                             </td>
 							<td>
 								<span class="name"><%= subFile.name %></span><br/>
-								<span class="path"><%= subFile.protocol %>://<span title="<%= subFile.ip %>"><%= subFile.hostname %></span><%= subFile.path %></span>
+                                <punksearch:path_line file="<%= subFile %>" />
 							</td>
 						</tr>
 						<%
