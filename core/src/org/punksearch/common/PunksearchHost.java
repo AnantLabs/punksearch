@@ -1,5 +1,6 @@
 package org.punksearch.common;
 
+import org.punksearch.ip.Ip;
 import org.punksearch.logic.hosts_resolver.HostnameResolver;
 import org.punksearch.logic.online.OnlineStatuses;
 
@@ -10,9 +11,10 @@ import org.punksearch.logic.online.OnlineStatuses;
  * Date: 04.06.12
  * Time: 17:56
  */
-public class PunksearchHost {
+public class PunksearchHost implements Comparable<PunksearchHost> {
     private final String protocol;
     private final String ip;
+    private final Ip ipIp;
 
     /**
      * @param protoIp like smb_1.1.1.1
@@ -22,6 +24,7 @@ public class PunksearchHost {
 
         protocol = parts[0];
         ip = parts[1];
+        ipIp = new Ip(ip);
     }
 
     public String getProtocol() {
@@ -38,5 +41,10 @@ public class PunksearchHost {
 
     public boolean isOnline() {
         return OnlineStatuses.getInstance().isOnline(protocol + "_" + ip);
+    }
+
+    @Override
+    public int compareTo(PunksearchHost o) {
+        return ipIp.compareTo(o.ipIp);
     }
 }
