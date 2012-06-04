@@ -7,9 +7,22 @@
     request.setAttribute("indexedHosts", indexedHosts);
 %>
 
-<table>
+<h2>Scanned hosts</h2>
+
+<table align="center" class="data">
+    <tr>
+        <th>Protocol</th>
+        <th>IP</th>
+        <th>Host</th>
+        <th>Online status</th>
+    </tr>
     <c:forEach items="${indexedHosts}" var="host">
-        <tr><td>${host.hostName}</td></tr>
+        <tr>
+            <td>${host.protocol}</td>
+            <td>${host.ip}</td>
+            <td>${host.hostName}</td>
+            <td>${host.online ? 'online' : 'offline'}</td>
+        </tr>
     </c:forEach>
 </table>
 

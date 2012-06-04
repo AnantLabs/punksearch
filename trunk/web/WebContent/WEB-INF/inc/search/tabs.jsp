@@ -5,7 +5,7 @@
 <%
     String defaultTabs = "films,serials,music,clips,pictures";
     String tabs = System.getProperty("org.punksearch.web.tabs", defaultTabs);
-    tabs = "everything," + tabs + ",advanced";
+    tabs = "everything," + tabs + ",advanced,scanned";
     String[] tabsArray = tabs.split(",");
 %>
 <c:set var="tabsArray" value="<%=tabsArray%>" />
@@ -16,7 +16,7 @@
             <%--<td style="width: 200px;">&#160;</td>--%>
             <c:forEach items="${tabsArray}" var="tab">
                 <c:choose>
-                    <c:when test="${tab == 'advanced'}" >
+                    <c:when test="${tab == 'advanced' or tab == 'scanned'}" >
                         <td class="spacer" style="padding-left: 50px;">&#160;</td>
                     </c:when>
                     <c:otherwise>
