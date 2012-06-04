@@ -176,7 +176,8 @@ SPAN.name {
 }
 
 SPAN.path {
-	padding-left: 0pt;
+	padding-left: 0;
+    font-size: 8pt;
 }
 
 DIV.othersInGroup {
@@ -185,8 +186,4 @@ DIV.othersInGroup {
 
 DIV.othersInGroup SPAN.name {
 	font-size: 10pt;
-}
-
-DIV.othersInGroup SPAN.path {
-	font-size: 8pt;
 }
