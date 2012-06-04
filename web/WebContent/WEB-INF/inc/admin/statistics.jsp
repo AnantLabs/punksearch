@@ -8,7 +8,7 @@
 <%@page import="org.jfree.chart.JFreeChart"%>
 <%@page import="org.jfree.chart.ChartFactory"%>
 <%@page import="java.text.NumberFormat" %>
-<%@ page import="org.punksearch.util.lucene.LuceneUtils" %>
+<%@ page import="org.punksearch.lucene.LuceneUtils" %>
 <%@ page import="org.apache.lucene.store.Directory" %>
 
 <div id="statistics">
