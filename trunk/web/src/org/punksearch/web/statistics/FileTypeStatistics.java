@@ -25,8 +25,8 @@ import org.jfree.data.general.PieDataset;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
-import org.punksearch.util.lucene.Hits;
-import org.punksearch.util.lucene.LuceneUtils;
+import org.punksearch.lucene.Hits;
+import org.punksearch.lucene.LuceneUtils;
 import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.web.filters.TypeFilters;
 
