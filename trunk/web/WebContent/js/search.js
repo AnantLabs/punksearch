@@ -1,9 +1,12 @@
 function changeSearchType(type) {
     var params = "?type=" + type;
 
-    var queryElement = document.forms["searchForm"].elements["query"];
-    if ((queryElement != null) && (queryElement.value.length != 0)) {
-        params += "&query=" + queryElement.value.replace(/\+/g, "%2B");
+    var form = document.forms["searchForm"];
+    if (form) {
+        var queryElement = form.elements["query"];
+        if ((queryElement != null) && (queryElement.value.length != 0)) {
+            params += "&query=" + queryElement.value.replace(/\+/g, "%2B");
+        }
     }
     /*
      var offlineElement = document.forms["searchForm"].elements["showoffline"];
