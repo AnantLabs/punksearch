@@ -8,6 +8,9 @@
 
         &lt;!&ndash;JSP Support&ndash;&gt;
         <dependency org="org.mortbay.jetty" name="jsp-2.1-glassfish" rev="2.1.v20100127"/>-->
+        <dependency org="log4j" name="log4j" rev="1.2.16" conf="default"/>
+        <dependency org="org.slf4j" name="slf4j-api" rev="1.6.4"/>
+        <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.4"/>
 
         <dependency org="org.eclipse.jetty" name="jetty-server" rev="8.1.1.v20120215"/>
         <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="8.1.1.v20120215"/>
