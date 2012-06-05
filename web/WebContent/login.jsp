@@ -21,7 +21,7 @@
 				String password = request.getParameter("password");
 				if (password != null)				
 				{
-					String adminPassword = getServletContext().getInitParameter("admin_password");
+					String adminPassword = application.getInitParameter("admin_password");
 					if (password.equals(adminPassword))
 					{
 						session.setAttribute("logged", true);
