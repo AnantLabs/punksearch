@@ -16,6 +16,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LengthFilter;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.punksearch.crawler.CrawlerKeys;
 import org.punksearch.crawler.LuceneVersion;
 
 /**
@@ -30,8 +31,8 @@ public class FilenameAnalyzer extends Analyzer {
 
 	public static final int MIN_TERM_LENGTH;
 
-	static {
-		String termLength = System.getProperty("org.punksearch.crawler.termlength");
+    static {
+		String termLength = System.getProperty(CrawlerKeys.CRAWLER_TERMLENGTH);
 		MIN_TERM_LENGTH = (termLength != null) ? Integer.valueOf(termLength) : 3;
 	}
 

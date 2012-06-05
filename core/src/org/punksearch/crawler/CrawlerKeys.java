@@ -54,6 +54,8 @@ public class CrawlerKeys {
 
     public static final String DUMP_STATUS_PERIOD = "org.punksearch.crawler.dump.status.period";
 
+    public static final String CRAWLER_TERMLENGTH = "org.punksearch.crawler.termlength";
+
     public static final String SMB_ENABLED = "org.punksearch.crawler.smb";
     public static final String FTP_ENABLED = "org.punksearch.crawler.ftp";
 
