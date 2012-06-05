@@ -21,6 +21,8 @@
         <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="default"/>
         <dependency org="commons-net" name="commons-net" rev="3.1" conf="default"/>
 
+        <dependency org="log4j" name="log4j" rev="1.2.16" conf="default"/>
+
         <dependency org="org.apache.lucene" name="lucene-core" rev="3.6.0"/>
         <dependency org="org.apache.lucene" name="lucene-queries" rev="3.6.0"/>
 
