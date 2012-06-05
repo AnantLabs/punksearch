@@ -12,6 +12,9 @@ package org.punksearch.common;
 
 import java.io.File;
 
+import static org.punksearch.common.CoreKeys.PUNKSEARCH_HOME;
+import static org.punksearch.common.CoreKeys.PUNKSEARCH_INDEX_DIR;
+
 /**
  * Utility class to deal with Punksearch's filesystem artifacts. Helps to resolve path to index directory, etc.
  * 
@@ -19,9 +22,9 @@ import java.io.File;
  * 
  */
 public class PunksearchFs {
-	
-	public static String resolveIndexDirectory() {
-		return resolve(System.getProperty("org.punksearch.index.dir"));
+
+    public static String resolveIndexDirectory() {
+		return resolve(System.getProperty(PUNKSEARCH_INDEX_DIR));
 	}
 
 	public static String resolveStatsDirectory() {
@@ -29,7 +32,7 @@ public class PunksearchFs {
 	}
 
 	public static String resolveHome() {
-		String home = System.getProperty("org.punksearch.home");
+		String home = System.getProperty(PUNKSEARCH_HOME);
 		if (home == null) {
 			home = System.getenv("PUNKSEARCH_HOME");
 			if (home == null) {

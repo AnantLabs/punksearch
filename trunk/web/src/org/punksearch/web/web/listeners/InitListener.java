@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 
 import javax.servlet.*;
 
+import org.punksearch.common.CoreKeys;
 import org.punksearch.common.PunksearchProperties;
 import org.punksearch.web.SearcherWrapper;
 
@@ -22,10 +23,10 @@ public class InitListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
 
-        if (System.getProperty("org.punksearch.home") == null) {
+        if (System.getProperty(CoreKeys.PUNKSEARCH_HOME) == null) {
             String home = servletContextEvent.getServletContext().getInitParameter("punksearch_home");
             if (home != null) {
-                System.setProperty("org.punksearch.home", home);
+                System.setProperty(CoreKeys.PUNKSEARCH_HOME, home);
             }
         }
 

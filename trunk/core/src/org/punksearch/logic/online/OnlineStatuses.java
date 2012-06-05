@@ -10,18 +10,15 @@
  ***************************************************************************/
 package org.punksearch.logic.online;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.punksearch.util.Computable;
 import org.punksearch.util.RenewableMemoizer;
+
+import java.util.*;
+
+import static org.punksearch.common.Settings.getBool;
+import static org.punksearch.common.Settings.getInt;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
@@ -47,12 +44,12 @@ public class OnlineStatuses {
 	 */
 	public static final String                 CACHE_TIMEOUT_PROPERTY = "org.punksearch.online.cache.timeout";
 
-	private static final boolean               CACHE                  = Boolean.valueOf(System.getProperty(CACHE_PROPERTY, "true"));
+	private static final boolean               CACHE                  = getBool(CACHE_PROPERTY, true);
 
-	private static final boolean               CACHE_ACTIVE           = Boolean.getBoolean(CACHE_ACTIVE_PROPERTY);
-	private static final int                   CACHE_TIMEOUT          = Integer.getInteger(CACHE_TIMEOUT_PROPERTY, 600);
+	private static final boolean               CACHE_ACTIVE           = getBool(CACHE_ACTIVE_PROPERTY);
+	private static final int                   CACHE_TIMEOUT          = getInt(CACHE_TIMEOUT_PROPERTY, 600);
 
-	private static final int                   PROBE_THREAD_COUNT     = Integer.getInteger(PROBE_THREADS_PROPERTY, 10);
+	private static final int                   PROBE_THREAD_COUNT     = getInt(PROBE_THREADS_PROPERTY, 10);
 
 	private static final OnlineStatuses        INSTANCE               = new OnlineStatuses();
 
