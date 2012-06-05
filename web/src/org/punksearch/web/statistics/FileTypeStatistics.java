@@ -110,7 +110,7 @@ public class FileTypeStatistics {
 				// Rough approximation to the root directories.
 				// Obviously, non-latin1 directory names slip through the filter, we'll catch them later
 				// Maybe we should use some ranges with UTF8-16 characters... TODO
-				String approxQuery = "Host:ftp_* Host:smb_* -Path:{a TO Z*} -Path:{0 TO 9*}";
+				String approxQuery = "*:* -Path:{a TO Z*} -Path:{0 TO 9*}";
 				QueryParser parser = new QueryParser(LuceneVersion.VERSION,
                         "Host", new SimpleAnalyzer(LuceneVersion.VERSION));
 				Query query = parser.parse(approxQuery);
