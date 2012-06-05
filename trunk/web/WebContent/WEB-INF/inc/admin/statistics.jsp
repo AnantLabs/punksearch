@@ -10,13 +10,15 @@
 <%@page import="java.text.NumberFormat" %>
 <%@ page import="org.punksearch.util.lucene.LuceneUtils" %>
 <%@ page import="org.apache.lucene.store.Directory" %>
+<%@ page import="org.punksearch.Core" %>
 
 <div id="statistics">
 		<h2>Index Statistics</h2>
 		<%
-			String indexDir = PunksearchFs.resolveIndexDirectory();
+			String indexDir = Core.getIndexDirectory();
             final Directory dir = LuceneUtils.dir(indexDir);
-            IndexReader ir = IndexReader.open(dir);
+//            IndexReader ir = IndexReader.open(dir);
+            IndexReader ir = Core.getIndexReaderHolder().getCurrentReader();
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			NumberFormat nfPercent = NumberFormat.getPercentInstance();
 			nfPercent.setMaximumFractionDigits(2);
