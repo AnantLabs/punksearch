@@ -194,6 +194,12 @@ public class EasyQueryParser {
         if (item.startsWith("+") || item.startsWith("-")) {
             item = item.substring(1);
         }
+
+        if (isFastSearch) {
+            // don't allow user to use "*someterm" search
+            item = StringUtils.stripStart(item, "*");
+        }
+
         return !isExpandTerms
                 ? item
                 : isFastSearch
