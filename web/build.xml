@@ -9,7 +9,7 @@
         <!--<ivy:cachefileset setid="ivy_war_classpath" conf="war"/>-->
         <ivy:retrieve pattern="${build.dir}/war_lib/[artifact]-[type]-[revision].[ext]"
                       conf="war"
-                      type="jar"
+                      type="jar,bundle"
                       sync="true"
                       overwriteMode="different"
                       setid="ivy_war_classpath"/>
