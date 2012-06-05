@@ -13,7 +13,7 @@
 		Map<String, String> properties = Properties.getPunksearchProperties();
 		for (String key : properties.keySet()) {
 	%>
-	<tr><th><%= key.toString() %></th><td><%= properties.get(key.toString()) %></td></tr>	
+	<tr><th><%= key %></th><td><%= properties.get(key) %></td></tr>
 	<%			
 		}
 	%>
@@ -24,14 +24,15 @@
 		<tr><th>title</th><th>min (bytes)</th><th>max (bytes)</th><th>extensions</th></tr>
 		<% for (String title : TypeFilters.getTypes().list()) { %>
 		<%
-			long min = TypeFilters.getTypes().get(title).getMinBytes();
-			long max = TypeFilters.getTypes().get(title).getMaxBytes();
+            final FileType fileType = TypeFilters.getTypes().get(title);
+            long min = fileType.getMinBytes();
+			long max = fileType.getMaxBytes();
 		%>
 		<tr>
 			<td><%= title %></td>
 			<td><%= (min == 0)? "-" : min %></td>
 			<td><%= (max == Long.MAX_VALUE)? "-" : max %></td>
-			<td><%= TypeFilters.getTypes().get(title).getExtensions() %></td>
+			<td><%= fileType.getExtensions() %></td>
 		</tr>	
 		<% } %>
 	</table>
