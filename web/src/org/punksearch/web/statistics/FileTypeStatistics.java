@@ -10,29 +10,31 @@
  ***************************************************************************/
 package org.punksearch.web.statistics;
 
-import java.text.NumberFormat;
-import java.util.Map;
-import java.util.TreeMap;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
+import org.punksearch.Core;
 import org.punksearch.common.FileTypes;
 import org.punksearch.common.IndexFields;
-import org.punksearch.common.PunksearchFs;
+import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.util.lucene.Hits;
 import org.punksearch.util.lucene.LuceneUtils;
-import org.punksearch.crawler.LuceneVersion;
 import org.punksearch.web.filters.TypeFilters;
 
-public class FileTypeStatistics {
+import java.text.NumberFormat;
+import java.util.Map;
+import java.util.TreeMap;
 
-	private static Map<String, Long> countCache              = null;
+public class FileTypeStatistics {
+    private static final Log log = LogFactory.getLog(FileTypeStatistics.class);
+
+    private static Map<String, Long> countCache              = null;
 	private static Map<String, Long> sizeCache               = null;
 	private static Long              totalSizeCache          = null;
 	private static long              countCacheTimestamp     = 0;
@@ -41,23 +43,15 @@ public class FileTypeStatistics {
 
 	private static Thread            updater                 = new AsyncUpdater();
 
-	private static Query makeQuery() {
-		BooleanQuery query = new BooleanQuery();
-		Query smbQuery = new WildcardQuery(new Term(IndexFields.HOST, "smb_*"));
-		Query ftpQuery = new WildcardQuery(new Term(IndexFields.HOST, "ftp_*"));
-		query.add(smbQuery, BooleanClause.Occur.SHOULD);
-		query.add(ftpQuery, BooleanClause.Occur.SHOULD);
-		return query;
-	}
-
 	private static Hits extractDocsForType(String type) {
 		Filter filter = TypeFilters.get(type);
 		try {
-            final IndexReader indexReader = IndexReader.open(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory()));
-            IndexSearcher indexSearcher = new IndexSearcher(indexReader);
-            final TopDocs topDocs = indexSearcher.search(makeQuery(), filter, indexReader.numDocs());
+            IndexSearcher indexSearcher = Core.getIndexReaderHolder().getCurrentSearcher();
+            IndexReader indexReader = indexSearcher.getIndexReader();
+            final TopDocs topDocs = indexSearcher.search(new MatchAllDocsQuery(), filter, indexReader.numDocs());
             return new Hits(indexSearcher, topDocs);
 		} catch (Exception e) {
+            log.error("error extractDocsForType", e);
 			return null;
 		}
 	}
@@ -90,9 +84,9 @@ public class FileTypeStatistics {
 				size += Long.parseLong(doc.get(IndexFields.SIZE));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("", e);
 		}
-		System.out.println("Finished FileTypeStatistics.size() for " + type + "=" + (size / (1024D * 1024)) + "MB");
+		log.info("Finished FileTypeStatistics.size() for " + type + "=" + (size / (1024D * 1024)) + "MB");
 		return size;
 	}
 
@@ -120,8 +114,8 @@ public class FileTypeStatistics {
 				QueryParser parser = new QueryParser(LuceneVersion.VERSION,
                         "Host", new SimpleAnalyzer(LuceneVersion.VERSION));
 				Query query = parser.parse(approxQuery);
-                IndexReader indexReader = IndexReader.open(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory()));
-				IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+				IndexSearcher indexSearcher = Core.getIndexReaderHolder().getCurrentSearcher();
+                IndexReader indexReader = indexSearcher.getIndexReader();
                 final TopDocs topDocs = indexSearcher.search(query, indexReader.numDocs());
                 Hits hits = new Hits(indexSearcher, topDocs);
                 for (int i = 0; i < hits.length(); i++) {
@@ -133,7 +127,7 @@ public class FileTypeStatistics {
 					size += Long.parseLong(doc.get(IndexFields.SIZE));
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("", e);
 			}
 			totalSizeCache = size;
 			totalSizeCacheTimestamp = System.currentTimeMillis();
@@ -177,7 +171,7 @@ public class FileTypeStatistics {
 	private static boolean indexChangedAfter(long timestamp) {
 		try {
             // TODO: rewrite
-			return (IndexReader.lastModified(LuceneUtils.dir(PunksearchFs.resolveIndexDirectory())) > timestamp);
+			return (IndexReader.lastModified(LuceneUtils.dir(Core.getIndexDirectory())) > timestamp);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
