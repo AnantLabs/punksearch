@@ -30,7 +30,7 @@ import static org.punksearch.common.Settings.getInt;
  * @author Yury Soldak (ysoldak@gmail.com)
  */
 public class EasyQueryParser {
-    private static final Log log = LogFactory.getLog(Searcher.class);
+    private static final Log log = LogFactory.getLog(EasyQueryParser.class);
 
     public static final String SEARCH_MAX_CLAUSES = "org.punksearch.search.clauses";
     public static final String SEARCH_MIN_TERM_LENGTH = "org.punksearch.search.termlength";
