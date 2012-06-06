@@ -8,7 +8,6 @@ import org.punksearch.common.IndexFields;
 import org.punksearch.common.PunksearchFs;
 import org.punksearch.common.PunksearchProperties;
 import org.punksearch.util.lucene.LuceneUtils;
-import org.punksearch.logic.online.Probe;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,22 +26,6 @@ public class Experiments {
         System.out.println(paramValue);
         paramValue = new String(paramValue.getBytes("ISO-8859-1"), "UTF-8");
         System.out.println(paramValue);
-    }
-
-    @Test
-    public void probeTest1() {
-        final Probe probe = new Probe();
-        final boolean res = probe.probe("smb://194.85.80.61");
-        System.out.println(res);
-    }
-
-    @Test
-    public void probeTest2() {
-        final Probe probe = new Probe();
-        for (int i = 0; i < 10; i++) {
-            final boolean res = probe.probe("smb://194.85.80.11");
-            System.out.println(res);
-        }
     }
 
     @Test
