@@ -1,10 +1,11 @@
 package org.punksearch.experiments;
 
 import org.junit.Test;
+import org.punksearch.common.PunksearchProperties;
 import org.punksearch.logic.online.Probe;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -45,26 +46,39 @@ public class ProbeExperiments {
         @Override
         public void run() {
             for (int i = 0; i < times; i++) {
-                System.out.println("ftp: " + probe.probe("ftp://" + host));
-                final boolean smbOk = probe.probe("smb://" + host);
+                System.out.println("ftp: " + probe("ftp://" + host));
+                final boolean smbOk = probe("smb://" + host);
                 if (smbOk) {
                     smbSuccess++;
                 }
                 System.out.println("smb: " + smbOk);
             }
         }
+
+        private boolean probe(final String host) {
+            /*try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
+            return probe.probe(host);
+//            return probe.probe(host) || probe.probe(host);
+        }
     }
 
     @Test
-    public void probeTest3() throws InterruptedException {
+    public void probeTest3() throws InterruptedException, FileNotFoundException {
+        PunksearchProperties.loadDefault();
+
         List<IpProber> threads = new ArrayList<IpProber>();
 
-        final int times = 5;
+        final int times = 20;
 
         threads.add(new IpProber("194.85.80.8", times));
         threads.add(new IpProber("194.85.80.9", times));
         threads.add(new IpProber("194.85.80.10", times));
-        threads.add(new IpProber("194.85.80.11", times));
+//        threads.add(new IpProber("194.85.80.11", times));
+        threads.add(new IpProber("194.85.80.61", times));
 //        threads.add(new Thread(new IpProber("194.85.80.12", times)));
 
         for (Thread thread : threads) {

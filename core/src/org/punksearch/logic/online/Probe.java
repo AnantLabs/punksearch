@@ -10,14 +10,17 @@
  ***************************************************************************/
 package org.punksearch.logic.online;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static org.punksearch.common.Settings.get;
+import static org.punksearch.common.Settings.getInt;
 
 /**
  * Probes if some particular host is online. Both SMB and FTP protocols are supported.
@@ -48,8 +51,9 @@ public class Probe {
      */
     public static final String STRATEGY_PROPERTY = "org.punksearch.online.strategy";
 
-    private static int PROBE_TIMEOUT = Integer.getInteger(TIMEOUT_PROPERTY, 1000);
-    private static String PROBE_STRATEGY = System.getProperty(STRATEGY_PROPERTY, "connect");
+    private static int PROBE_TIMEOUT = getInt(TIMEOUT_PROPERTY, 1000);
+    private static String PROBE_STRATEGY = get(STRATEGY_PROPERTY, "connect");
+
     private static final boolean USE_OLD_SMB_PORT = true;
 
     private static final int SMB_PORT = 445;
