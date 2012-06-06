@@ -14,9 +14,6 @@
     <!-- the place punksearch core will search for punksearch.properties and filetypes.conf files -->
     <Parameter name="punksearch_home" value="/opt/punksearch" override="false"/>
     
-    <!-- the password for admin interface (admin.jsp) -->
-    <Parameter name="admin_password" value="123_456" override="false"/>
-    
     <!-- apache-style access logging to parse log files with tools like awstats -->
     <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  prefix="punksearch-access" suffix=".log" pattern="combined" resolveHosts="false" rotatable="false"/>
     
