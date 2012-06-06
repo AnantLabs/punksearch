@@ -1,3 +1,4 @@
+<%@ page import="org.punksearch.common.Settings" %>
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -21,7 +22,7 @@
 				String password = request.getParameter("password");
 				if (password != null)				
 				{
-					String adminPassword = application.getInitParameter("admin_password");
+					String adminPassword = Settings.get("org.punksearch.web.admin_password");
 					if (password.equals(adminPassword))
 					{
 						session.setAttribute("logged", true);
