@@ -37,6 +37,15 @@ public class Experiments {
     }
 
     @Test
+    public void probeTest2() {
+        final Probe probe = new Probe();
+        for (int i = 0; i < 10; i++) {
+            final boolean res = probe.probe("smb://194.85.80.11");
+            System.out.println(res);
+        }
+    }
+
+    @Test
     public void attemptToReadFieldTerms() throws IOException {
         PunksearchProperties.loadDefault();
 
@@ -59,6 +68,7 @@ public class Experiments {
             System.out.println(term);
         }
     }
+
     @Test
     public void attemptToReadFieldTerms1() throws IOException {
         PunksearchProperties.loadDefault();
