@@ -249,7 +249,7 @@ public class HostCrawler extends Thread {
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Crawling directory " + adapter.getProtocol() + "://" + getIp() + adapter.getFullPath(dir));
+            log.trace("Crawling " + adapter.getProtocol() + "://" + getIp() + adapter.getFullPath(dir));
         }
 
         Object[] items = adapter.list(dir);
