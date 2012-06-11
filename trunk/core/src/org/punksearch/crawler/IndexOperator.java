@@ -282,7 +282,7 @@ public class IndexOperator {
 
 	public static void unlock(String dir) {
         try {
-            log.info("Clearing lock: " + dir);
+            log.trace("Clearing lock: " + dir);
 
             final Directory d = LuceneUtils.dir(dir);
             d.clearLock(WRITE_LOCK_FILE);
