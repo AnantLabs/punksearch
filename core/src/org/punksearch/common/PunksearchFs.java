@@ -38,7 +38,8 @@ public class PunksearchFs {
 			if (home == null) {
 				home = System.getProperty("user.dir");
 			}
-		}
+            System.setProperty(PUNKSEARCH_HOME, home);
+        }
 		return home;
 	}
 
