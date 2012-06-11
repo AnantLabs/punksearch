@@ -30,7 +30,7 @@ public class IndexReaderHolder {
         } else {
             final IndexReader updatedReader = IndexReader.openIfChanged(indexReader);
             if (updatedReader != null) {
-                log.info("Index updated. Recreating reader...");
+                log.debug("Index updated. Recreating reader...");
 
                 indexReader.close();
                 indexReader = updatedReader;
