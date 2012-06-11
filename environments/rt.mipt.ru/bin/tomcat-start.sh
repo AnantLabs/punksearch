@@ -23,5 +23,6 @@ echo "PUNKSEARCH_HOME: $PUNKSEARCH_HOME"
 echo
 
 export PUNKSEARCH_HOME
+#export CATALINA_OPTS="-Dlog4j.configuration=$PUNKSEARCH_HOME/conf/log4j.properties"
 
 $PRGDIR/../tomcat/bin/startup.sh
