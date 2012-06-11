@@ -36,6 +36,19 @@
         </delete>
     </target>
 
+    <!--
+        Puts in ${build.dir}/lib/ folder all jars necessary for starting of the artifact jar
+        This lib should be included in distrib along with built artifact
+    -->
+    <target name="prepare-jar-lib" description="prepares a bunch of jars necessary for starting the module">
+        <ivy:retrieve pattern="${build.dir}/lib/[artifact]-[type]-[revision].[ext]"
+                      conf="default"
+                      type="jar,bundle"
+                      sync="true"
+                      overwriteMode="different"
+                />
+    </target>
+
     <target name="compile" depends="clean,resolve" description="Compiles the JAVA sources">
         <mkdir dir="${build.dir}/classes"/>
 
