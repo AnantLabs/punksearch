@@ -1,0 +1,3 @@
+
+*** Pass log4j conf like
+export TOMCAT_OPTS= "-Dlog4j.configuration="/m1/example1/WEB-INF/classes/example1.txt"

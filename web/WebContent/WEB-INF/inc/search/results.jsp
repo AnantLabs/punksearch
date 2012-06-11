@@ -19,6 +19,9 @@
 			int pages = SearchPager.getPageCount(searchAction.getOverallCount());
 			long searchTime = searchAction.getSearchTime();
 			long presentationTime = searchAction.getPresentationTime();
+
+            SearchHistory.logSearch(request, params, items,searchTime,presentationTime);
+
 			if (!searchResults.isEmpty()) {
 	%>
 	<table id="pager" cellspacing="0" cellpadding="0" align="center">
