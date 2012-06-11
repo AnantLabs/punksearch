@@ -1,0 +1,20 @@
+<!--
+    Context configuration file for the Tomcat Web App
+    
+    In case you want to use Tomcat as servlet container (as I do), you should do the following:
+    1) Change the values in this file according to your needs 
+    2) Put (or make a symlink) the file into CATALINA_HOME/conf/Catalina/localhost/
+    
+    Do not forget to change the punksearch.properties file as well, defining the absolute path to the index directory
+-->
+<Context path="/punksearch" docBase="/opt/punksearch/punksearch.war" debug="0" privileged="true" allowLinking="true">
+
+    <Logger className="org.apache.catalina.logger.FileLogger" prefix="punksearch_output." suffix=".log" timestamp="true"/>
+    
+    <!-- the place punksearch core will search for punksearch.properties and filetypes.conf files -->
+    <Parameter name="punksearch_home" value="/opt/punksearch" override="false"/>
+    
+    <!-- apache-style access logging to parse log files with tools like awstats -->
+    <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"  prefix="punksearch-access" suffix=".log" pattern="combined" resolveHosts="false" rotatable="false"/>
+    
+</Context>
