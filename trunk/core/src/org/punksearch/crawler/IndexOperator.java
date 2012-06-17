@@ -247,7 +247,7 @@ public class IndexOperator {
 
 	public static void merge(String targetDir, Set<String> sourceDirs) {
 		try {
-			IndexWriter iw = createIndexWriter(targetDir);
+			IndexWriter iw = createIndexWriter(targetDir, 2);
 			Directory[] dirs = new Directory[sourceDirs.size()];
 			int i = 0;
 			for (String source : sourceDirs) {
@@ -263,14 +263,30 @@ public class IndexOperator {
 		}
 	}
 
-	private static IndexWriter createIndexWriter(String dir) throws IOException {
-//		boolean indexExists = IndexReader.indexExists(dir);
-//		return new IndexWriter(dir, analyzer, !indexExists);
-        return new IndexWriter(FSDirectory.open(new File(dir)),
-                new IndexWriterConfig(LuceneVersion.VERSION, analyzer));
-	}
+    private static IndexWriter createIndexWriter(String dir) throws IOException {
+        return createIndexWriter(dir, /*default segments number*/0);
+    }
 
-	public static boolean isLocked(String dir) {
+    /**
+     * @param dir      to open writer for
+     * @param segments less segments number - slower indexing but faster search and vice versa, 0 - means default
+     * @return new index writer
+     * @throws IOException
+     */
+    private static IndexWriter createIndexWriter(String dir, int segments) throws IOException {
+        final IndexWriterConfig indexWriterConfig = new IndexWriterConfig(LuceneVersion.VERSION, analyzer);
+
+        if (segments > 0) {
+            indexWriterConfig
+                    .setMergePolicy(new TieredMergePolicy()
+                            .setSegmentsPerTier(segments)
+                            .setMaxMergeAtOnce(segments));
+        }
+
+        return new IndexWriter(FSDirectory.open(new File(dir)), indexWriterConfig);
+    }
+
+    public static boolean isLocked(String dir) {
 		try {
 			return LuceneUtils.dir(dir).fileExists(WRITE_LOCK_FILE);
 		} catch (IOException e) {

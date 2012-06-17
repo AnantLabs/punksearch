@@ -112,8 +112,7 @@ public class HostCrawler extends Thread {
                 }
             }
         } catch (Throwable e) {
-            e.printStackTrace();
-            log.warn("Crawling of a host " + currentHostUrl() + " was cancelled due to: " + e.getMessage());
+            log.warn("Crawling of a host " + currentHostUrl() + " was cancelled due to: " + e.getMessage(), e);
             // delete files of failed host from temp index
             indexOperator.deleteDocuments(ip.toString(), adapter.getProtocol());
         } finally {
