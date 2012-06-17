@@ -247,7 +247,7 @@ public class IndexOperator {
 
 	public static void merge(String targetDir, Set<String> sourceDirs) {
 		try {
-			IndexWriter iw = createIndexWriter(targetDir, 2);
+			IndexWriter iw = createIndexWriter(targetDir);
 			Directory[] dirs = new Directory[sourceDirs.size()];
 			int i = 0;
 			for (String source : sourceDirs) {
@@ -264,7 +264,7 @@ public class IndexOperator {
 	}
 
     private static IndexWriter createIndexWriter(String dir) throws IOException {
-        return createIndexWriter(dir, /*default segments number*/0);
+        return createIndexWriter(dir, 3);
     }
 
     /**
