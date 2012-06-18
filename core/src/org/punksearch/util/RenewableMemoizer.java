@@ -68,7 +68,7 @@ public class RenewableMemoizer<A, V> implements Computable<A, V> {
 				}
 			}
 		};
-		new Timer().scheduleAtFixedRate(activeRenewTask, Math.round(timeout * 1.1), Math.round(timeout * 1.1));
+		new Timer(true).scheduleAtFixedRate(activeRenewTask, Math.round(timeout * 1.1), Math.round(timeout * 1.1));
 	}
 
 	public V compute(final A arg) throws InterruptedException {
