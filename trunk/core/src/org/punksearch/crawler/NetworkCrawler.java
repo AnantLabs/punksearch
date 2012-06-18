@@ -19,6 +19,7 @@ import org.punksearch.ip.IpIterator;
 import org.punksearch.ip.IpRange;
 import org.punksearch.ip.IpRanges;
 import org.punksearch.ip.SynchronizedIpIterator;
+import org.punksearch.logic.hosts_resolver.HostnameResolver;
 
 import java.io.File;
 import java.io.IOException;
@@ -167,7 +168,7 @@ public class NetworkCrawler implements Runnable {
         daysToKeep = getFloat(KEEPDAYS_PROPERTY, 7);
         maxHours = getInt(MAXHOURS_PROPERTY, 12);
 
-        ranges = parseRanges(System.getProperty(RANGE_PROPERTY));
+        ranges = parseRanges(get(RANGE_PROPERTY));
     }
 
     private void startTimers() {
@@ -207,9 +208,14 @@ public class NetworkCrawler implements Runnable {
     private void removeHostsFromIndex(Set<HostStats> hosts) {
         log.trace("Start cleaning target index directory from set of indexed hosts");
         for (HostStats host : hosts) {
-            String hostTerm = host.getProtocol() + "_" + host.getIp();
-            log.debug("Cleaning target index directory from indexed host: " + hostTerm.replace("_", "://"));
-            IndexOperator.deleteByHost(indexDirectory, hostTerm);
+            final String hostTerm = host.getProtocol() + "_" + host.getIp();
+            final String hostName = HostnameResolver.getInstance().resolveByIp(host.getIp().toString());
+
+            log.debug("Cleaning target index directory from indexed host: " + hostTerm.replace("_", "://") +
+                    ", hostname: " + hostName);
+
+            IndexOperator.deleteByHost(indexDirectory,
+                    hostTerm, hostName);
         }
         log.trace("Finished cleaning target index directory from set of indexed hosts");
     }

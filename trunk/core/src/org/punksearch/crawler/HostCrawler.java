@@ -20,6 +20,7 @@ import org.punksearch.crawler.adapters.ProtocolAdapter;
 import org.punksearch.crawler.adapters.ProtocolAdapterFactory;
 import org.punksearch.crawler.selective_scan.ScannedFoldersRegistry;
 import org.punksearch.ip.Ip;
+import org.punksearch.logic.hosts_resolver.HostnameResolver;
 
 import java.util.*;
 
@@ -146,6 +147,7 @@ public class HostCrawler extends Thread {
         docCount++;
         Document document = new Document();
         document.add(new Field(IndexFields.HOST, currentHost(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+        document.add(new Field(IndexFields.HOST_NAME, HostnameResolver.getInstance().resolveByIp(getIp()), Field.Store.YES, Field.Index.NOT_ANALYZED));
         document.add(new Field(IndexFields.NAME, name, Field.Store.YES, Field.Index.ANALYZED));
         document.add(new Field(IndexFields.EXTENSION, ext.toLowerCase(), Field.Store.YES, Field.Index.NOT_ANALYZED));
         document.add(new Field(IndexFields.SIZE, size, Field.Store.YES, Field.Index.NOT_ANALYZED));

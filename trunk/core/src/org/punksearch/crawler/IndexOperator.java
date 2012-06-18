@@ -190,10 +190,15 @@ public class IndexOperator {
 		return indexWriter == null;
 	}
 
-	public static void deleteByHost(String dir, String host) {
+	public static void deleteByHost(String dir, String host, String hostName) {
 		try {
 			IndexWriter iw = createIndexWriter(dir);
-			iw.deleteDocuments(new Term(IndexFields.HOST, host));
+
+            final BooleanQuery delQuery = new BooleanQuery();
+            delQuery.add(new TermQuery(new Term(IndexFields.HOST, host)), BooleanClause.Occur.SHOULD);
+            delQuery.add(new TermQuery(new Term(IndexFields.HOST_NAME, hostName)), BooleanClause.Occur.SHOULD);
+
+            iw.deleteDocuments(delQuery);
 			iw.close();
 		} catch (IOException ex) {
 			log.error("Exception during merging index directories", ex);
