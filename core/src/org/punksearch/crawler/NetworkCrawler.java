@@ -140,8 +140,8 @@ public class NetworkCrawler implements Runnable {
         }
 
         // should always optimize, since some old items could have been deleted and no one new host crawled.
-        // optimization is depricated in new Lucene
-// ***       IndexOperator.optimize(indexDirectory);
+        log.info("Optimizing index...");
+        IndexOperator.optimize(indexDirectory);
 
         long finishTime = new Date().getTime();
         log.info("Crawl process finished in " + ((finishTime - startTime) / 1000) + " sec");
