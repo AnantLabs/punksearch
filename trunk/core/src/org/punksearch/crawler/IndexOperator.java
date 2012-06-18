@@ -269,7 +269,7 @@ public class IndexOperator {
 	}
 
     private static IndexWriter createIndexWriter(String dir) throws IOException {
-        return createIndexWriter(dir, 3);
+        return createIndexWriter(dir, -1);
     }
 
     /**
@@ -337,15 +337,14 @@ public class IndexOperator {
         return new PerFieldAnalyzerWrapper(new KeywordAnalyzer(), analyzerMap);
 	}
 
-	/*public static void optimize(String dir) {
+	public static void optimize(String dir) {
 		IndexWriter iw;
 		try {
 			iw = createIndexWriter(dir);
-			iw.optimize();
-			iw.flush();
+			iw.forceMerge(5);
 			iw.close();
 		} catch (IOException e) {
 			log.error("Exception during optimizing index directory '" + dir + "': " + e.getMessage());
 		}
-	}*/
+	}
 }
