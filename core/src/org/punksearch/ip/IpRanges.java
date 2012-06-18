@@ -1,5 +1,9 @@
 package org.punksearch.ip;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.punksearch.logic.hosts_resolver.HostnameResolver;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +13,8 @@ import java.util.List;
  * Time: 18:03
  */
 public class IpRanges {
+    private static final Log log = LogFactory.getLog(IpRanges.class);
+
     private List<IpRange> ipRanges;
 
     /**
@@ -49,8 +55,13 @@ public class IpRanges {
                 if (IpRange.isIpRange(range)) {
                     result.add(new IpRange(range));
                 } else {
-                    if (!silent) {
+                    String ip = HostnameResolver.getIpByHostname(range);
+                    if (ip != null) {
+                        result.add(new IpRange(ip));
+                    } else if (!silent) {
                         throw new IllegalArgumentException("Invalid ranges: " + ranges + " because of part: " + range);
+                    } else {
+                        log.warn("Not an ip range: " + range);
                     }
                 }
             }

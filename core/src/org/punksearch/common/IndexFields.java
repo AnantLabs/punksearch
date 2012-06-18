@@ -13,6 +13,7 @@ package org.punksearch.common;
 public class IndexFields {
 	public static final String EXTENSION     = "Extension";   // avi, mp3, ...
 	public static final String HOST          = "Host";        // [smb|ftp]_10.0.3.2
+	public static final String HOST_NAME     = "HostName";        // user-pc.campus
 	public static final String LAST_MODIFIED = "LastModified"; // timestamp
 	public static final String NAME          = "Name";        // filename without extension
 	public static final String PATH          = "Path";        // /video/best/ghost/
