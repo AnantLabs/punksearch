@@ -33,9 +33,10 @@ public class ListInvalidFolders {
         }
 
         final int total = indexReader.numDocs();
+        final MapFieldSelector fieldSelector = new MapFieldSelector(IndexFields.HOST, IndexFields.PATH);
         for (int i = 0; i < total; i++) {
             try {
-                final Document doc = indexReader.document(i, new MapFieldSelector(IndexFields.HOST, IndexFields.PATH));
+                final Document doc = indexReader.document(i, fieldSelector);
                 checkDoc(doc.get(IndexFields.HOST), doc.get(IndexFields.PATH));
             } catch (IOException e) {
                 e.printStackTrace();
