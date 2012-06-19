@@ -3,10 +3,17 @@
 
     <info organisation="punksearch" module="cli" revision="0.9.3"/>
 
+    <configurations>
+        <conf name="default" description="default"/>
+        <conf name="test" extends="default" visibility="private" description="testing"/>
+    </configurations>
+
     <dependencies>
         <dependency org="punksearch" name="core" rev="latest.integration"/>
 
         <dependency org="commons-io" name="commons-io" rev="2.3"/>
         <dependency org="org.apache.lucene" name="lucene-core" rev="3.6.0"/>
+
+        <dependency org="junit" name="junit" rev="4.10" conf="test->default"/>
     </dependencies>
 </ivy-module>
