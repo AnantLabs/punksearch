@@ -9,7 +9,7 @@
 	}
 %>
 
-<c:set var="currentTab" value="<%= session.getAttribute("tab") %>" />
+<c:set var="currentTab" value='<%= session.getAttribute("tab") %>' />
 
 <div id="tabsContainer">
 <table cellspacing="0" id="tabs">
