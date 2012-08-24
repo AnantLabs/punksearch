@@ -12,6 +12,7 @@ package org.punksearch.crawler;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.punksearch.common.FileTypes;
@@ -86,7 +87,8 @@ public class HostCrawler extends Thread {
     }
 
     private void crawl() {
-        timestamp = Long.toString(System.currentTimeMillis());
+//        timestamp = Long.toString(System.currentTimeMillis());
+        timestamp = DateTools.timeToString(System.currentTimeMillis(), DateTools.Resolution.MILLISECOND);
         docCount = 0;
 
         boolean connected = false;

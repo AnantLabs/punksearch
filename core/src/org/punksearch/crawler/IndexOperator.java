@@ -10,19 +10,13 @@
  ***************************************************************************/
 package org.punksearch.crawler;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
+import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.*;
@@ -31,8 +25,13 @@ import org.apache.lucene.store.FSDirectory;
 import org.punksearch.common.IndexFields;
 import org.punksearch.crawler.analysis.FilenameAnalyzer;
 import org.punksearch.util.lucene.LuceneUtils;
-import org.punksearch.searcher.filters.FilterFactory;
-import org.punksearch.searcher.filters.NumberRangeFilter;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class to work with an index. Hides all Lucene's read/write logics.
@@ -219,38 +218,40 @@ public class IndexOperator {
 		}
 	}
 
-	public static void deleteByAge(String dirPath, float days) {
-		try {
+    public static void deleteByAge(String dirPath, float days) {
+        try {
             final Directory dir = LuceneUtils.dir(dirPath);
             boolean indexExists = IndexReader.indexExists(dir);
             if (!indexExists) {
                 return;
             }
 
-            final IndexReader indexReader = IndexReader.open(dir);
-            IndexSearcher is = new IndexSearcher(indexReader);
-			long max = System.currentTimeMillis() - Math.round(days * 1000 * 3600 * 24);
-			NumberRangeFilter<Long> oldDocs = FilterFactory.createNumberFilter(IndexFields.INDEXED, null, max);
-			Query query = new WildcardQuery(new Term(IndexFields.HOST, "*"));
-            final int docsInReader = indexReader.numDocs();
-            if (docsInReader > 0) {
-                final TopDocs topDocs = is.search(query, oldDocs, docsInReader);
-                log.info("Deleting by age from index directory. Items to delete: " + topDocs.totalHits);
+            final IndexWriter iw = createIndexWriter(dirPath);
+            final IndexReader ir = IndexReader.open(dir);
+            IndexSearcher is = new IndexSearcher(ir);
 
-                final ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+            long min = 0;
+            long max = System.currentTimeMillis() - Math.round(days * 1000 * 3600 * 24);
 
-                for (ScoreDoc scoreDoc : scoreDocs) {
-                    indexReader.deleteDocument(scoreDoc.doc); // TODO!!!
-                }
-            }
-            indexReader.close();
-		} catch (IOException ex) {
-			log.error("Exception during deleting by age from index directory", ex);
-			throw new RuntimeException(ex);
-		}
-	}
+            final TermRangeQuery oldDocsQuery = new TermRangeQuery(IndexFields.INDEXED,
+                    DateTools.timeToString(min, DateTools.Resolution.MILLISECOND),
+                    DateTools.timeToString(max, DateTools.Resolution.MILLISECOND),
+                    true, false);
 
-	public static void merge(String targetDir, Set<String> sourceDirs) {
+            final int docsInReader = ir.numDocs();
+            final TopDocs topDocs = is.search(oldDocsQuery, docsInReader);
+            log.info("Deleting by age from index directory. Items to delete: " + topDocs.totalHits);
+
+            iw.deleteDocuments(oldDocsQuery);
+
+            iw.close();
+        } catch (IOException ex) {
+            log.error("Exception during deleting by age from index directory", ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static void merge(String targetDir, Set<String> sourceDirs) {
 		try {
 			IndexWriter iw = createIndexWriter(targetDir);
 			Directory[] dirs = new Directory[sourceDirs.size()];
