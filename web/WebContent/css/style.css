@@ -201,7 +201,7 @@ TABLE.data .offline,
 .clip_container {
     position: relative;
     display: inline-block;
-    margin-left: 5px;
+    margin: 0 5px;
 }
 
 .clip_container a {
@@ -210,4 +210,15 @@ TABLE.data .offline,
     font-style: italic;
     /*color: #f08080;*/
     color: #777777;
+}
+
+.clipboard_ok {
+    background-image: url("../images/accept.png");
+    width: 16px;
+    height: 16px;
+}
+
+.clipboard_ok_container {
+    display: inline-block;
+    vertical-align: bottom;
 }

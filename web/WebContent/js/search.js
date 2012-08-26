@@ -43,10 +43,18 @@ function add_copy_to_clipboard(paths) {
 
             path = $(path);
             path.after($('<div class="clip_container" id="' + container_id + '">' +
-                '<a id="' + button_id + '">[Copy to Clipboard]</a></div>'));
+                '<a id="' + button_id + '">[Copy to Clipboard]</a></div>' +
+                '<div class="clipboard_ok_container"><div class="clipboard_ok" style="display: none;" /></div>'));
 
             clip.setText($.trim(path.text()));
             clip.glue(button_id, container_id);
+            clip.addEventListener('onComplete', function (client, text) {
+//                alert('ok');
+                var ok_icon = $('#' + container_id).next().find('.clipboard_ok');
+                ok_icon.show(300, function () {
+                    ok_icon.hide(2000);
+                });
+            });
         }
     });
 }
