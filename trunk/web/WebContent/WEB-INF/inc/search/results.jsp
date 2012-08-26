@@ -46,7 +46,7 @@
 			</td>
 			<td style="padding-left: 2px;">
 				<span style="font-size: 12pt;" class="name"><%=file.name%></span>
-				<span class="more"><%=group.getItems().size() > 1 ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
+				<span class="more"><%=group.getItems().size() > 1 ? "( <a href=\"#\" onClick=\"toggle('subGroup" + counter + "');return false;\">" + (group.getItems().size() - 1) + " more</a> )" : ""%></span>
 				<%= showScores ? "(" + file.score + ")" : ""%><br/>
                 <punksearch:path_line file="<%= file %>" />
                 <br/>
