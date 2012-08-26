@@ -25,22 +25,34 @@ function setFocus(type) {
     }
 }
 
-$(function () {
-//    $('.path').click(function () {alert($(this).text())});
+function next_clip_id() {
+    return arguments.callee.clip_id++;
+}
+next_clip_id.clip_id = 0;
 
+function add_copy_to_clipboard(paths) {
+    $.each(paths, function (i, path) {
+        if (!path.clipboard_clip) {
+            var clip_id = next_clip_id();
+
+            var container_id = 'clip_container_' + clip_id;
+            var button_id = 'clip_button_' + clip_id;
+
+            var clip = new ZeroClipboard.Client();
+            path.clipboard_clip = clip;
+
+            path = $(path);
+            path.after($('<div class="clip_container" id="' + container_id + '">' +
+                '<div id="' + button_id + '">[Copy to Clipboard]</div></div>'));
+
+            clip.setText($.trim(path.text()));
+            clip.glue(button_id, container_id);
+        }
+    });
+}
+
+$(function () {
     ZeroClipboard.setMoviePath('js/zeroclipboard/ZeroClipboard.swf');
 
-    $.each($('.path'), function (i, path) {
-        var container_id = 'clip_container_' + i;
-        var button_id = 'clip_button_' + i;
-
-        var path = $(path);
-        path.after($('<div class="clip_container" id="' + container_id + '">' +
-            '<div id="' + button_id + '">[Copy to Clipboard]</div></div>'));
-
-
-        var clip = new ZeroClipboard.Client();
-        clip.setText($.trim(path.text()));
-        clip.glue(button_id, container_id);
-    });
+    add_copy_to_clipboard($('.path').not(':hidden'));
 });

@@ -1,6 +1,8 @@
 function toggle(id) {
 	var obj = document.getElementById(id);
 	obj.style.display = (obj.style.display == "none")? "block" : "none";
+
+    add_copy_to_clipboard($(obj).find('.path'));
 }
 
 function toggleTable(id) {
