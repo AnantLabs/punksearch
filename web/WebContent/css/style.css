@@ -201,4 +201,13 @@ TABLE.data .offline,
 .clip_container {
     position: relative;
     display: inline-block;
+    margin-left: 5px;
+}
+
+.clip_container a {
+    font-size: 8pt;
+    /*font-weight: bold;*/
+    font-style: italic;
+    /*color: #f08080;*/
+    color: #777777;
 }
