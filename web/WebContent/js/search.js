@@ -24,3 +24,23 @@ function setFocus(type) {
         input.focus();
     }
 }
+
+$(function () {
+//    $('.path').click(function () {alert($(this).text())});
+
+    ZeroClipboard.setMoviePath('js/zeroclipboard/ZeroClipboard.swf');
+
+    $.each($('.path'), function (i, path) {
+        var container_id = 'clip_container_' + i;
+        var button_id = 'clip_button_' + i;
+
+        var path = $(path);
+        path.after($('<div class="clip_container" id="' + container_id + '">' +
+            '<div id="' + button_id + '">[Copy to Clipboard]</div></div>'));
+
+
+        var clip = new ZeroClipboard.Client();
+        clip.setText($.trim(path.text()));
+        clip.glue(button_id, container_id);
+    });
+});

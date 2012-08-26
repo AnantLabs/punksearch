@@ -15,6 +15,8 @@
 
 	<body onload="setFocus('${currentTab}')">
 
+		<script type="text/javascript" src="js/jQuery/jquery-1.8.0.min.js" > </script>
+		<script type="text/javascript" src="js/zeroclipboard/ZeroClipboard.js" > </script>
 		<script type="text/javascript" src="js/search.js" > </script>
 
 		<%@ include file="/WEB-INF/inc/header.jsp" %>
