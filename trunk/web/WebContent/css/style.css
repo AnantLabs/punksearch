@@ -197,3 +197,8 @@ TABLE.data .offline,
 .offline {
     background-color: #FF0000;
 }
+
+.clip_container {
+    position: relative;
+    display: inline-block;
+}
