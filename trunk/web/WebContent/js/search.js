@@ -43,7 +43,7 @@ function add_copy_to_clipboard(paths) {
 
             path = $(path);
             path.after($('<div class="clip_container" id="' + container_id + '">' +
-                '<div id="' + button_id + '">[Copy to Clipboard]</div></div>'));
+                '<a id="' + button_id + '">[Copy to Clipboard]</a></div>'));
 
             clip.setText($.trim(path.text()));
             clip.glue(button_id, container_id);
