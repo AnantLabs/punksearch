@@ -51,8 +51,8 @@ function add_copy_to_clipboard(paths) {
             clip.addEventListener('onComplete', function (client, text) {
 //                alert('ok');
                 var ok_icon = $('#' + container_id).next().find('.clipboard_ok');
-                ok_icon.show(300, function () {
-                    ok_icon.hide(2000);
+                ok_icon.fadeIn(300, function () {
+                    ok_icon.fadeOut(2000);
                 });
             });
         }
