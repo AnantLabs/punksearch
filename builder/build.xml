@@ -30,6 +30,13 @@
 		</ant>
 	</target>
 
+	<target name="prepare-cli-and-web">
+		<ant dir="../core" target="publish-local" inheritAll="false" />
+		<ant dir="../cli" target="jar" inheritAll="false" />
+		<ant dir="../cli" target="prepare-jar-lib" inheritAll="false" />
+		<ant dir="../web" target="war" inheritAll="false" />
+	</target>
+
 	<target name="build-web">
 		<ant dir="../web" target="war" inheritAll="false">
 			<property name="version" value="${version}" />
