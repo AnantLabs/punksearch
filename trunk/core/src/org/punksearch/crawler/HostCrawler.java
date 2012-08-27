@@ -22,6 +22,7 @@ import org.punksearch.crawler.adapters.ProtocolAdapterFactory;
 import org.punksearch.crawler.selective_scan.ScannedFoldersRegistry;
 import org.punksearch.ip.Ip;
 import org.punksearch.logic.hosts_resolver.HostnameResolver;
+import org.punksearch.stats.HostStats;
 
 import java.util.*;
 
@@ -59,6 +60,7 @@ public class HostCrawler extends Thread {
     private Set<HostStats> crawledHosts = new HashSet<HostStats>();
     private String timestamp;
     private long docCount;
+    private int shares;
 
     public HostCrawler(String name, Iterator<Ip> ipIterator, FileTypes fileTypes, String indexDirectoryPath) {
         super(name);
@@ -87,7 +89,6 @@ public class HostCrawler extends Thread {
     }
 
     private void crawl() {
-//        timestamp = Long.toString(System.currentTimeMillis());
         timestamp = DateTools.timeToString(System.currentTimeMillis(), DateTools.Resolution.MILLISECOND);
         docCount = 0;
 
@@ -257,6 +258,10 @@ public class HostCrawler extends Thread {
 
         Object[] items = adapter.list(dir);
 
+        if (deep == 0) {
+            shares = items.length;
+        }
+
         // start actual crawling
         long size = 0L;
         List<Document> documentList = new ArrayList<Document>();
@@ -367,5 +372,9 @@ public class HostCrawler extends Thread {
 
     public synchronized boolean isStopRequested() {
         return stopRequested;
+    }
+
+    public int getShares() {
+        return shares;
     }
 }

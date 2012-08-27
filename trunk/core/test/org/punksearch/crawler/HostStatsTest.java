@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 import junit.framework.TestCase;
+import org.punksearch.stats.HostStats;
 
 /**
  * @author Yury Soldak (ysoldak@gmail.com)
