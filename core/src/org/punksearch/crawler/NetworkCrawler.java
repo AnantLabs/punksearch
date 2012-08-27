@@ -20,6 +20,9 @@ import org.punksearch.ip.IpRange;
 import org.punksearch.ip.IpRanges;
 import org.punksearch.ip.SynchronizedIpIterator;
 import org.punksearch.logic.hosts_resolver.HostnameResolver;
+import org.punksearch.stats.HostStats;
+import org.punksearch.stats.TotalStats;
+import org.punksearch.stats.TotalStatsWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +38,7 @@ import static org.punksearch.crawler.CrawlerKeys.*;
  * @author Yury Soldak (ysoldak@gmail.com)
  * @see HostCrawler
  * @see IndexOperator
- * @see HostStats
+ * @see org.punksearch.stats.HostStats
  */
 public class NetworkCrawler implements Runnable {
     private static final Log log = LogFactory.getLog(NetworkCrawler.class);
@@ -113,8 +116,11 @@ public class NetworkCrawler implements Runnable {
             }
         }
 
+        TotalStats totalStats = new TotalStats(System.currentTimeMillis());
         List<HostStats> hosts = new ArrayList<HostStats>();
+
         boolean cleaned = false;
+
         for (HostCrawler thread : threadList) {
             try {
                 thread.join();
@@ -125,6 +131,7 @@ public class NetworkCrawler implements Runnable {
                     cleaned = true;
                 }
                 hosts.addAll(thread.getCrawledHosts());
+                totalStats.addShares(thread.getShares());
                 removeHostsFromIndex(thread.getCrawledHosts());
                 mergeIntoIndex(thread.getName());
                 cleanTempForThread(thread.getName());
@@ -133,10 +140,13 @@ public class NetworkCrawler implements Runnable {
             }
             log.info("Finished: " + thread.getName());
         }
+
         if (hosts.size() > 0) {
             String statsDir = PunksearchFs.resolveStatsDirectory();
             HostStats.dump(statsDir, hosts);
             HostStats.merge(statsDir, PunksearchFs.resolve(statsDir + File.separator + "hosts.csv"));
+            totalStats.addHostStats(hosts);
+            TotalStatsWriter.dump(totalStats);
         }
 
         // should always optimize, since some old items could have been deleted and no one new host crawled.
@@ -214,8 +224,7 @@ public class NetworkCrawler implements Runnable {
             log.debug("Cleaning target index directory from indexed host: " + hostTerm.replace("_", "://") +
                     ", hostname: " + hostName);
 
-            IndexOperator.deleteByHost(indexDirectory,
-                    hostTerm, hostName);
+            IndexOperator.deleteByHost(indexDirectory, hostTerm, hostName);
         }
         log.trace("Finished cleaning target index directory from set of indexed hosts");
     }
