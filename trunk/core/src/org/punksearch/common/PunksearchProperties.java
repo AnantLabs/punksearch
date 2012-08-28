@@ -26,11 +26,19 @@ import java.util.Properties;
  * 
  */
 public class PunksearchProperties {
-
 	public static final String PROPERTIES_FILENAME = "punksearch.properties";
+
+    // the file not intended to be commited to VCS
+	public static final String PASSWORDS_FILENAME = "passwords.properties";
 
 	public static void loadDefault() throws FileNotFoundException {
 		loadFromFile(PunksearchFs.resolve("conf" + File.separator + PROPERTIES_FILENAME));
+
+        String passwordsFile = PunksearchFs.resolve("conf" + File.separator + PASSWORDS_FILENAME);
+
+        if (new File(passwordsFile).isFile()) {
+            loadFromFile(passwordsFile);
+        }
 	}
 
 	public static void loadFromFile(String path) throws FileNotFoundException {
@@ -51,5 +59,4 @@ public class PunksearchProperties {
 			System.setProperty((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
-
 }
