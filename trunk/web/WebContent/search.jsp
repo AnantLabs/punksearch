@@ -46,7 +46,7 @@
                     use "+/-" to specialize search terms, like: "+pink -floyd"
                 </div>
 
-                <c:if test="${empty param['query']}">
+                <c:if test="${param['query'] == null && param['fromDate'] == null}">
                     <%@ include file="/WEB-INF/inc/search/total_stats.jsp" %>
                 </c:if>
             </c:otherwise>
