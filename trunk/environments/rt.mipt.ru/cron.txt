@@ -1,0 +1,8 @@
+LP=/usr/local/bin/
+
+# every day at 5:00AM
+0 5 * * * export PATH=$PATH:$LP; sh /home/users/xonix/punksearch/bin/crawl.sh 1>>/home/users/xonix/punksearch/logs/cron-crawl.log 2>&1
+
+# VVV--test
+#15 15 * * * export PATH=$PATH:$LP; sh /home/users/xonix/punksearch/bin/crawl.sh 1>>/home/users/xonix/punksearch/logs/cron-crawl.log 2>&1
+#* * * * * ( export PATH=$PATH:$LP; set; java -version ) > /home/users/xonix/punksearch/logs/tst1.log 2>&1
